@@ -9,7 +9,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { ToastProvider } from "@/components/ui/toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { CheckCircle2, Calendar } from "lucide-react"
+import { CheckCircle2, Calendar, UserX } from "lucide-react"
 import axios from "axios"
 
 // Interfaces TypeScript
@@ -35,7 +35,6 @@ interface Student {
 interface AttendanceRecord {
   studentId: number
   sessionId: number
-  isPresent: boolean
 }
 
 function AttendancePage() {
@@ -58,6 +57,7 @@ function AttendancePage() {
         const response = await axios.get<Session[]>(`http://localhost:8080/api/sessions/instructor/${instructorId}`)
         setSessions(response.data)
       } catch (error) {
+        console.error("Error fetching sessions:", error)
         toast({
           title: "Erreur de chargement",
           description: "Impossible de charger les sessions. Veuillez réessayer.",
@@ -68,7 +68,7 @@ function AttendancePage() {
       }
     }
     fetchSessions()
-  }, [instructorId, toast])
+  }, [toast])
 
   // Fetch students for a session
   useEffect(() => {
@@ -89,13 +89,14 @@ function AttendancePage() {
         }))
         setStudents(fetchedStudents)
 
-        // Initialize attendance
+        // Initialize attendance (all students present by default)
         const initialAttendance: Record<number, boolean> = {}
         fetchedStudents.forEach((student: Student) => {
           initialAttendance[student.id] = true
         })
         setAttendance(initialAttendance)
       } catch (error) {
+        console.error("Error fetching students:", error)
         toast({
           title: "Erreur de chargement",
           description: "Impossible de charger les étudiants. Veuillez réessayer.",
@@ -116,24 +117,29 @@ function AttendancePage() {
   const handleSaveAttendance = async () => {
     setIsSaving(true)
     try {
-      const payload: AttendanceRecord[] = Object.entries(attendance).map(([studentId, isPresent]) => ({
-        studentId: Number(studentId),
-        sessionId: selectedSession!,
-        isPresent,
-      }))
+      const absentStudents = Object.entries(attendance)
+        .filter(([_, isPresent]) => !isPresent)
+        .map(([studentId]) => ({
+          studentId: Number(studentId),
+          sessionId: selectedSession!,
+        }))
 
-      await axios.post("http://localhost:8080/api/attendance", payload)
+      if (absentStudents.length > 0) {
+        await axios.post("http://localhost:8080/api/attendance", absentStudents)
+      }
+
       setSavedAttendance(true)
       toast({
         title: "Présences enregistrées",
-        description: "Les présences ont été enregistrées avec succès.",
+        description: `Les absences ont été enregistrées avec succès. ${absentStudents.length} étudiant(s) absent(s).`,
         variant: "default",
         icon: <CheckCircle2 className="h-4 w-4 text-green-500" />,
       })
     } catch (error) {
+      console.error("Error saving attendance:", error)
       toast({
         title: "Erreur d'enregistrement",
-        description: "Impossible d'enregistrer les présences. Veuillez réessayer.",
+        description: "Impossible d'enregistrer les absences. Veuillez réessayer.",
         variant: "destructive",
       })
     } finally {
@@ -142,6 +148,8 @@ function AttendancePage() {
   }
 
   const selectedSessionDetails = sessions.find((s) => s.id === selectedSession)
+
+  const absentCount = Object.values(attendance).filter((isPresent) => !isPresent).length
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -185,48 +193,53 @@ function AttendancePage() {
             {isLoading ? (
               <div className="text-center py-4">Chargement des données...</div>
             ) : students.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead className="text-right">Présent</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {students.map((student) => (
-                    <TableRow key={student.id}>
-                      <TableCell>
-                        {student.firstname} {student.lastname}
-                      </TableCell>
-                      <TableCell>{student.email}</TableCell>
-                      <TableCell className="text-right">
-                        <Checkbox
-                          checked={attendance[student.id]}
-                          onCheckedChange={(checked) => handleAttendanceChange(student.id, checked as boolean)}
-                        />
-                      </TableCell>
+              <>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nom</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead className="text-right">Présent</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {students.map((student) => (
+                      <TableRow key={student.id}>
+                        <TableCell>
+                          {student.firstname} {student.lastname}
+                        </TableCell>
+                        <TableCell>{student.email}</TableCell>
+                        <TableCell className="text-right">
+                          <Checkbox
+                            checked={attendance[student.id]}
+                            onCheckedChange={(checked) => handleAttendanceChange(student.id, checked as boolean)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <UserX className="mr-2 h-4 w-4" />
+                    <span>{absentCount} étudiant(s) absent(s)</span>
+                  </div>
+                  <Button
+                    onClick={handleSaveAttendance}
+                    disabled={isSaving || !selectedSession || savedAttendance}
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    {isSaving
+                      ? "Enregistrement..."
+                      : savedAttendance
+                        ? "Présences enregistrées"
+                        : "Enregistrer les absences"}
+                  </Button>
+                </div>
+              </>
             ) : selectedSession ? (
               <div className="text-center py-4">Aucun étudiant trouvé pour cette session.</div>
             ) : null}
-
-            <div className="flex justify-end">
-              <Button
-                onClick={handleSaveAttendance}
-                disabled={isSaving || !selectedSession || savedAttendance}
-                className="bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                {isSaving
-                  ? "Enregistrement..."
-                  : savedAttendance
-                    ? "Présences enregistrées"
-                    : "Enregistrer les présences"}
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
