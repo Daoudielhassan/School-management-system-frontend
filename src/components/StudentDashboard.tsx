@@ -8,7 +8,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 
 // Fetch student data from API
 const fetchStudentData = async () => {
-  const response = await fetch("http://localhost:8080/api/students/1");
+  const response = await fetch("http://localhost:8080/api/students/222");
   if (!response.ok) {
     throw new Error("Failed to fetch student data");
   }

@@ -1,6 +1,5 @@
-import StudentDashboard from "../components/StudentDashboard"
+import StudentDashboard from "../components/student-dashboard";
 
-export default function Home() {
-  return <StudentDashboard />
+export default function AttendancePage() {
+  return <StudentDashboard />;
 }
-
