@@ -7,14 +7,13 @@ import { LogOut, Calendar, Home, BookOpen, BarChart2, Mail, Award, User, Setting
 const BASE_URL = "http://localhost:3000/"
 
 const navItems = [
-  { icon: Home, label: "Dashboard", href: `${BASE_URL}/dashboard` },
-  { icon: Calendar, label: "Schedule", href: `${BASE_URL}/schedule` },
-  { icon: BookOpen, label: "Courses", href: `${BASE_URL}/courses` },
-  { icon: BarChart2, label: "Grades", href: `${BASE_URL}/grades` },
+  { icon: Home, label: "Tableau de bord", href: `${BASE_URL}/` },
+  { icon: Calendar, label: "Emploi du temps", href: `${BASE_URL}/schedule` },
+  { icon: BookOpen, label: "Cours", href: `${BASE_URL}/courses` },
+  { icon: BarChart2, label: "Notes", href: `${BASE_URL}/grades` },
   { icon: Mail, label: "Messages", href: `${BASE_URL}/messages` },
-  { icon: Award, label: "Achievements", href: `${BASE_URL}/achievements` },
-  { icon: User, label: "Profile", href: `${BASE_URL}/profile` },
-  { icon: Settings, label: "Settings", href: `${BASE_URL}/settings` },
+  { icon: User, label: "Profil", href: `${BASE_URL}/profile` },
+  { icon: Settings, label: "Paramètres", href: `${BASE_URL}/settings` },
 ]
 
 export const Sidebar = ({ isOpen }: { isOpen: boolean }) => {
@@ -54,11 +53,11 @@ export const Sidebar = ({ isOpen }: { isOpen: boolean }) => {
           })}
         </nav>
 
-        {/* Logout Button */}
+        {/* Bouton de déconnexion */}
         <div className="p-4 mt-auto">
           <Button variant="ghost" className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-200">
             <LogOut className="mr-3 h-5 w-5" />
-            Logout
+            Déconnexion
           </Button>
         </div>
       </div>
