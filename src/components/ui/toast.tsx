@@ -17,6 +17,24 @@ interface ToastContextType {
   removeToast: (id: string) => void
 }
 
+// ToastActionElement: Represents the action element for a toast
+export type ToastActionElement = React.ReactElement<{
+  label: string;
+  onClick: () => void;
+}>;
+
+// ToastProps: Defines the properties for the Toast component
+export interface ToastProps {
+  toast: {
+    id: string;
+    title: string;
+    description?: string;
+    action?: { label: string; onClick: () => void };
+  };
+  onClose: () => void;
+}
+
+
 const ToastContext = createContext<ToastContextType | null>(null)
 
 export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
@@ -46,7 +64,7 @@ export const useToast = () => {
   return context
 }
 
-export const ToastViewport = ({ children }: { children: React.ReactNode }) => {
+export const ToastViewport = () => {
   const { toasts, removeToast } = useToast()
 
   return (
