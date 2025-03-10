@@ -1,4 +1,3 @@
-// components/ScheduleCard.tsx
 "use client"
 import { useState, useEffect } from "react"
 import { useStudent } from "@/context/StudentContext"
@@ -14,7 +13,7 @@ const fetchScheduleData = async (departmentId: number, classeId: number) => {
 }
 
 export const ScheduleCard = () => {
-  const { studentData } = useStudent() // Access student data from the context
+  const { studentData } = useStudent() // Accéder aux données de l'étudiant depuis le contexte
   const [scheduleData, setScheduleData] = useState<any[]>([])
   const [currentDate, setCurrentDate] = useState<string>("")
 
@@ -24,7 +23,7 @@ export const ScheduleCard = () => {
     setCurrentDate(today.toLocaleDateString(undefined, options))
 
     if (studentData) {
-      // Fetch schedule data when the student data is available
+      // Récupérer les données de l'emploi du temps lorsque les données de l'étudiant sont disponibles
       const loadSchedule = async () => {
         const data = await fetchScheduleData(studentData.departmentId, studentData.classeId)
         setScheduleData(data)
@@ -33,12 +32,12 @@ export const ScheduleCard = () => {
     }
   }, [studentData])
 
-  // Filter the schedule data to only include sessions that are today
+  // Filtrer les données de l'emploi du temps pour n'inclure que les sessions d'aujourd'hui
   const todaySessions = scheduleData.filter((session) => {
     const sessionDate = new Date(session.sessionDate)
     const today = new Date()
 
-    // Compare only the date part (ignoring time)
+    // Comparer uniquement la partie date (en ignorant l'heure)
     return (
       sessionDate.getFullYear() === today.getFullYear() &&
       sessionDate.getMonth() === today.getMonth() &&
@@ -50,16 +49,16 @@ export const ScheduleCard = () => {
     <Card className="bg-white border-gray-200 shadow-md col-span-1 lg:col-span-2">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
-          <CardTitle className="font-heading">Today's Schedule</CardTitle>
+          <CardTitle className="font-heading">Emploi du temps d'aujourd'hui</CardTitle>
           <CardDescription className="text-gray-600 font-body">{currentDate}</CardDescription>
         </div>
         <Button variant="ghost" className="text-cyan-400 hover:text-cyan-300 hover:bg-white/5">
-          View All <ChevronRight className="ml-1 h-4 w-4" />
+          Voir tout <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
       </CardHeader>
       <CardContent>
         {todaySessions.length === 0 ? (
-          <p className="text-center text-gray-500">No sessions today</p>
+          <p className="text-center text-gray-500">Aucune session aujourd'hui</p>
         ) : (
           todaySessions.map((session, index) => (
             <div key={index} className="mb-4 last:mb-0">
@@ -72,7 +71,7 @@ export const ScheduleCard = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-600">{session.sessionDate} - {session.startTime} to {session.endTime}</p>
+                  <p className="text-sm text-gray-600">{session.sessionDate} - {session.startTime} à {session.endTime}</p>
                   <p className="text-sm text-gray-600">{session.instructor.firstName} {session.instructor.lastName}</p>
                   <Badge className={session.sessionType === "Cours" ? "bg-green-100 text-green-800 hover:bg-green-200" : "bg-cyan-100 text-cyan-800 hover:bg-cyan-200"}>
                     {session.sessionType}

@@ -6,8 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
 // Fetch sessions based on department and class
-const fetchSessions = async ({ queryKey }) => {
-  const [, departmentId, classeId] = queryKey;
+import { QueryFunctionContext } from "react-query";
+
+const fetchSessions = async (context: QueryFunctionContext<[string, string, string]>) => {
+  const [, departmentId, classeId] = context.queryKey;
   const response = await fetch(`http://localhost:8080/api/sessions/filter?departmentId=${departmentId}&classeId=${classeId}`);
   if (!response.ok) {
     throw new Error("Failed to fetch sessions");
@@ -29,21 +31,26 @@ const getSessionStyle = (type: string) => {
 };
 
 // Function to get the day of the week in French
-const getFrenchDay = (dateString) => {
+const getFrenchDay = (dateString: string) => {
   const daysInFrench = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
   const date = new Date(dateString);
   return daysInFrench[date.getDay()];
 };
 
-export default function Schedule({ departmentId, classeId }) {
+interface ScheduleProps {
+  departmentId: string;
+  classeId: string;
+}
+
+export default function Schedule({ departmentId, classeId }: ScheduleProps) {
   const { data: sessions, isLoading } = useQuery(["sessions", departmentId, classeId], fetchSessions, {
     enabled: !!departmentId && !!classeId,
   });
 
   if (isLoading) return <div>Chargement de l'emploi du temps...</div>;
 
-  const getSessionForSlot = (day, time) => {
-    return sessions?.find(session => getFrenchDay(session.sessionDate) === day && session.startTime.startsWith(time));
+  const getSessionForSlot = (day: string, time: string) => {
+    return sessions?.find((session: any) => getFrenchDay(session.sessionDate) === day && session.startTime.startsWith(time));
   };
 
   return (
