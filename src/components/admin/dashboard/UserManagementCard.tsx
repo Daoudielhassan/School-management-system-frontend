@@ -1,100 +1,208 @@
 import { useState, useEffect } from "react";
-import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
-import UserCard from "./UserCard"; // Import the UserCard component
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown, Search } from "lucide-react";
+import UserCard from "./UserCard";
 
 const UserManagementCard = () => {
-  const [users, setUsers] = useState<any[]>([]);
+  interface User {
+    id: number;
+    username: string;
+    email: string;
+    identity: string;
+  }
+
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [filter, setFilter] = useState("all");
+  const [error, setError] = useState<string | null>(null);
+  type RoleType = "manager" | "student" | "professor" | "admin" | "all";
+  const [filter, setFilter] = useState<RoleType>("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [totalPages, setTotalPages] = useState(1);
 
-  // Fetch users when the page or filter changes
+  const roleMapping: Record<string, string> = {
+    ETUDIANT: "student",
+    MANAGER: "MANAGER",
+    ADMINISTRATEUR: "admin",
+    PROFESSEUR: "professor",
+    all: "all",
+  };
+
   useEffect(() => {
-    const fetchUsers = async (page: number) => {
+    const fetchUsers = async () => {
       setLoading(true);
+      setError(null);
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/users?page=${page}&size=10`
-        );
-        if (!response.ok) throw new Error("Failed to fetch users");
+        // Handle the case when filter is "all" specially
+        let backendRole = filter === "all" ? "" : roleMapping[filter];
+
+        // Build the URL with proper encoding and handle empty values
+        let url = `http://localhost:8080/api/users?page=${page-1}&size=10`;
+        if (backendRole) {
+          url += `&role=${encodeURIComponent(backendRole)}`;
+        }
+        if (searchTerm) {
+          url += `&searchTerm=${encodeURIComponent(searchTerm)}`;
+        }
+
+        console.log(`Calling API: ${url}`);
+
+        const response = await fetch(url);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`Server responded with ${response.status}: ${errorText}`);
+          throw new Error(`Failed to fetch users (Status: ${response.status})`);
+        }
+
         const data = await response.json();
-        setUsers(data.content); // Assuming 'content' contains the user list
-        setTotalPages(data.totalPages); // Assuming 'totalPages' gives the number of pages
+        console.log("Received data:", data);
+        setUsers(data.content || []);
+        setTotalPages(data.totalPages || 1);
       } catch (error) {
         console.error("Error fetching users:", error);
+        setError("Impossible de charger les utilisateurs. Veuillez réessayer plus tard.");
       } finally {
         setLoading(false);
       }
     };
-    
-    fetchUsers(page);
-  }, [page]);
+
+    fetchUsers();
+  }, [page, filter, searchTerm]);
+
+  const displayRoleName = (role: RoleType) => {
+    switch(role) {
+      case "manager": return "Managers";
+      case "student": return "Étudiants";
+      case "professor": return "Professeurs";
+      case "admin": return "Administrateurs";
+      case "all": return "Tous les Utilisateurs";
+      default: return role;
+    }
+  };
 
   return (
-    <Card className="bg-[#1E2D3D] border-[#2A3747] shadow-lg">
-      <CardHeader>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <CardTitle className="text-xl font-semibold text-white">User Management</CardTitle>
-            <CardDescription className="text-gray-400">Manage system users</CardDescription>
+      <Card className="bg-[#1E2D3D] border-[#2A3747] shadow-lg">
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <CardTitle className="text-xl font-semibold text-white">
+                Gestion des Utilisateurs
+              </CardTitle>
+              <CardDescription className="text-gray-400">
+                Gérer les utilisateurs du système
+              </CardDescription>
+            </div>
+            <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+                <input
+                    type="text"
+                    placeholder="Rechercher des utilisateurs..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setPage(1);
+                    }}
+                    className="pl-8 pr-4 py-2 rounded-lg bg-[#2A3747] border border-[#2A3747] text-white placeholder-gray-400 focus:outline-none focus:border-[#00D4FF]"
+                />
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="border-[#2A3747] hover:bg-[#2A3747] hover:text-[#00D4FF]">
+                    Filtre <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-[#1E2D3D] border-[#2A3747] text-white">
+                  <DropdownMenuLabel>Filtrer par Rôle</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-[#2A3747]" />
+                  {(Object.keys(roleMapping) as RoleType[]).map((key) => (
+                      <DropdownMenuItem
+                          key={key}
+                          onClick={() => setFilter(key)}
+                          className="hover:bg-[#2A3747] cursor-pointer"
+                      >
+                        {displayRoleName(key)}
+                      </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-          <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="border-[#2A3747] hover:bg-[#2A3747] hover:text-[#00D4FF]">
-                  Filter <ChevronDown className="ml-2 h-4 w-4" />
+        </CardHeader>
+
+        <CardContent>
+          {error && (
+              <div className="bg-red-500/20 text-red-300 p-4 rounded-md mb-4">
+                <p>{error}</p>
+                <Button
+                    onClick={() => {
+                      setError(null);
+                      const fetchUsers = async () => {}; // This will trigger the useEffect
+                      setPage(page);
+                    }}
+                    variant="outline"
+                    className="mt-2 border-red-400 text-red-300 hover:bg-red-500/20"
+                >
+                  Réessayer
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#1E2D3D] border-[#2A3747] text-white">
-                <DropdownMenuLabel>Filter by Role</DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-[#2A3747]" />
-                <DropdownMenuItem onClick={() => setFilter("all")} className="hover:bg-[#2A3747] cursor-pointer">All Users</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilter("student")} className="hover:bg-[#2A3747] cursor-pointer">Students</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilter("professor")} className="hover:bg-[#2A3747] cursor-pointer">Professors</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilter("manager")} className="hover:bg-[#2A3747] cursor-pointer">Managers</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilter("admin")} className="hover:bg-[#2A3747] cursor-pointer">Admins</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {loading ? (
-            <div className="text-center text-gray-400">Loading...</div>
-          ) : (
-            users.map((user, index) => (
-              <UserCard key={index} user={user} />
-            ))
+              </div>
           )}
-        </div>
-      </CardContent>
-      <CardFooter className="border-t border-[#2A3747] pt-4">
-        <div className="flex justify-between items-center w-full">
+
+          {loading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D4FF]"></div>
+              </div>
+          ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {users.length > 0 ? (
+                    users.map((user) => <UserCard key={user.id} user={user} />)
+                ) : (
+                    <div className="col-span-full text-center py-8 text-gray-400">
+                      Aucun utilisateur trouvé
+                    </div>
+                )}
+              </div>
+          )}
+        </CardContent>
+
+        <CardFooter className="flex justify-between pt-4">
           <Button
-            variant="outline"
-            className="border-[#2A3747] hover:bg-[#2A3747] hover:text-[#00D4FF]"
-            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              variant="outline"
+              className="border-[#2A3747] hover:bg-[#2A3747] hover:text-[#00D4FF]"
+              onClick={() => setPage(Math.max(1, page - 1))}
+              disabled={page === 1 || loading}
           >
-            Previous
+            Précédent
           </Button>
-          <div className="text-sm text-gray-400">
-            Page {page} of {totalPages}
-          </div>
+          <span className="text-white">
+          Page {page} sur {totalPages}
+        </span>
           <Button
-            variant="outline"
-            className="border-[#2A3747] hover:bg-[#2A3747] hover:text-[#00D4FF]"
-            onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+              variant="outline"
+              className="border-[#2A3747] hover:bg-[#2A3747] hover:text-[#00D4FF]"
+              onClick={() => setPage(Math.min(totalPages, page + 1))}
+              disabled={page >= totalPages || loading}
           >
-            Next
+            Suivant
           </Button>
-        </div>
-      </CardFooter>
-    </Card>
+        </CardFooter>
+      </Card>
   );
 };
 
