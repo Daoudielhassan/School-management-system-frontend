@@ -34,7 +34,7 @@ export const StudentProvider = ({ children }: { children: React.ReactNode }) => 
 
   useEffect(() => {
     // You can set userId dynamically, for now it's hardcoded to 250
-    fetchStudentData(250) // Replace with actual dynamic userId if needed
+    fetchStudentData(8) // Replace with actual dynamic userId if needed
   }, [])
 
   return (
