@@ -48,18 +48,18 @@ const DashboardStats = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       {statsConfig.map((stat, index) => (
-        <Card key={index} className="bg-[#1E2D3D] border-[#2A3747] shadow-lg hover:shadow-[#00D4FF]/10 transition-shadow duration-300">
+        <Card key={index} className="bg-[#FFFFFF] border-[#9D1F15] shadow-lg hover:shadow-[#9D1F15]/10 transition-shadow duration-300">
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
-              <CardTitle className="text-sm font-medium text-gray-300">{stat.title}</CardTitle>
+              <CardTitle className="text-sm font-medium text-black">{stat.title}</CardTitle>
               <div className={`p-2 rounded-md ${stat.color}`}>
-                <stat.icon className="h-4 w-4 text-white" />
+                <stat.icon className="h-4 w-4 text-gray-900" />
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{stat.value}</div>
-            <p className="text-xs text-gray-400">Last updated now</p>
+            <div className="text-2xl font-bold text-gray-800">{stat.value}</div>
+            <p className="text-xs text-gray-900">Last updated now</p>
           </CardContent>
         </Card>
       ))}

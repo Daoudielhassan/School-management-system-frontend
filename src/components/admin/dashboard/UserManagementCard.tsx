@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { debounce } from "lodash"; // ✅ Import debounce
 import {
   Card,
   CardHeader,
@@ -31,34 +32,44 @@ const UserManagementCard = () => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
-  type RoleType = "manager" | "student" | "professor" | "admin" | "all";
+  type RoleType = "manager" | "student" | "professor" | "administrator" | "all";
   const [filter, setFilter] = useState<RoleType>("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(""); // New state for debounced search
   const [totalPages, setTotalPages] = useState(1);
 
   const roleMapping: Record<string, string> = {
     ETUDIANT: "student",
     MANAGER: "MANAGER",
-    ADMINISTRATEUR: "admin",
+    ADMINISTRATEUR: "administrator",
     PROFESSEUR: "professor",
     all: "all",
   };
+
+  // Debounced function for setting search term
+  const debounceSearch = useCallback(
+      debounce((term: string) => {
+        setDebouncedSearchTerm(term);
+      }, 500), // Adjust debounce delay as needed
+      []
+  );
+
+  useEffect(() => {
+    debounceSearch(searchTerm);
+  }, [searchTerm, debounceSearch]);
 
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
       setError(null);
       try {
-        // Handle the case when filter is "all" specially
         let backendRole = filter === "all" ? "" : roleMapping[filter];
-
-        // Build the URL with proper encoding and handle empty values
-        let url = `http://localhost:8080/api/users?page=${page-1}&size=10`;
+        let url = `http://localhost:8080/api/users?page=${page - 1}&size=10`;
         if (backendRole) {
           url += `&role=${encodeURIComponent(backendRole)}`;
         }
-        if (searchTerm) {
-          url += `&searchTerm=${encodeURIComponent(searchTerm)}`;
+        if (debouncedSearchTerm) {
+          url += `&searchTerm=${encodeURIComponent(debouncedSearchTerm)}`;
         }
 
         console.log(`Calling API: ${url}`);
@@ -83,48 +94,51 @@ const UserManagementCard = () => {
     };
 
     fetchUsers();
-  }, [page, filter, searchTerm]);
+  }, [page, filter, debouncedSearchTerm]); // Use debouncedSearchTerm instead of searchTerm
 
   const displayRoleName = (role: RoleType) => {
-    switch(role) {
-      case "manager": return "Managers";
-      case "student": return "Étudiants";
-      case "professor": return "Professeurs";
-      case "admin": return "Administrateurs";
-      case "all": return "Tous les Utilisateurs";
-      default: return role;
+    switch (role) {
+      case "manager":
+        return "Managers";
+      case "student":
+        return "Étudiants";
+      case "professor":
+        return "Professeurs";
+      case "administrator":
+        return "Administrateurs";
+      case "all":
+        return "Tous les Utilisateurs";
+      default:
+        return role;
     }
   };
 
   return (
-      <Card className="bg-[#1E2D3D] border-[#2A3747] shadow-lg">
+      <Card className="bg-[#FFFFFF] border-[#9D1F15] shadow-lg">
         <CardHeader>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <CardTitle className="text-xl font-semibold text-white">
+              <CardTitle className="text-xl font-semibold text-black">
                 Gestion des Utilisateurs
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription className="text-gray-800">
                 Gérer les utilisateurs du système
               </CardDescription>
             </div>
             <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
               <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400"/>
                 <input
                     type="text"
                     placeholder="Rechercher des utilisateurs..."
                     value={searchTerm}
-                    onChange={(e) => {
-                      setSearchTerm(e.target.value);
-                      setPage(1);
-                    }}
-                    className="pl-8 pr-4 py-2 rounded-lg bg-[#2A3747] border border-[#2A3747] text-white placeholder-gray-400 focus:outline-none focus:border-[#00D4FF]"
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-8 pr-4 py-2 rounded-lg bg-white border  border-y-blue-950 text-BLACK focus:border-blue-950 "
                 />
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="border-[#2A3747] hover:bg-[#2A3747] hover:text-[#00D4FF]">
+                  <Button variant="outline" className="border-[#2A3747] hover:shadow-[#9D1F15]/10 hover:text-[#00246B]">
                     Filtre <ChevronDown className="ml-2 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -153,7 +167,6 @@ const UserManagementCard = () => {
                 <Button
                     onClick={() => {
                       setError(null);
-                      const fetchUsers = async () => {}; // This will trigger the useEffect
                       setPage(page);
                     }}
                     variant="outline"
@@ -190,9 +203,7 @@ const UserManagementCard = () => {
           >
             Précédent
           </Button>
-          <span className="text-white">
-          Page {page} sur {totalPages}
-        </span>
+          <span className="text-white">Page {page} sur {totalPages}</span>
           <Button
               variant="outline"
               className="border-[#2A3747] hover:bg-[#2A3747] hover:text-[#00D4FF]"

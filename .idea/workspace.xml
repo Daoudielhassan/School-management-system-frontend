@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="22155671-9dd4-4036-a89b-616b80014bfc" name="Changes" comment="Add @radix-ui/react-alert-dialog dependency  &#10;&#10;This commit introduces the @radix-ui/react-alert-dialog package, adding support for alert dialog components. The package and its related dependencies are updated in both `package.json` and `package-lock.json`.">
+      <change afterPath="$PROJECT_DIR$/src/app/admin/users/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/UserManagement/UserManagement.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/UserManagement/UsersPage.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/dashboard/CustomSidebar.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/hooks/use-mobile.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/frontend-school management system.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/Dashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/Dashboard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/dashboard/DashboardStats.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/dashboard/DashboardStats.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/dashboard/Header.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/dashboard/Header.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/dashboard/Sidebar.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/dashboard/UserCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/dashboard/UserCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/dashboard/UserManagementCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/dashboard/UserManagementCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/tsconfig.json" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="TypeScript JSX File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Daoudielhassan&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Daoudielhassan/stuedent.git&quot;,
+    &quot;accountId&quot;: &quot;fee39210-73a2-43f2-b586-8fa655082018&quot;
+  }
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="2u8iYrWfUsv8nUwGG2Euv1BvfBq" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Node.js.use-toast.ts.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.dev.executor&quot;: &quot;Run&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;D:\\frontend-school management system\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RunDashboard">
+    <option name="excludedTypes">
+      <set>
+        <option value="HttpClient.HttpRequestRunConfigurationType" />
+      </set>
+    </option>
+  </component>
+  <component name="RunManager" selected="npm.dev">
+    <configuration name="Unnamed" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" nameIsGenerated="true" environment="&lt;No Environment&gt;" path="">
+      <method v="2" />
+    </configuration>
+    <configuration name="dev" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="HTTP Request.Unnamed" />
+      <item itemvalue="npm.dev" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="npm.dev" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-WS-243.25659.40" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="22155671-9dd4-4036-a89b-616b80014bfc" name="Changes" comment="" />
+      <created>1741636653911</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1741636653911</updated>
+      <workItem from="1741636656337" duration="11759000" />
+      <workItem from="1741701375866" duration="16365000" />
+    </task>
+    <task id="LOCAL-00001" summary="Refactor toast component types and enhance open state handling&#10;&#10;Introduce `ToastActionElement` and refine `ToastProps` for better type clarity. Add `open` state and `onOpenChange` handler to manage toast visibility consistently. Simplify `ToastViewport` by removing unused `children` prop.">
+      <option name="closed" value="true" />
+      <created>1741641332317</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1741641332317</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Improve user management with enhanced filtering and UI updates&#10;&#10;Added search functionality, improved role-based filtering, and integrated error handling in the User Management Card. Refactored components to streamline API integration and enhance user feedback with loading states and visuals. Updated &quot;UserCard&quot; to better display roles and statuses with cleaner styling.">
+      <option name="closed" value="true" />
+      <created>1741641349889</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1741641349889</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Add IDE configuration files and placeholder assets&#10;&#10;This commit includes project-specific IntelliJ IDEA configuration files (.idea/*) for module, VCS, and excluded folders. Additionally, a placeholder SVG and user.png asset files are added to the public directory. These updates support initial project setup and organization.">
+      <option name="closed" value="true" />
+      <created>1741641369473</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1741641369473</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Add @radix-ui/react-alert-dialog dependency  &#10;&#10;This commit introduces the @radix-ui/react-alert-dialog package, adding support for alert dialog components. The package and its related dependencies are updated in both `package.json` and `package-lock.json`.">
+      <option name="closed" value="true" />
+      <created>1741641717570</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1741641717570</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="User">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="*" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="user">
+                    <value>
+                      <list>
+                        <option value="*" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
+    <MESSAGE value="Refactor toast component types and enhance open state handling&#10;&#10;Introduce `ToastActionElement` and refine `ToastProps` for better type clarity. Add `open` state and `onOpenChange` handler to manage toast visibility consistently. Simplify `ToastViewport` by removing unused `children` prop." />
+    <MESSAGE value="Improve user management with enhanced filtering and UI updates&#10;&#10;Added search functionality, improved role-based filtering, and integrated error handling in the User Management Card. Refactored components to streamline API integration and enhance user feedback with loading states and visuals. Updated &quot;UserCard&quot; to better display roles and statuses with cleaner styling." />
+    <MESSAGE value="Add IDE configuration files and placeholder assets&#10;&#10;This commit includes project-specific IntelliJ IDEA configuration files (.idea/*) for module, VCS, and excluded folders. Additionally, a placeholder SVG and user.png asset files are added to the public directory. These updates support initial project setup and organization." />
+    <MESSAGE value="Add @radix-ui/react-alert-dialog dependency  &#10;&#10;This commit introduces the @radix-ui/react-alert-dialog package, adding support for alert dialog components. The package and its related dependencies are updated in both `package.json` and `package-lock.json`." />
+    <option name="LAST_COMMIT_MESSAGE" value="Add @radix-ui/react-alert-dialog dependency  &#10;&#10;This commit introduces the @radix-ui/react-alert-dialog package, adding support for alert dialog components. The package and its related dependencies are updated in both `package.json` and `package-lock.json`." />
+  </component>
+</project>
