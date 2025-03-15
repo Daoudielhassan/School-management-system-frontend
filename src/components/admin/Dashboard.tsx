@@ -1,6 +1,6 @@
 import { useState } from "react";
 import CustomSidebar from "./dashboard/CustomSidebar";
-import { Header } from "@/components/Header"
+import { Header } from "@/components/student/Header"
 import DashboardStats from "./dashboard/DashboardStats";
 import UserActivityCard from "./dashboard/UserActivityCard";
 import AttendanceOverviewCard from "./dashboard/AttendanceOverviewCard";

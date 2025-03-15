@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button"
 import { ChevronRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import Link from "next/link"
 
 const fetchScheduleData = async (departmentId: number, classeId: number) => {
   const response = await fetch(`http://localhost:8080/api/sessions/filter?departmentId=${departmentId}&classeId=${classeId}`)
@@ -52,9 +53,11 @@ export const ScheduleCard = () => {
           <CardTitle className="font-heading">Emploi du temps d'aujourd'hui</CardTitle>
           <CardDescription className="text-gray-600 font-body">{currentDate}</CardDescription>
         </div>
-        <Button variant="ghost" className="text-cyan-400 hover:text-cyan-300 hover:bg-white/5">
+        <Link href="/student/Schedule">
+        <Button variant="ghost" className="text-cyan-400 hover:text-cyan-300 hover:bg-white/5" >
           Voir tout <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
+        </Link>
       </CardHeader>
       <CardContent>
         {todaySessions.length === 0 ? (

@@ -4,11 +4,11 @@ import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { LogOut, Calendar, Home, BookOpen, BarChart2, Mail, Award, User, Settings } from "lucide-react"
 
-const BASE_URL = "http://localhost:3000/"
+const BASE_URL = "http://localhost:3000/student"
 
 const navItems = [
   { icon: Home, label: "Tableau de bord", href: `${BASE_URL}/` },
-  { icon: Calendar, label: "Emploi du temps", href: `${BASE_URL}/schedule` },
+  { icon: Calendar, label: "Emploi du temps", href: `${BASE_URL}/Schedule` },
   { icon: BookOpen, label: "Cours", href: `${BASE_URL}/courses` },
   { icon: BarChart2, label: "Notes", href: `${BASE_URL}/grades` },
   { icon: Mail, label: "Messages", href: `${BASE_URL}/messages` },

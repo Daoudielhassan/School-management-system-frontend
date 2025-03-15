@@ -51,62 +51,13 @@ const SESSION_TYPES = {
   Examen: "bg-red-100 border-red-300 text-red-800",
 }
 
-// Helper functions
-const getSessionStyle = (type: string) => {
-  return SESSION_TYPES[type as keyof typeof SESSION_TYPES] || "bg-gray-100 border-gray-300 text-gray-800"
-}
-
-const getFrenchDay = (dateString: string) => {
-  const date = new Date(dateString)
-  return DAYS[date.getDay() === 0 ? 6 : date.getDay() - 1]
-}
-
-const formatDate = (date: Date) => {
-  return date.toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  })
-}
-
-const getWeekDates = (date: Date) => {
-  const day = date.getDay()
-  const diff = date.getDate() - day + (day === 0 ? -6 : 1)
-  const monday = new Date(date)
-  monday.setDate(diff)
-
-  const weekDates = []
-  for (let i = 0; i < 7; i++) {
-    const currentDate = new Date(monday)
-    currentDate.setDate(monday.getDate() + i)
-    weekDates.push(currentDate)
-  }
-
-  return weekDates
-}
-
-const fetchSessions = async ({ departmentId, classeId }: { departmentId: number; classeId: number }) => {
-  try {
-    const response = await fetch(
-      `http://localhost:8080/api/sessions/filter?departmentId=${departmentId}&classeId=${classeId}`,
-    )
-    if (!response.ok) {
-      throw new Error("Failed to fetch sessions")
-    }
-    return response.json()
-  } catch (error) {
-    console.error("Error fetching sessions:", error)
-    throw error
-  }
-}
-
-export function WeeklySchedule({
+export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
   departmentId: propDepartmentId,
   classeId: propClasseId,
   showHeader = true,
   showFilters = true,
   compact = false,
-}: WeeklyScheduleProps) {
+}) => {
   // Get student data from context if props are not provided
   const { studentData } = useStudent()
 
@@ -117,6 +68,85 @@ export function WeeklySchedule({
   const [weekDates, setWeekDates] = useState<Date[]>(getWeekDates(currentDate))
   const [view, setView] = useState<"week" | "day" | "list">("week")
   const [selectedDay, setSelectedDay] = useState<Date>(new Date())
+  const [sessions, setSessions] = useState<Session[]>([])
+
+  // Helper functions
+  const getSessionStyle = (type: string) => {
+    return SESSION_TYPES[type as keyof typeof SESSION_TYPES] || "bg-gray-100 border-gray-300 text-gray-800"
+  }
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
+  }
+
+  function getWeekDates(date: Date) {
+    const day = date.getDay()
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1)
+    const monday = new Date(date)
+    monday.setDate(diff)
+
+    const weekDates = []
+    for (let i = 0; i < 7; i++) {
+      const currentDate = new Date(monday)
+      currentDate.setDate(monday.getDate() + i)
+      weekDates.push(currentDate)
+    }
+
+    return weekDates
+  }
+
+  const getFrenchDay = (dateString: string) => {
+    // Add T00:00:00 to ensure consistent date parsing
+    const date = new Date(dateString + "T00:00:00");
+    return DAYS[date.getDay() === 0 ? 6 : date.getDay() - 1];
+  };
+
+  // Get sessions for a specific day and time slot
+  const getSessionForSlot = (day: string, time: string) => {
+    if (!sessions?.length) return null
+    
+    // Find the corresponding date for this day of the week
+    const dayIndex = DAYS.findIndex(d => d === day);
+    if (dayIndex === -1) return null;
+    
+    const targetDate = weekDates[dayIndex];
+    const formattedTargetDate = targetDate.toISOString().split("T")[0];
+    
+    return sessions.find(
+      (session) => 
+        session.sessionDate === formattedTargetDate && 
+        session.startTime.startsWith(time)
+    );
+  }
+
+  // Get all sessions for a specific day
+  const getSessionsForDay = (date: Date) => {
+    if (!sessions?.length) return [];
+
+    // Format the date to YYYY-MM-DD
+    const formattedDate = date.toISOString().split("T")[0];
+    
+    return sessions.filter((session) => {
+      // Direct comparison with the raw session date
+      return session.sessionDate === formattedDate;
+    }).sort((a, b) => a.startTime.localeCompare(b.startTime));
+  };
+
+  // Get today's sessions
+  const getTodaySessions = () => {
+    if (!sessions?.length) return []
+
+    const today = new Date()
+    const formattedToday = today.toISOString().split("T")[0]
+
+    return sessions
+      .filter((session) => session.sessionDate === formattedToday)
+      .sort((a, b) => a.startTime.localeCompare(b.startTime))
+  }
 
   // Update week dates when current date changes
   useEffect(() => {
@@ -124,18 +154,29 @@ export function WeeklySchedule({
   }, [currentDate])
 
   // Fetch sessions data
-  const {
-    data: sessions,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery(
+  const fetchSessions = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/sessions/filter?departmentId=${departmentId}&classeId=${classeId}`,
+      )
+      if (!response.ok) {
+        throw new Error("Failed to fetch sessions")
+      }
+      return response.json()
+    } catch (error) {
+      console.error("Error fetching sessions:", error)
+      throw error
+    }
+  }
+
+  const { isLoading, isError, refetch } = useQuery(
     ["sessions", departmentId, classeId],
-    () => fetchSessions({ departmentId: departmentId!, classeId: classeId! }),
+    fetchSessions,
     {
       enabled: !!departmentId && !!classeId,
       refetchOnWindowFocus: false,
       staleTime: 5 * 60 * 1000, // 5 minutes
+      onSuccess: (data) => setSessions(data)
     },
   )
 
@@ -156,37 +197,6 @@ export function WeeklySchedule({
   // Go to current week
   const goToCurrentWeek = () => {
     setCurrentDate(new Date())
-  }
-
-  // Get sessions for a specific day and time slot
-  const getSessionForSlot = (day: string, time: string) => {
-    if (!sessions) return null
-
-    return sessions.find(
-      (session: Session) => getFrenchDay(session.sessionDate) === day && session.startTime.startsWith(time),
-    )
-  }
-
-  // Get all sessions for a specific day
-  const getSessionsForDay = (date: Date) => {
-    if (!sessions) return []
-
-    const formattedDate = date.toISOString().split("T")[0]
-    return sessions
-      .filter((session: Session) => session.sessionDate.startsWith(formattedDate))
-      .sort((a: Session, b: Session) => a.startTime.localeCompare(b.startTime))
-  }
-
-  // Get today's sessions
-  const getTodaySessions = () => {
-    if (!sessions) return []
-
-    const today = new Date()
-    const formattedToday = today.toISOString().split("T")[0]
-
-    return sessions
-      .filter((session: Session) => session.sessionDate.startsWith(formattedToday))
-      .sort((a: Session, b: Session) => a.startTime.localeCompare(b.startTime))
   }
 
   // Render session card

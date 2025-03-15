@@ -1,15 +1,14 @@
 // app/student-dashboard/page.tsx
 "use client"
 import { useState, useEffect } from "react"
-import { MobileMenuButton } from "@/components/MobileMenuButton"
-import { Sidebar } from "@/components/sidebar"
-import { Header } from "@/components/Header"
-import { StatCard } from "@/components/StatCard"
-import { ScheduleCard } from "@/components/ScheduleCard"
+import { MobileMenuButton } from "@/components/student/MobileMenuButton"
+import { Sidebar } from "@/components/student/sidebar"
+import { Header } from "@/components/student/Header"
+import { ScheduleCard } from "@/components/student/ScheduleCard"
 import { MessagesCard } from "@/components/MessagesCard"
 import { AttendanceOverview } from "./AttendanceOverview"
-import { AttendanceCard } from "@/components/AttendanceCard"
-import { AssignmentsCard } from "@/components/AssignmentsCard"
+import { AttendanceCard } from "@/components/student/AttendanceCard"
+import { AssignmentsCard } from "@/components/student/AssignmentsCard"
 import { Clock } from "lucide-react"
 
 export default function StudentDashboard() {
@@ -34,13 +33,7 @@ export default function StudentDashboard() {
         <Header />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {/* <StatCard
-            title="Attendance"
-            value="87%"
-            icon={Clock}
-            color="from-cyan-500 to-blue-600"
-          /> */}
-          {/* Add other StatCards */}
+
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

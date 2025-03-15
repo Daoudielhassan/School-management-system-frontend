@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { AttendanceCard } from "@/components/AttendanceCard"
+import { AttendanceCard } from "@/components/student/AttendanceCard"
 import { useStudent } from "@/context/StudentContext"
 
 export const AttendanceOverview = () => {
