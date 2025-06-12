@@ -1,5 +1,5 @@
 import { useState } from "react";
-import CustomSidebar from "./dashboard/CustomSidebar";
+import CustomSidebar from "./CustomSidebar";
 import { Header } from "@/components/student/Header"
 import DashboardStats from "./dashboard/DashboardStats";
 import UserActivityCard from "./dashboard/UserActivityCard";

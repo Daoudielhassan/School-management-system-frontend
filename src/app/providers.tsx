@@ -1,13 +1,12 @@
 "use client"
 
-import type React from "react"
+import { ReactNode } from 'react';
 
-import { QueryClient, QueryClientProvider } from "react-query"
-import { useState } from "react"
+interface ProvidersProps {
+  children: ReactNode;
+}
 
-export default function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient())
-
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+export default function Providers({ children }: ProvidersProps) {
+  return <>{children}</>;
 }
 

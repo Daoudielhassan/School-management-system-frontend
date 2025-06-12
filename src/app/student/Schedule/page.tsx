@@ -2,7 +2,7 @@
 
 import { Sidebar } from "@/components/student/sidebar";
 import { MobileMenuButton } from "@/components/student/MobileMenuButton"
-import { WeeklySchedule } from "@/components/weekly-schedule";
+import { WeeklySchedule } from "@/components/student/weekly-schedule";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { useState } from "react";
 

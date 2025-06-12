@@ -427,7 +427,7 @@ const AddStudent = () => {
         <p className="text-xs text-gray-500">
           Need help? Contact the IT department at{" "}
           <a href="mailto:it@example.com" className="text-blue-600 hover:underline">
-            it@example.com
+            it.club@aiac.ma
           </a>
         </p>
       </CardFooter>

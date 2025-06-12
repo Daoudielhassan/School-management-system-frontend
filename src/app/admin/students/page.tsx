@@ -1,7 +1,7 @@
 'use clients';
 import React from 'react';
 
-import CustomSidebar from "@/components/admin/dashboard/CustomSidebar";
+import CustomSidebar from "@/components/admin/CustomSidebar";
 import AddStudent from '@/components/admin/UserManagement/AddStudent';
 import StudentManagement from '@/components/admin/UserManagement/StudentManagement';
 

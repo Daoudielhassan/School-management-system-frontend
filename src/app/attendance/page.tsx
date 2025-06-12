@@ -1,7 +1,7 @@
 "use client";
 
 import AttendancePage from "@/components/attendance-page";
-import CustomSidebar from "@/components/admin/dashboard/CustomSidebar";
+import CustomSidebar from "@/components/admin/CustomSidebar";
 
 export default function Home() {
     return(

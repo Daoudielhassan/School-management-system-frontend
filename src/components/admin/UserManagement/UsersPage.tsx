@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from "react";
-import Sidebar from "@/components/admin/dashboard/CustomSidebar";
+import Sidebar from "@/components/admin/CustomSidebar";
 import Header from "@/components/admin/dashboard/Header";
 import UserManagement from "@/components/admin/UserManagement/UserManagement";
 // Create a simple spinner component inline
