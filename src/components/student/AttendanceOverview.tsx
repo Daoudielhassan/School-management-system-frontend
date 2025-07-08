@@ -1,16 +1,21 @@
 import { useEffect, useState } from "react"
 import { AttendanceCard } from "@/components/student/AttendanceCard"
 import { useStudent } from "@/context/StudentContext"
+import { useAuth } from "@/context/AuthContext"
 
 export const AttendanceOverview = () => {
   const [attendanceData, setAttendanceData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const { studentData } = useStudent()
+  const { token } = useAuth()
 
   // Fetch attendance data based on student ID
-  const fetchAttendanceData = async (id: number) => {
+  const fetchAttendanceData = async (id: number, token: string | null) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/attendance/students/${id}`)
+      const response = await fetch(`http://localhost:8080/api/attendance/students/${id}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        })
       const data = await response.json()
 
       // Ensure sessionDate is properly formatted before filtering/sorting
@@ -42,10 +47,10 @@ export const AttendanceOverview = () => {
   }
 
   useEffect(() => {
-    if (studentData) {
-      fetchAttendanceData(studentData.id)
+    if (studentData && token) {
+      fetchAttendanceData(studentData.id, token)
     }
-  }, [studentData])
+  }, [studentData, token])
 
   if (loading) return <div>Loading...</div>
 

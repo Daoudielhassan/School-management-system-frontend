@@ -1,14 +1,20 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useStudent } from "@/context/StudentContext"
+import { useAuth } from "@/context/AuthContext"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ChevronRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 
-const fetchScheduleData = async (departmentId: number, classeId: number) => {
-  const response = await fetch(`http://localhost:8080/api/sessions/filter?departmentId=${departmentId}&classeId=${classeId}`)
+const fetchScheduleData = async (departmentId: number, classeId: number, token: string | null) => {
+  const response = await fetch(
+    `http://localhost:8080/api/sessions/filter?departmentId=${departmentId}&classeId=${classeId}`,
+    {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    }
+  )
   if (!response.ok) throw new Error("Failed to fetch schedule data")
   const text = await response.text()
   if (!text) return []
@@ -17,6 +23,7 @@ const fetchScheduleData = async (departmentId: number, classeId: number) => {
 
 export const ScheduleCard = () => {
   const { studentData } = useStudent() // Accéder aux données de l'étudiant depuis le contexte
+  const { token } = useAuth()
   const [scheduleData, setScheduleData] = useState<any[]>([])
   const [currentDate, setCurrentDate] = useState<string>("")
 
@@ -25,15 +32,15 @@ export const ScheduleCard = () => {
     const options: Intl.DateTimeFormatOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" }
     setCurrentDate(today.toLocaleDateString(undefined, options))
 
-    if (studentData) {
+    if (studentData && token) {
       // Récupérer les données de l'emploi du temps lorsque les données de l'étudiant sont disponibles
       const loadSchedule = async () => {
-        const data = await fetchScheduleData(studentData.departmentId, studentData.classeId)
+        const data = await fetchScheduleData(studentData.departmentId, studentData.classeId, token)
         setScheduleData(Array.isArray(data) ? data : [])
       }
       loadSchedule()
     }
-  }, [studentData])
+  }, [studentData, token])
 
   // Filtrer les données de l'emploi du temps pour n'inclure que les sessions d'aujourd'hui
   const todaySessions = scheduleData.filter((session) => {

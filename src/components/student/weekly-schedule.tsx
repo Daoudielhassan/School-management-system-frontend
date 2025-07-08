@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Loader2 } from "lucide-react"
+import { useAuth } from "@/context/AuthContext"
 
 // Define the expected shape of a session object
 type Session = {
@@ -26,17 +27,21 @@ export const WeeklySchedule = ({ departmentId, classeId }: WeeklyScheduleProps) 
   const [scheduleData, setScheduleData] = useState<Session[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
+  const { token } = useAuth()
 
   // Days of the week in French
   const daysOfWeek = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
 
   // Fetch sessions from the API
-  const fetchScheduleData = async (departmentId: number, classeId: number) => {
+  const fetchScheduleData = async (departmentId: number, classeId: number, token: string | null) => {
     setLoading(true)
     setError(null)
 
     try {
-      const response = await fetch(`http://localhost:8080/api/sessions/filter?departmentId=${departmentId}&classeId=${classeId}`)
+      const response = await fetch(`http://localhost:8080/api/sessions/filter?departmentId=${departmentId}&classeId=${classeId}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        })
       if (!response.ok) {
         throw new Error("Erreur lors du chargement de l'emploi du temps.")
       }
@@ -51,10 +56,10 @@ export const WeeklySchedule = ({ departmentId, classeId }: WeeklyScheduleProps) 
 
   // Fetch when props change
   useEffect(() => {
-    if (departmentId && classeId) {
-      fetchScheduleData(departmentId, classeId)
+    if (departmentId && classeId && token) {
+      fetchScheduleData(departmentId, classeId, token)
     }
-  }, [departmentId, classeId])
+  }, [departmentId, classeId, token])
 
   // Group sessions by weekday
   const groupedByDay = daysOfWeek.map(day => ({
