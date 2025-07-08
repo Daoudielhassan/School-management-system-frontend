@@ -1,65 +1,163 @@
 'use client';
 
-import { useAuth } from '@/contexts/AuthContext';
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar } from "@/components/ui/calendar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/context/AuthContext";
+import axios from "axios";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+
+interface Session {
+  id: number;
+  subject: {
+    name: string;
+  };
+  sessionDate: string;
+  startTime: string;
+  endTime: string;
+  roomNumber: string;
+  sessionType: string;
+  classEntity: {
+    name: string;
+  };
+}
 
 export default function ProfessorDashboard() {
-  const { logout } = useAuth();
+  const { userId } = useAuth();
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [loading, setLoading] = useState(true);
+  const [professor, setProfessor] = useState<{ firstname: string; lastname: string } | null>(null);
+
+  useEffect(() => {
+    const fetchProfessorData = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/instructors/user/${userId}`);
+        setProfessor(response.data);
+      } catch (error) {
+        console.error("Error fetching professor data:", error);
+      }
+    };
+
+    if (userId) {
+      fetchProfessorData();
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/instructor/${userId}`);
+        setSessions(response.data);
+      } catch (error) {
+        console.error("Error fetching sessions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) {
+      fetchSessions();
+    }
+  }, [userId]);
+
+  const todaySessions = sessions.filter(session => 
+    new Date(session.sessionDate).toDateString() === selectedDate.toDateString()
+  );
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-semibold">Professor Dashboard</h1>
-            </div>
-            <div className="flex items-center">
-              <button
-                onClick={logout}
-                className="ml-4 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-              >
-                Sign Out
-              </button>
-            </div>
-          </div>
+    <div className="flex h-screen bg-[#00246B] text-[#FFFFFF] overflow-hidden">
+      <div className="flex-1 overflow-y-auto p-6 bg-[#FFFFFF] text-black">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>Bienvenue, {professor?.firstname} {professor?.lastname}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>Professeur</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Sessions du jour</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>{todaySessions.length} sessions prévues</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Prochain cours</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {todaySessions.length > 0 ? (
+                <div>
+                  <p>{todaySessions[0].subject.name}</p>
+                  <p>{format(new Date(todaySessions[0].startTime), 'HH:mm')} - {format(new Date(todaySessions[0].endTime), 'HH:mm')}</p>
+                  <p>Salle: {todaySessions[0].roomNumber}</p>
+                </div>
+              ) : (
+                <p>Aucun cours prévu</p>
+              )}
+            </CardContent>
+          </Card>
         </div>
-      </nav>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Course Management Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <h3 className="text-lg font-medium text-gray-900">Course Management</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Manage your courses, assignments, and materials
-                </p>
-              </div>
-            </div>
-
-            {/* Student Progress Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <h3 className="text-lg font-medium text-gray-900">Student Progress</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Track and evaluate student performance
-                </p>
-              </div>
-            </div>
-
-            {/* Schedule Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <h3 className="text-lg font-medium text-gray-900">Schedule</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  View and manage your teaching schedule
-                </p>
-              </div>
-            </div>
-          </div>
+        <div className="mt-6">
+          <Tabs defaultValue="calendar" className="w-full">
+            <TabsList>
+              <TabsTrigger value="calendar">Calendrier</TabsTrigger>
+              <TabsTrigger value="sessions">Sessions</TabsTrigger>
+            </TabsList>
+            <TabsContent value="calendar">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Calendrier des cours</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => date && setSelectedDate(date)}
+                    locale={fr}
+                    className="rounded-md border"
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="sessions">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Sessions du {format(selectedDate, 'dd MMMM yyyy', { locale: fr })}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <p>Chargement...</p>
+                  ) : todaySessions.length > 0 ? (
+                    <div className="space-y-4">
+                      {todaySessions.map((session) => (
+                        <div key={session.id} className="p-4 border rounded-lg">
+                          <h3 className="font-bold">{session.subject.name}</h3>
+                          <p>Classe: {session.classEntity.name}</p>
+                          <p>Horaire: {format(new Date(session.startTime), 'HH:mm')} - {format(new Date(session.endTime), 'HH:mm')}</p>
+                          <p>Salle: {session.roomNumber}</p>
+                          <p>Type: {session.sessionType}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p>Aucune session prévue pour cette date</p>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
-      </main>
+      </div>
     </div>
   );
 } 

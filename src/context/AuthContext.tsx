@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { AuthContextType, AuthState, LoginCredentials, UserRole } from '@/types/auth';
 import { API_ENDPOINTS } from '@/config/api';
 import { setCookie, deleteCookie, getCookie } from 'cookies-next';
+import { isTokenExpired } from '@/lib/utils';
+import { toast } from 'react-toastify';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -20,12 +22,89 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
   const router = useRouter();
 
+  // Function to handle token expiration
+  const handleTokenExpiration = () => {
+    // Show notification to user
+    toast.warning('Your session has expired. Please log in again.');
+    
+    // Remove cookies
+    deleteCookie('token');
+    deleteCookie('role');
+    deleteCookie('userId');
+    
+    // Remove axios header
+    delete axios.defaults.headers.common['Authorization'];
+    
+    // Reset auth state
+    setAuthState({
+      token: null,
+      role: null,
+      userId: null,
+      isAuthenticated: false,
+    });
+    
+    // Redirect to login page
+    router.push('/login');
+  };
+
+  // Set up axios response interceptor for handling expired tokens
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (axios.isAxiosError(error)) {
+          // Handle 401 (Unauthorized) and 403 (Forbidden) responses
+          if (error.response?.status === 401 || error.response?.status === 403) {
+            // Only handle token expiration if we have a token (user is authenticated)
+            if (authState.token) {
+              handleTokenExpiration();
+            }
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    // Cleanup interceptor on unmount
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, [authState.token]);
+
+  // Periodic token validation check
+  useEffect(() => {
+    if (!authState.token) return;
+
+    const checkTokenExpiration = () => {
+      if (authState.token && isTokenExpired(authState.token)) {
+        handleTokenExpiration();
+      }
+    };
+
+    // Check immediately
+    checkTokenExpiration();
+
+    // Set up periodic check every 5 minutes
+    const interval = setInterval(checkTokenExpiration, 5 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [authState.token]);
+
   useEffect(() => {
     const token = getCookie('token');
     const role = getCookie('role') as UserRole | null;
     const userId = Number(getCookie('userId')) || null;
     
     if (token && role && userId) {
+      // Check if token is expired before setting auth state
+      if (typeof token === 'string' && isTokenExpired(token)) {
+        // Clear expired cookies
+        deleteCookie('token');
+        deleteCookie('role');
+        deleteCookie('userId');
+        return;
+      }
+      
       setAuthState({
         token: token.toString(),
         role,
@@ -75,7 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           [UserRole.MANAGER]: '/manager',
           [UserRole.ADMINISTRATEUR]: '/admin'
         };
-        router.push(`${rolePathMap[role as UserRole]}/dashboard`);
+        router.push(`${rolePathMap[role as UserRole]}/`);
       } else {
         throw new Error(response.data.message || 'Login failed');
       }

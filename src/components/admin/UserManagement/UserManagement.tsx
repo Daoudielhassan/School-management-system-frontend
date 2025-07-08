@@ -10,9 +10,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import UserCard from "./UserCard";
+import { useAuth } from "@/context/AuthContext";
+import { Edit, Trash2 } from "lucide-react";
 
-const UserManagementCard = () => {
+const UserManagement = () => {
   interface User {
     id: number;
     username: string;
@@ -28,12 +29,13 @@ const UserManagementCard = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth();
 
   const roleMapping: Record<string, string> = {
     all: "all",
     ETUDIANT: "student",
     MANAGER: "manager",
-    ADMINISTRATEUR: "administrator",
+    ADMINISTRATEUR: "ADMINISTRATEUR",
     PROFESSEUR: "professor",
   };
 
@@ -56,6 +58,11 @@ const UserManagementCard = () => {
       setLoading(true);
       setError(null); // Reset error during fetch
       try {
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
         const backendRole = filter === "all" ? "" : roleMapping[filter];
         let url = `http://localhost:8080/api/users?page=${page - 1}&size=10`;
         if (backendRole) {
@@ -66,7 +73,11 @@ const UserManagementCard = () => {
         }
 
         console.log(`Calling API: ${url}`);
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -88,7 +99,7 @@ const UserManagementCard = () => {
     };
 
     fetchUsers();
-  }, [filter, page, debouncedSearchTerm]);
+  }, [filter, page, debouncedSearchTerm, token]);
 
   // Handle filter selection
   const handleFilter = (role: string) => {
@@ -98,53 +109,58 @@ const UserManagementCard = () => {
 
   // Render
   return (
-      <main className="flex-1 overflow-y-auto p-6 bg-[#0A192F]">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold text-white mb-8">User Management</h1>
-
-          {/* Search & Role Filters */}
-          <div className="mb-6 flex flex-wrap items-center gap-4">
-            <Input
-                type="text"
-                placeholder="Search users..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-xs bg-[#1E2D3D] border-none text-gray-300 focus:ring-[#00D4FF]"
-            />
-            <div className="flex flex-wrap gap-2">
-              {Object.keys(roleMapping).map((role) => (
-                  <Button
-                      key={role}
-                      variant={filter === role ? "default" : "outline"}
-                      onClick={() => handleFilter(role)}
-                      className={`capitalize ${
-                          filter === role
-                              ? "bg-[#00D4FF] text-[#0A192F]"
-                              : "border-gray-600 text-gray-400 hover:bg-[#1E2D3D] hover:text-white"
-                      }`}
-                  >
-                    {role === "all" ? "All" : roleMapping[role]}
-                  </Button>
-              ))}
-            </div>
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">User Management</h1>
+            <p className="text-gray-600 dark:text-gray-400">Manage system users</p>
           </div>
+        </div>
 
-          {/* Error Message */}
-          {error && (
-              <div className="bg-red-500 text-white p-4 rounded-lg mb-6">
-                <p>{error}</p>
-              </div>
-          )}
+        {/* Search & Role Filters */}
+        <div className="flex flex-wrap items-center gap-4">
+          <Input
+              type="text"
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-xs bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-300 focus:ring-blue-500"
+          />
+          <div className="flex flex-wrap gap-2">
+            {Object.keys(roleMapping).map((role) => (
+                <Button
+                    key={role}
+                    variant={filter === role ? "default" : "outline"}
+                    onClick={() => handleFilter(role)}
+                    className={`capitalize ${
+                        filter === role
+                            ? "bg-blue-600 text-white"
+                            : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                >
+                  {role === "all" ? "All" : roleMapping[role]}
+                </Button>
+            ))}
+          </div>
+        </div>
 
-          {/* User Table */}
-          {!loading && users.length > 0 && (
-              <Table className="bg-[#1E2D3D] text-gray-300">
+        {/* Error Message */}
+        {error && (
+            <div className="bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-lg">
+              <p>{error}</p>
+            </div>
+        )}
+
+        {/* User Table */}
+        {!loading && users.length > 0 && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+              <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-sm font-bold text-gray-400">Username</TableHead>
-                    <TableHead className="text-sm font-bold text-gray-400">Email</TableHead>
-                    <TableHead className="text-sm font-bold text-gray-400">Role</TableHead>
-                    <TableHead className="text-sm font-bold text-gray-400">Actions</TableHead>
+                    <TableHead className="text-sm font-bold text-gray-600 dark:text-gray-300">Username</TableHead>
+                    <TableHead className="text-sm font-bold text-gray-600 dark:text-gray-300">Email</TableHead>
+                    <TableHead className="text-sm font-bold text-gray-600 dark:text-gray-300">Role</TableHead>
+                    <TableHead className="text-sm font-bold text-gray-600 dark:text-gray-300">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -152,14 +168,14 @@ const UserManagementCard = () => {
                       <TableRow key={user.id}>
                         <TableCell>{user.username}</TableCell>
                         <TableCell>{user.email}</TableCell>
-                        <TableCell>{roleMapping[user.identity]}</TableCell>
-                        <TableCell className="flex items-center gap-4">
-                          <Button variant="default" className="text-sm">
-                            <Edit className="h-4 w-4 mr-2" />
+                        <TableCell>{roleMapping[user.identity] || user.identity}</TableCell>
+                        <TableCell className="flex items-center gap-2">
+                          <Button variant="outline" size="sm" className="text-sm">
+                            <Edit className="h-4 w-4 mr-1" />
                             Edit
                           </Button>
-                          <Button variant="destructive" className="text-sm">
-                            <Trash2 className="h-4 w-4 mr-2" />
+                          <Button variant="destructive" size="sm" className="text-sm">
+                            <Trash2 className="h-4 w-4 mr-1" />
                             Delete
                           </Button>
                         </TableCell>
@@ -167,43 +183,47 @@ const UserManagementCard = () => {
                   ))}
                 </TableBody>
               </Table>
-          )}
+            </div>
+        )}
 
-          {/* No Users Found */}
-          {!loading && users.length === 0 && (
-              <p className="text-center text-gray-400">No users found</p>
-          )}
+        {/* No Users Found */}
+        {!loading && users.length === 0 && (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              <p>No users found</p>
+            </div>
+        )}
 
-          {/* Loading Indicator */}
-          {loading && (
-              <div className="flex justify-center items-center py-6">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#00D4FF]"></div>
-              </div>
-          )}
+        {/* Loading Indicator */}
+        {loading && (
+            <div className="flex justify-center items-center py-6">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-600"></div>
+            </div>
+        )}
 
-          {/* Pagination */}
-          <div className="mt-6 flex justify-between items-center">
-            <Button
-                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                disabled={page === 1 || loading}
-                className="bg-[#1E2D3D] text-white hover:bg-gray-700"
-            >
-              Previous
-            </Button>
-            <p className="text-gray-400">
-              Page {page} of {totalPages}
-            </p>
-            <Button
-                onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-                disabled={page === totalPages || loading}
-                className="bg-[#1E2D3D] text-white hover:bg-gray-700"
-            >
-              Next
-            </Button>
-          </div>
+        {/* Pagination */}
+        <div className="flex justify-between items-center">
+          <Button
+              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              disabled={page === 1 || loading}
+              variant="outline"
+              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            Previous
+          </Button>
+          <p className="text-gray-600 dark:text-gray-400">
+            Page {page} of {totalPages}
+          </p>
+          <Button
+              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={page === totalPages || loading}
+              variant="outline"
+              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            Next
+          </Button>
         </div>
-      </main>
+      </div>
   );
 };
 
-export default UserManagementCard;
+export default UserManagement;

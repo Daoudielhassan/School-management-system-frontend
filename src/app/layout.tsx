@@ -5,7 +5,8 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import Providers from "./providers"
 import { StudentProvider } from "@/context/StudentContext"
-import { AuthProvider } from '@/contexts/AuthContext'
+import { InstructorProvider } from "@/context/InstructorContext"
+import { AuthProvider } from '@/context/AuthContext'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -27,7 +28,9 @@ export default function RootLayout({
         <AuthProvider>
           <Providers>
             <StudentProvider>
-              {children}
+              <InstructorProvider>
+                {children}
+              </InstructorProvider>
             </StudentProvider>
           </Providers>
           <ToastContainer

@@ -1,258 +1,166 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useToast } from "@/components/ui/use-toast"
-import { Toaster } from "@/components/ui/toaster"
-import { ToastProvider } from "@/components/ui/toast"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { CheckCircle2, Calendar, UserX } from "lucide-react"
-import axios from "axios"
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/context/AuthContext";
+import axios from "axios";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
-// Interfaces TypeScript
 interface Session {
-  id: number
-  subject: { name: string }
-  sessionDate: string
-  classId: number
-  startTime: string
-  endTime: string
-  roomNumber: string
-  classe: { name: string }
+  id: number;
+  subject: {
+    name: string;
+  };
+  sessionDate: string;
+  startTime: string;
+  endTime: string;
+  roomNumber: string;
+  classEntity: {
+    name: string;
+  };
 }
 
-interface Student {
-  id: number
-  firstname: string
-  lastname: string
-  email: string
-  classId: number
+interface Attendance {
+  id: number;
+  studentId: number;
+  studentName: string;
+  status: string;
+  sessionId: number;
 }
 
-interface AttendanceRecord {
-  studentId: number
-  sessionId: number
-}
+export default function AttendancePage() {
+  const { user } = useAuth();
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [attendances, setAttendances] = useState<Attendance[]>([]);
+  const [loading, setLoading] = useState(true);
 
-function AttendancePage() {
-  const [sessions, setSessions] = useState<Session[]>([])
-  const [selectedSession, setSelectedSession] = useState<number | null>(null)
-  const [students, setStudents] = useState<Student[]>([])
-  const [attendance, setAttendance] = useState<Record<number, boolean>>({})
-  const [isSaving, setIsSaving] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [savedAttendance, setSavedAttendance] = useState(false)
-  const { toast } = useToast()
-
-  const instructorId = 1 // Replace with the actual instructor ID
-
-  // Fetch instructor's sessions
   useEffect(() => {
     const fetchSessions = async () => {
-      setIsLoading(true)
       try {
-        const response = await axios.get<Session[]>(`http://localhost:8080/api/sessions/instructor/${instructorId}`)
-        setSessions(response.data)
+        const response = await axios.get(`/api/sessions/instructor/${user?.id}`);
+        setSessions(response.data);
       } catch (error) {
-        console.error("Error fetching sessions:", error)
-        toast({
-          title: "Erreur de chargement",
-          description: "Impossible de charger les sessions. Veuillez réessayer.",
-          variant: "destructive",
-        })
+        console.error("Error fetching sessions:", error);
       } finally {
-        setIsLoading(false)
+        setLoading(false);
+      }
+    };
+
+    if (user?.id) {
+      fetchSessions();
+    }
+  }, [user?.id]);
+
+  const handleSessionChange = async (sessionId: string) => {
+    const session = sessions.find(s => s.id === parseInt(sessionId));
+    setSelectedSession(session || null);
+
+    if (session) {
+      try {
+        const response = await axios.get(`/api/attendance/session/${session.id}`);
+        setAttendances(response.data);
+      } catch (error) {
+        console.error("Error fetching attendances:", error);
       }
     }
-    fetchSessions()
-  }, [toast])
+  };
 
-  // Fetch students for a session
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!selectedSession) return
-      setIsLoading(true)
+  const handleStatusChange = async (studentId: number, newStatus: string) => {
+    const attendance = attendances.find(a => a.studentId === studentId);
+    if (attendance) {
       try {
-        const session = sessions.find((s) => s.id === selectedSession)
-        if (!session) return
-
-        const studentsResponse = await axios.get(`http://localhost:8080/api/classes/${session.classId}/students`)
-        const fetchedStudents = studentsResponse.data.map((student: any) => ({
-          id: student.id,
-          firstname: student.firstName,
-          lastname: student.lastName,
-          email: student.email,
-          classId: student.classeId,
-        }))
-        setStudents(fetchedStudents)
-
-        // Initialize attendance (all students present by default)
-        const initialAttendance: Record<number, boolean> = {}
-        fetchedStudents.forEach((student: Student) => {
-          initialAttendance[student.id] = true
-        })
-        setAttendance(initialAttendance)
+        const response = await axios.put(`/api/attendance/${attendance.id}`, {
+          status: newStatus
+        });
+        setAttendances(prev => prev.map(a => 
+          a.id === attendance.id ? { ...a, status: newStatus } : a
+        ));
       } catch (error) {
-        console.error("Error fetching students:", error)
-        toast({
-          title: "Erreur de chargement",
-          description: "Impossible de charger les étudiants. Veuillez réessayer.",
-          variant: "destructive",
-        })
-      } finally {
-        setIsLoading(false)
+        console.error("Error updating attendance:", error);
       }
     }
-    fetchData()
-  }, [selectedSession, sessions, toast])
+  };
 
-  const handleAttendanceChange = (studentId: number, isPresent: boolean) => {
-    setAttendance((prev) => ({ ...prev, [studentId]: isPresent }))
-    setSavedAttendance(false)
-  }
-
-  const handleSaveAttendance = async () => {
-    setIsSaving(true)
+  const handleSaveAll = async () => {
     try {
-      const absentStudents = Object.entries(attendance)
-        .filter(([_, isPresent]) => !isPresent)
-        .map(([studentId]) => ({
-          studentId: Number(studentId),
-          sessionId: selectedSession!,
-        }))
-
-      if (absentStudents.length > 0) {
-        await axios.post("http://localhost:8080/api/attendance", absentStudents)
-      }
-
-      setSavedAttendance(true)
-      toast({
-        title: "Présences enregistrées",
-        description: `Les absences ont été enregistrées avec succès. ${absentStudents.length} étudiant(s) absent(s).`,
-        variant: "default",
-        icon: <CheckCircle2 className="h-4 w-4 text-green-500" />,
-      })
+      await axios.post('/api/attendance', attendances);
+      alert('Présences enregistrées avec succès');
     } catch (error) {
-      console.error("Error saving attendance:", error)
-      toast({
-        title: "Erreur d'enregistrement",
-        description: "Impossible d'enregistrer les absences. Veuillez réessayer.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsSaving(false)
+      console.error("Error saving attendances:", error);
+      alert('Erreur lors de l\'enregistrement des présences');
     }
-  }
-
-  const selectedSessionDetails = sessions.find((s) => s.id === selectedSession)
-
-  const absentCount = Object.values(attendance).filter((isPresent) => !isPresent).length
+  };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto p-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Gestion des présences</CardTitle>
+          <CardTitle>Gestion des présences</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <Select
-              value={selectedSession?.toString()}
-              onValueChange={(value) => {
-                setSelectedSession(Number(value))
-                setSavedAttendance(false)
-              }}
-            >
-              <SelectTrigger className="w-full md:w-[300px]">
-                <SelectValue placeholder="Sélectionnez une session" />
+          <div className="mb-4">
+            <Select onValueChange={handleSessionChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner une session" />
               </SelectTrigger>
               <SelectContent>
                 {sessions.map((session) => (
                   <SelectItem key={session.id} value={session.id.toString()}>
-                    <div className="flex items-center">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      <span>
-                        {session.subject.name} - {session.classe.name} ({session.sessionDate} à {session.startTime})
-                      </span>
-                    </div>
+                    {session.subject.name} - {format(new Date(session.sessionDate), 'dd/MM/yyyy', { locale: fr })} - {session.classEntity.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-
-            {selectedSessionDetails && (
-              <div className="text-sm text-muted-foreground">
-                Salle: {selectedSessionDetails.roomNumber} | Horaire: {selectedSessionDetails.startTime} -{" "}
-                {selectedSessionDetails.endTime}
-              </div>
-            )}
-
-            {isLoading ? (
-              <div className="text-center py-4">Chargement des données...</div>
-            ) : students.length > 0 ? (
-              <>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nom</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead className="text-right">Présent</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {students.map((student) => (
-                      <TableRow key={student.id}>
-                        <TableCell>
-                          {student.firstname} {student.lastname}
-                        </TableCell>
-                        <TableCell>{student.email}</TableCell>
-                        <TableCell className="text-right">
-                          <Checkbox
-                            checked={attendance[student.id]}
-                            onCheckedChange={(checked) => handleAttendanceChange(student.id, checked as boolean)}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <UserX className="mr-2 h-4 w-4" />
-                    <span>{absentCount} étudiant(s) absent(s)</span>
-                  </div>
-                  <Button
-                    onClick={handleSaveAttendance}
-                    disabled={isSaving || !selectedSession || savedAttendance}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    {isSaving
-                      ? "Enregistrement..."
-                      : savedAttendance
-                        ? "Présences enregistrées"
-                        : "Enregistrer les absences"}
-                  </Button>
-                </div>
-              </>
-            ) : selectedSession ? (
-              <div className="text-center py-4">Aucun étudiant trouvé pour cette session.</div>
-            ) : null}
           </div>
+
+          {selectedSession && (
+            <div>
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold">
+                  {selectedSession.subject.name} - {selectedSession.classEntity.name}
+                </h3>
+                <p>
+                  {format(new Date(selectedSession.sessionDate), 'dd MMMM yyyy', { locale: fr })} - 
+                  {format(new Date(selectedSession.startTime), 'HH:mm')} - 
+                  {format(new Date(selectedSession.endTime), 'HH:mm')}
+                </p>
+                <p>Salle: {selectedSession.roomNumber}</p>
+              </div>
+
+              <div className="space-y-4">
+                {attendances.map((attendance) => (
+                  <div key={attendance.studentId} className="flex items-center justify-between p-4 border rounded-lg">
+                    <span>{attendance.studentName}</span>
+                    <Select
+                      value={attendance.status}
+                      onValueChange={(value) => handleStatusChange(attendance.studentId, value)}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Statut" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="present">Présent</SelectItem>
+                        <SelectItem value="absent">Absent</SelectItem>
+                        <SelectItem value="late">En retard</SelectItem>
+                        <SelectItem value="excused">Excusé</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4">
+                <Button onClick={handleSaveAll}>Enregistrer les présences</Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
-      <Toaster />
     </div>
-  )
-}
-
-export default function AttendancePageWrapper() {
-  return (
-    <ToastProvider>
-      <AttendancePage />
-    </ToastProvider>
-  )
+  );
 }
 

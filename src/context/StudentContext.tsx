@@ -1,7 +1,7 @@
 // context/StudentContext.tsx
 "use client"
 import React, { createContext, useContext, useState, useEffect } from "react"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/context/AuthContext"
 import axios from "axios"
 
 // Define the student data type

@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { UserRole } from '@/types/auth';
+import { isTokenExpired } from '@/lib/utils';
 
 const protectedRoutes: Record<string, UserRole[]> = {
   '/student': [UserRole.ETUDIANT],
   '/professor': [UserRole.PROFESSEUR],
-  '/manager': [UserRole.MANAGER],
+  '/manager':[UserRole.MANAGER],
   '/admin': [UserRole.ADMINISTRATEUR],
 };
 
@@ -26,6 +27,16 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
+    // Check if token is expired
+    if (isTokenExpired(token)) {
+      // Clear expired cookies
+      const response = NextResponse.redirect(new URL('/login', request.url));
+      response.cookies.delete('token');
+      response.cookies.delete('role');
+      response.cookies.delete('userId');
+      return response;
+    }
+
     // Check if user has required role
     const path = Object.keys(protectedRoutes).find((route) =>
       request.nextUrl.pathname.startsWith(route)
@@ -38,6 +49,16 @@ export function middleware(request: NextRequest) {
 
   // If user is authenticated and tries to access login page, redirect to appropriate dashboard
   if (token && role && request.nextUrl.pathname === '/login') {
+    // Check if token is expired before redirecting
+    if (isTokenExpired(token)) {
+      // Clear expired cookies
+      const response = NextResponse.redirect(new URL('/login', request.url));
+      response.cookies.delete('token');
+      response.cookies.delete('role');
+      response.cookies.delete('userId');
+      return response;
+    }
+    
     const dashboardPath = Object.keys(protectedRoutes).find(route => protectedRoutes[route].includes(role)) || '/';
     return NextResponse.redirect(new URL(dashboardPath, request.url));
   }

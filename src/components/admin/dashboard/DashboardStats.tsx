@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Users, GraduationCap, Briefcase, Shield } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 interface StatsResponse {
   totalUsers: number;
@@ -13,11 +14,20 @@ const DashboardStats = () => {
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth();
 
   useEffect(() => {
     const fetchStats = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       try {
-        const response = await fetch("http://localhost:8080/api/users/admin/stats");
+        const response = await fetch("http://localhost:8080/api/users/admin/stats", {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (!response.ok) throw new Error("Failed to fetch stats");
         const data: StatsResponse = await response.json();
         setStats(data);
@@ -28,7 +38,7 @@ const DashboardStats = () => {
       }
     };
     fetchStats();
-  }, []);
+  }, [token]);
 
   if (loading) return <p className="text-gray-400">Loading stats...</p>;
   if (error) return <p className="text-red-500">{error}</p>;

@@ -13,7 +13,7 @@ const UserCard = ({ user }: { user: User }) => {
   const roleMapping: Record<string, { name: string; color: string }> = {
     ETUDIANT: { name: "Student", color: "bg-green-500/20" },
     MANAGER: { name: "Manager", color: "bg-yellow-500/20" },
-    ADMINISTRATEUR: { name: "Admin", color: "bg-purple-500/20"},
+    ADMINISTRATEUR: { name: "ADMINISTRATEUR", color: "bg-purple-500/20"},
     PROFESSEUR: { name: "Professor", color: "bg-blue-500/20" },
   };
 

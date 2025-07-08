@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, Search } from "lucide-react";
 import UserCard from "./UserCard";
+import { useAuth } from "@/context/AuthContext";
 
 const UserManagementCard = () => {
   interface User {
@@ -32,16 +33,17 @@ const UserManagementCard = () => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
-  type RoleType = "manager" | "student" | "professor" | "administrator" | "all";
+  type RoleType = "manager" | "student" | "professor" | "admin" | "all";
   const [filter, setFilter] = useState<RoleType>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(""); // New state for debounced search
   const [totalPages, setTotalPages] = useState(1);
+  const { token } = useAuth();
 
   const roleMapping: Record<string, string> = {
     ETUDIANT: "student",
     MANAGER: "MANAGER",
-    ADMINISTRATEUR: "administrator",
+    ADMINISTRATEUR: "admin",
     PROFESSEUR: "professor",
     all: "all",
   };
@@ -63,6 +65,11 @@ const UserManagementCard = () => {
       setLoading(true);
       setError(null);
       try {
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
         let backendRole = filter === "all" ? "" : roleMapping[filter];
         let url = `http://localhost:8080/api/users?page=${page - 1}&size=10`;
         if (backendRole) {
@@ -74,7 +81,11 @@ const UserManagementCard = () => {
 
         console.log(`Calling API: ${url}`);
 
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (!response.ok) {
           const errorText = await response.text();
           console.error(`Server responded with ${response.status}: ${errorText}`);
@@ -94,7 +105,7 @@ const UserManagementCard = () => {
     };
 
     fetchUsers();
-  }, [page, filter, debouncedSearchTerm]); // Use debouncedSearchTerm instead of searchTerm
+  }, [page, filter, debouncedSearchTerm, token]); // Use debouncedSearchTerm instead of searchTerm
 
   const displayRoleName = (role: RoleType) => {
     switch (role) {
@@ -104,8 +115,8 @@ const UserManagementCard = () => {
         return "Étudiants";
       case "professor":
         return "Professeurs";
-      case "administrator":
-        return "Administrateurs";
+      case "admin":
+        return "Administrateur";
       case "all":
         return "Tous les Utilisateurs";
       default:

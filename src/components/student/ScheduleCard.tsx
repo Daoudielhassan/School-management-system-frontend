@@ -9,8 +9,10 @@ import Link from "next/link"
 
 const fetchScheduleData = async (departmentId: number, classeId: number) => {
   const response = await fetch(`http://localhost:8080/api/sessions/filter?departmentId=${departmentId}&classeId=${classeId}`)
-  const data = await response.json()
-  return data
+  if (!response.ok) throw new Error("Failed to fetch schedule data")
+  const text = await response.text()
+  if (!text) return []
+  return JSON.parse(text)
 }
 
 export const ScheduleCard = () => {
@@ -27,7 +29,7 @@ export const ScheduleCard = () => {
       // Récupérer les données de l'emploi du temps lorsque les données de l'étudiant sont disponibles
       const loadSchedule = async () => {
         const data = await fetchScheduleData(studentData.departmentId, studentData.classeId)
-        setScheduleData(data)
+        setScheduleData(Array.isArray(data) ? data : [])
       }
       loadSchedule()
     }
