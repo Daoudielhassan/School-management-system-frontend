@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
-import CustomSidebar from "@/components/admin/CustomSidebar";
 
 interface Attendance {
   id: number;
@@ -81,11 +80,8 @@ export default function ManagerAttendancePage() {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="flex h-screen bg-[#00246B] text-[#FFFFFF] overflow-hidden">
-      <div style={{ display: "flex" }}>
-        <CustomSidebar />
-      </div>
-      <div className="flex-1 overflow-y-auto p-6 bg-[#FFFFFF] text-black">
+    <div className="min-h-screen bg-[#00246B] text-[#FFFFFF]">
+      <div className="p-6 bg-[#FFFFFF] text-black">
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-4">Department Attendance Management</h1>
           <select
@@ -149,4 +145,4 @@ export default function ManagerAttendancePage() {
       </div>
     </div>
   );
-} 
+}
