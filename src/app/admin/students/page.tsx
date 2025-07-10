@@ -1,21 +1,756 @@
-'use clients';
-import React from 'react';
+'use client';
 
-import CustomSidebar from "@/components/admin/CustomSidebar";
-import AddStudent from '@/components/admin/UserManagement/AddStudent';
-import StudentManagement from '@/components/admin/UserManagement/StudentManagement';
+import { useState, useEffect, useRef } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { toast, ToastContainer } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Upload, UserPlus, FileSpreadsheet, AlertCircle } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import { useAuth } from "@/context/AuthContext";
 
+interface Class {
+  id: number
+  name: string
+  departmentId: number
+  level: number
+}
 
-export default function StudentsPage() {
+interface Student {
+  firstName: string
+  lastName: string
+  email: string
+  phoneNumber: string
+  status: string
+  dateOfBirth: string
+  classeId: number
+}
+
+interface StudentData {
+  id: number
+  firstName: string
+  lastName: string
+  email: string
+  dateOfBirth: string
+  phoneNumber: string
+  status: string
+  classe: Class
+}
+
+// AddStudent Component
+const AddStudent = () => {
+  const { token, isAuthenticated } = useAuth();
+  const [classes, setClasses] = useState<Class[]>([])
+  const [manualStudent, setManualStudent] = useState<Student>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    status: "active",
+    dateOfBirth: "",
+    classeId: 0,
+  })
+  const [error, setError] = useState<string>("")
+  const [loading, setLoading] = useState<boolean>(false)
+  const [uploadLoading, setUploadLoading] = useState<boolean>(false)
+  const [uploadError, setUploadError] = useState<string>("")
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+
+  useEffect(() => {
+    console.log("AddStudent useEffect - token:", token ? "present" : "missing", "isAuthenticated:", isAuthenticated);
+    const fetchClasses = async () => {
+      if (!token) {
+        console.log("No token available, skipping fetchClasses");
+        return;
+      }
+      setLoading(true)
+      try {
+        const response = await fetch("http://localhost:8080/api/classes", {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+        if (!response.ok) throw new Error("Failed to fetch classes")
+        const data = await response.json()
+        setClasses(data)
+      } catch (error) {
+        console.error("Error fetching classes:", error)
+        toast.error("Failed to load class data")
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchClasses()
+  }, [token, isAuthenticated])
+
+  const handleManualInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setManualStudent({ ...manualStudent, [name]: value })
+  }
+
+  const handleClassChange = (value: string) => {
+    setManualStudent({ ...manualStudent, classeId: Number.parseInt(value) })
+  }
+
+  const validateForm = () => {
+    if (
+      !manualStudent.firstName ||
+      !manualStudent.lastName ||
+      !manualStudent.email ||
+      !manualStudent.phoneNumber ||
+      !manualStudent.dateOfBirth
+    ) {
+      setError("All fields are required")
+      return false
+    }
+    setError("")
+    return true
+  }
+
+  const handleManualSubmit = async () => {
+    if (!validateForm()) return
+    if (!token) {
+      toast.error("Authentication token not available")
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch("http://localhost:8080/api/students", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          ...manualStudent,
+          departmentId: classes.find((c) => c.id === manualStudent.classeId)?.departmentId,
+        }),
+      })
+
+      const responseData = await response.json()
+
+      if (!response.ok) throw new Error(responseData.message || "Failed to add student")
+
+      toast.success("Student added successfully!")
+      resetForm()
+      setIsDialogOpen(false)
+    } catch (error) {
+      console.error("Error adding student:", error)
+      toast.error(`Failed to add student: ${(error as Error).message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const resetForm = () => {
+    setManualStudent({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      status: "active",
+      dateOfBirth: "",
+      classeId: 0,
+    })
+    setError("")
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null
+    setSelectedFile(file)
+    setUploadError("")
+  }
+
+  const handleFileUpload = async () => {
+    if (!selectedFile) {
+      setUploadError("Please select a file to upload")
+      return
+    }
+    if (!token) {
+      setUploadError("Authentication token not available")
+      return
+    }
+
+    const fileExtension = selectedFile.name.split(".").pop()?.toLowerCase()
+    if (fileExtension !== "csv" && fileExtension !== "xlsx") {
+      setUploadError("Only CSV or Excel files are supported")
+      return
+    }
+
+    setUploadLoading(true)
+    setUploadError("")
+
+    try {
+      const formData = new FormData()
+      formData.append("file", selectedFile)
+
+      const response = await fetch("http://localhost:8080/api/students/bulk-upload", {
+        method: "POST",
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData,
+      })
+
+      const responseData = await response.json()
+
+      if (!response.ok) throw new Error(responseData.message || "Failed to upload students")
+
+      toast.success(`Successfully uploaded ${responseData.count || "multiple"} students!`)
+      setSelectedFile(null)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
+    } catch (error) {
+      console.error("Error uploading students:", error)
+      setUploadError(`Failed to upload: ${(error as Error).message}`)
+      toast.error(`Upload failed: ${(error as Error).message}`)
+    } finally {
+      setUploadLoading(false)
+    }
+  }
+
   return (
-    <div className="flex h-screen bg-[#00246B] text-[#FFFFFF] overflow-hidden">
-        <div style={{ display: "flex" }}>
-            <CustomSidebar />
+    <Card className="bg-white border border-gray-200 shadow-md rounded-lg overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white p-6">
+        <CardTitle className="text-2xl font-bold">Student Management</CardTitle>
+        <CardDescription className="text-blue-100">Add new students individually or in bulk</CardDescription>
+      </CardHeader>
+      <CardContent className="p-6">
+        <Tabs defaultValue="manual" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="manual" className="flex items-center gap-2">
+              <UserPlus size={18} />
+              <span>Add Manually</span>
+            </TabsTrigger>
+            <TabsTrigger value="upload" className="flex items-center gap-2">
+              <Upload size={18} />
+              <span>Bulk Upload</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="manual">
+            <div className="flex justify-center">
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white w-full max-w-md flex items-center gap-2">
+                    <UserPlus size={18} />
+                    Add Student Manually
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-semibold text-gray-800">Add Student</DialogTitle>
+                    <DialogDescription className="text-sm text-gray-600">
+                      Fill out the form below to add a new student.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex flex-col gap-4 py-4">
+                    {error && (
+                      <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>{error}</AlertDescription>
+                      </Alert>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input
+                          id="firstName"
+                          name="firstName"
+                          value={manualStudent.firstName}
+                          onChange={handleManualInputChange}
+                          placeholder="John"
+                          className="w-full"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input
+                          id="lastName"
+                          name="lastName"
+                          value={manualStudent.lastName}
+                          onChange={handleManualInputChange}
+                          placeholder="Doe"
+                          className="w-full"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={manualStudent.email}
+                        onChange={handleManualInputChange}
+                        placeholder="john.doe@example.com"
+                        className="w-full"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="phoneNumber">Phone Number</Label>
+                        <Input
+                          id="phoneNumber"
+                          name="phoneNumber"
+                          value={manualStudent.phoneNumber}
+                          onChange={handleManualInputChange}
+                          placeholder="+1 (555) 123-4567"
+                          className="w-full"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                        <Input
+                          id="dateOfBirth"
+                          name="dateOfBirth"
+                          type="date"
+                          value={manualStudent.dateOfBirth}
+                          onChange={handleManualInputChange}
+                          className="w-full"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="class">Class</Label>
+                      <Select
+                        onValueChange={handleClassChange}
+                        value={manualStudent.classeId ? manualStudent.classeId.toString() : ""}
+                      >
+                        <SelectTrigger id="class" className="w-full">
+                          <SelectValue placeholder="Select a class" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {classes.map((classe) => (
+                            <SelectItem key={classe.id} value={classe.id.toString()}>
+                              {classe.name} (Level {classe.level}) - Department {classe.departmentId}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="status">Status</Label>
+                      <Select
+                        onValueChange={(value) => setManualStudent({ ...manualStudent, status: value })}
+                        value={manualStudent.status}
+                      >
+                        <SelectTrigger id="status" className="w-full">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="inactive">Inactive</SelectItem>
+                          <SelectItem value="suspended">Suspended</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <DialogFooter className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        resetForm()
+                        setIsDialogOpen(false)
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleManualSubmit}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                      disabled={loading}
+                    >
+                      {loading ? "Adding..." : "Add Student"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="upload" className="space-y-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+              <div className="flex items-start gap-4">
+                <FileSpreadsheet className="text-blue-600 h-10 w-10 flex-shrink-0" />
+                <div>
+                  <h3 className="font-medium text-blue-800 mb-1">Bulk Upload Students</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Upload a CSV or Excel file containing student information.
+                  </p>
+
+                  <div className="space-y-4">
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="file-upload">Upload File</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="file-upload"
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleFileChange}
+                          accept=".csv,.xlsx"
+                          className="flex-1"
+                        />
+                        <Button
+                          onClick={handleFileUpload}
+                          className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+                          disabled={uploadLoading || !selectedFile}
+                        >
+                          {uploadLoading ? "Uploading..." : "Upload"}
+                          <Upload size={16} />
+                        </Button>
+                      </div>
+                      {selectedFile && <p className="text-sm text-gray-600">Selected file: {selectedFile.name}</p>}
+                    </div>
+
+                    {uploadError && (
+                      <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>{uploadError}</AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+      <CardFooter className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+        <p className="text-xs text-gray-500">
+          Need help? Contact the IT department at{" "}
+          <a href="mailto:it@example.com" className="text-blue-600 hover:underline">
+            it.club@aiac.ma
+          </a>
+        </p>
+      </CardFooter>
+      <ToastContainer position="top-right" autoClose={5000} />
+    </Card>
+  )
+}
+
+// StudentManagement Component
+const StudentManagement = () => {
+  const { token } = useAuth();
+  const [students, setStudents] = useState<StudentData[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<StudentData | null>(null);
+  const [studentToDeleteId, setStudentToDeleteId] = useState<number | null>(null);
+
+  const fetchStudents = async () => {
+    if (!token) {
+      console.log("No token available, skipping fetchStudents");
+      return;
+    }
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/students?page=${page}&size=10&searchTerm=${searchTerm}&status=${filter}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      if (!response.ok) throw new Error("Failed to fetch students");
+      const data = await response.json();
+      setStudents(data.content);
+      setTotalPages(data.totalPages);
+    } catch (error) {
+      console.error("Error fetching students:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStudents();
+  }, [page, searchTerm, filter, token]);
+
+  const handleEdit = (student: StudentData) => {
+    setSelectedStudent(student);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteClick = (studentId: number) => {
+    setStudentToDeleteId(studentId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (studentToDeleteId === null) return;
+    if (!token) {
+      console.error("No token available for delete operation");
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/students/${studentToDeleteId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) throw new Error("Failed to delete student");
+      fetchStudents();
+    } catch (error) {
+      console.error("Error deleting student:", error);
+    } finally {
+      setIsDeleteModalOpen(false);
+      setStudentToDeleteId(null);
+    }
+  };
+
+  const handleSave = async (updatedStudent: StudentData) => {
+    if (!token) {
+      console.error("No token available for update operation");
+      return;
+    }
+    try {
+      const response = await fetch(`http://localhost:8080/api/students/${updatedStudent.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updatedStudent),
+      });
+      if (!response.ok) throw new Error("Failed to update student");
+      fetchStudents();
+    } catch (error) {
+      console.error("Error updating student:", error);
+    }
+  };
+
+  return (
+    <Card className="bg-gray border-[#2A3747] shadow-lg">
+      <CardHeader>
+        <CardTitle className="text-xl font-semibold text-blue-900">Student Management</CardTitle>
+        <div className="flex gap-2 mt-4">
+          <Input
+            type="text"
+            placeholder="Search by name or email"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8 pr-4 py-2 rounded-lg bg-white border border-blue-950 text-black focus:border-blue-950"
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="border-[#2A3747] hover:bg-[#2A3747] hover:text-[#00D4FF]">
+                Filter <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-[#1E2D3D] border-[#2A3747] text-white">
+              <DropdownMenuItem onClick={() => setFilter("all")} className="hover:bg-[#2A3747] cursor-pointer">
+                All Students
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFilter("active")} className="hover:bg-[#2A3747] cursor-pointer">
+                Active
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFilter("inactive")} className="hover:bg-[#2A3747] cursor-pointer">
+                Inactive
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <div className="flex-1 overflow-y-auto p-6 bg-[#FFFFFF] text-black">
-            <AddStudent />
-            <StudentManagement />
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Phone</TableHead>
+              <TableHead>Class</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {students.length > 0 ? (
+              students.map((student) => (
+                <TableRow key={student.id}>
+                  <TableCell>{student.firstName} {student.lastName}</TableCell>
+                  <TableCell>{student.email}</TableCell>
+                  <TableCell>{student.phoneNumber}</TableCell>
+                  <TableCell>{student.classe.name}</TableCell>
+                  <TableCell className={student.status === "active" ? "text-green-400" : "text-red-400"}>
+                    {student.status}
+                  </TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleEdit(student)} className="mr-2">Edit</Button>
+                    <Button onClick={() => handleDeleteClick(student.id)}>Delete</Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-gray-400">No students found</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Button onClick={() => setPage((prev) => Math.max(0, prev - 1))} disabled={page === 0}>
+          <ChevronLeft className="h-4 w-4" /> Prev
+        </Button>
+        <span className="text-gray-400">Page {page + 1} of {totalPages}</span>
+        <Button onClick={() => setPage((prev) => (prev < totalPages - 1 ? prev + 1 : prev))} disabled={page >= totalPages - 1}>
+          Next <ChevronRight className="h-4 w-4" />
+        </Button>
+      </CardFooter>
+
+      {/* Edit Student Modal */}
+      {isEditModalOpen && selectedStudent && (
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent className="p-6 rounded-lg shadow-lg bg-gray-300 w-full max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Student</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-4 py-4">
+              <Input
+                name="firstName"
+                value={selectedStudent.firstName}
+                onChange={(e) => setSelectedStudent({ ...selectedStudent, firstName: e.target.value })}
+                placeholder="First Name"
+              />
+              <Input
+                name="lastName"
+                value={selectedStudent.lastName}
+                onChange={(e) => setSelectedStudent({ ...selectedStudent, lastName: e.target.value })}
+                placeholder="Last Name"
+              />
+              <Input
+                name="email"
+                value={selectedStudent.email}
+                onChange={(e) => setSelectedStudent({ ...selectedStudent, email: e.target.value })}
+                placeholder="Email"
+              />
+              <Input
+                name="phoneNumber"
+                value={selectedStudent.phoneNumber}
+                onChange={(e) => setSelectedStudent({ ...selectedStudent, phoneNumber: e.target.value })}
+                placeholder="Phone Number"
+              />
+              <Input
+                name="status"
+                value={selectedStudent.status}
+                onChange={(e) => setSelectedStudent({ ...selectedStudent, status: e.target.value })}
+                placeholder="Status"
+              />
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
+              <Button onClick={() => handleSave(selectedStudent)}>Save</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+  {/* Delete Modal */}
+  {isDeleteModalOpen && (
+        <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm Deletion</DialogTitle>
+            </DialogHeader>
+            <p>Are you sure you want to delete this student?</p>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleDeleteConfirm}>Delete</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      <ToastContainer position="top-right" autoClose={4000} />
+    </Card>
+  );
+};
+
+export default function AdminStudentsPage() {
+  const { token, isAuthenticated, role, userId } = useAuth();
+  
+  // Temporary debugging
+  console.log("AdminStudentsPage - Auth state:", {
+    token: token ? "present" : "missing",
+    isAuthenticated,
+    role,
+    userId
+  });
+  
+  // Show loading state while auth is being determined
+  if (!isAuthenticated || !token) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading authentication...</p>
+          {!isAuthenticated && (
+            <p className="text-red-600 mt-2">Please log in to access this page.</p>
+          )}
+          <div className="mt-4 text-sm text-gray-500">
+            <p>Debug info: isAuthenticated={isAuthenticated.toString()}</p>
+            <p>Debug info: token={token ? "present" : "missing"}</p>
+            <p>Debug info: role={role || "none"}</p>
+            <p>Debug info: userId={userId || "none"}</p>
+          </div>
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Gestion des étudiants</h1>
+        <p className="text-gray-600">Ajout et gestion des étudiants du système</p>
+      </div>
+      <AddStudent />
+      <StudentManagement />
     </div>
   );
 }

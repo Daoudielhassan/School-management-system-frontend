@@ -1,30 +1,183 @@
 'use client';
 
-import { useCallback, useState } from "react";
-import AdminHeader from "@/components/admin/AdminHeader";
-import CustomSidebar from "@/components/admin/CustomSidebar";
-import SessionManagement from "@/components/admin/SessionManagement";
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
+import Schedule from '@/components/shared/schedule';
 
-export default function AdminSessionsPage() {
-    const [isSidebarOpen, setIsSidebarOpen] =useState(false);
+interface Department {
+    id: number;
+    name: string;
+}
 
-    const toggleSidebar = useCallback(() => {
-        setIsSidebarOpen((prev) => !prev);
-    }, []);
+interface Classe {
+    id: number;
+    name: string;
+    departmentId: number;
+}
+
+const SessionManagement = () => {
+    const { token } = useAuth();
+    const [departments, setDepartments] = useState<Department[]>([]);
+    const [classes, setClasses] = useState<Classe[]>([]);
+    const [selectedDepartment, setSelectedDepartment] = useState<string>('');
+    const [selectedClass, setSelectedClass] = useState<string>('');
+    const [loading, setLoading] = useState({
+        departments: false,
+        classes: false,
+    });
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchDepartments = async () => {
+            if (!token) return;
+            setLoading(prev => ({ ...prev, departments: true }));
+            try {
+                const response = await fetch('http://localhost:8080/api/departments', {
+                    headers: { 
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                });
+                if (!response.ok) throw new Error('Failed to fetch departments');
+                const data = await response.json();
+                setDepartments(data);
+            } catch (err) {
+                setError((err as Error).message);
+            } finally {
+                setLoading(prev => ({ ...prev, departments: false }));
+            }
+        };
+        fetchDepartments();
+    }, [token]);
+
+    useEffect(() => {
+        const fetchClasses = async () => {
+            if (!selectedDepartment || !token) {
+                setClasses([]);
+                setSelectedClass('');
+                return;
+            }
+            setLoading(prev => ({ ...prev, classes: true }));
+            try {
+                const response = await fetch(`http://localhost:8080/api/classes/department/${selectedDepartment}`, {
+                    headers: { 
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                });
+                if (!response.ok) throw new Error('Failed to fetch classes');
+                const data = await response.json();
+                setClasses(data);
+            } catch (err) {
+                setError((err as Error).message);
+            } finally {
+                setLoading(prev => ({ ...prev, classes: false }));
+            }
+        };
+        fetchClasses();
+    }, [selectedDepartment, token]);
 
     return (
-        <div className="flex h-screen bg-[#00246B] text-[#FFFFFF] overflow-hidden">
-            <div style={{ display: "flex" }}>
-                <CustomSidebar isOpen={isSidebarOpen} onClose={toggleSidebar} />
-            </div>
-            <div className="flex-1 overflow-y-auto p-6 bg-[#FFFFFF] text-black">
-                <AdminHeader toggleSidebar={toggleSidebar} />
+        <div className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-lg">Filtres</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label
+                                htmlFor="department-select"
+                                className="block text-sm font-medium text-gray-700 mb-1"
+                            >
+                                Département
+                            </label>
+                            <Select onValueChange={setSelectedDepartment} value={selectedDepartment}>
+                                <SelectTrigger id="department-select" className="w-full">
+                                    <SelectValue placeholder="Sélectionner un département" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-white border border-gray-300 rounded-md shadow-md">
+                                    {loading.departments ? (
+                                        <div className="flex justify-center p-2">
+                                            <Loader2 className="animate-spin" />
+                                        </div>
+                                    ) : (
+                                        departments.map((dep) => (
+                                            <SelectItem key={dep.id} value={dep.id.toString()}>
+                                                {dep.name}
+                                            </SelectItem>
+                                        ))
+                                    )}
+                                </SelectContent>
+                            </Select>
+                        </div>
 
-                <main className="grid grid-cols-1 gap-6 mb-8">
-                    <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Session Management</h1>
-                    <SessionManagement />
-                </main>
+                        <div>
+                            <label
+                                htmlFor="class-select"
+                                className="block text-sm font-medium text-gray-700 mb-1"
+                            >
+                                Classe
+                            </label>
+                            <Select
+                                onValueChange={setSelectedClass}
+                                value={selectedClass}
+                                disabled={!selectedDepartment || loading.classes}
+                            >
+                                <SelectTrigger id="class-select" className="w-full">
+                                    <SelectValue placeholder="Sélectionner une classe" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {loading.classes ? (
+                                        <div className="flex justify-center p-2">
+                                            <Loader2 className="animate-spin" />
+                                        </div>
+                                    ) : classes.length > 0 ? (
+                                        classes.map((cls) => (
+                                            <SelectItem key={cls.id} value={cls.id.toString()}>
+                                                {cls.name}
+                                            </SelectItem>
+                                        ))
+                                    ) : (
+                                        <p className="p-2 text-sm text-gray-500">Aucune classe trouvée</p>
+                                    )}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {error && (
+                <p className="text-red-500 p-4 bg-red-100 rounded-md">
+                    {error}
+                </p>
+            )}
+
+            {selectedDepartment && selectedClass ? (
+                <Schedule departmentId={selectedDepartment} classeId={selectedClass} />
+            ) : (
+                <Card className="text-center p-8">
+                    <p className="text-gray-600">
+                        Veuillez sélectionner un département et une classe pour afficher l'emploi du temps.
+                    </p>
+                </Card>
+            )}
+        </div>
+    )
+};
+
+export default function AdminSessionsPage() {
+    return (
+        <div className="space-y-6">
+            <div>
+                <h1 className="text-3xl font-bold text-gray-900">Gestion des sessions</h1>
+                <p className="text-gray-600">Planification et gestion des sessions de cours</p>
             </div>
+            <SessionManagement />
         </div>
     );
 } 

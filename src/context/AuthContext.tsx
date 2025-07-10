@@ -91,13 +91,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [authState.token]);
 
   useEffect(() => {
+    console.log("AuthContext: Initializing auth state from cookies...");
     const token = getCookie('token');
     const role = getCookie('role') as UserRole | null;
     const userId = Number(getCookie('userId')) || null;
     
+    console.log("AuthContext: Cookies found - token:", token ? "present" : "missing", "role:", role, "userId:", userId);
+    
     if (token && role && userId) {
       // Check if token is expired before setting auth state
       if (typeof token === 'string' && isTokenExpired(token)) {
+        console.log("AuthContext: Token is expired, clearing cookies");
         // Clear expired cookies
         deleteCookie('token');
         deleteCookie('role');
@@ -105,6 +109,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       
+      console.log("AuthContext: Setting authenticated state");
       setAuthState({
         token: token.toString(),
         role,
@@ -112,6 +117,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: true,
       });
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      console.log("AuthContext: No valid auth cookies found, staying unauthenticated");
     }
   }, []);
 
