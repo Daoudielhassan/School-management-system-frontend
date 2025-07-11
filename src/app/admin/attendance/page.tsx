@@ -16,19 +16,24 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useAuth } from "@/context/AuthContext";
+import { apiGet, apiPut, API_ENDPOINTS } from "@/config/api";
 
 interface AttendanceRecord {
   id: number;
+  studentId: number;
+  sessionId: number;
+  status: string;
+  recordedAt?: string;
   studentName: string;
-  studentId: string;
-  subject: string;
-  instructor: string;
-  date: string;
-  time: string;
-  status: 'present' | 'absent' | 'pending';
+  subjectName: string;
+  instructorName: string;
+  sessionDate: string;
+  sessiontype: string;
+  roomNumber: string;
+  startTime: string;
+  endTime: string;
   justification?: string;
-  room: string;
-  sessionType: string;
 }
 
 interface AttendanceStats {
@@ -39,6 +44,7 @@ interface AttendanceStats {
 }
 
 export default function AttendancePage() {
+  const { token } = useAuth();
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [stats, setStats] = useState<AttendanceStats>({
     totalSessions: 0,
@@ -50,51 +56,110 @@ export default function AttendancePage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock data - Replace with actual API calls
+  // Fetch attendance data from API
   useEffect(() => {
-    setTimeout(() => {
-      const mockData: AttendanceRecord[] = [
-        { id: 1, studentName: "Alice Martin", studentId: "STU001", subject: "Computer Science", instructor: "Dr. Smith", date: "2024-01-15", time: "09:00", status: "present", room: "A101", sessionType: "Cours" },
-        { id: 2, studentName: "Bob Johnson", studentId: "STU002", subject: "Mathematics", instructor: "Dr. Brown", date: "2024-01-15", time: "10:30", status: "absent", room: "B203", sessionType: "TD" },
-        { id: 3, studentName: "Claire Wilson", studentId: "STU003", subject: "Physics", instructor: "Dr. Davis", date: "2024-01-15", time: "14:00", status: "pending", justification: "Medical appointment", room: "C105", sessionType: "TP" },
-        { id: 4, studentName: "David Brown", studentId: "STU004", subject: "Engineering", instructor: "Prof. Miller", date: "2024-01-15", time: "15:30", status: "present", room: "D301", sessionType: "Cours" },
-        { id: 5, studentName: "Emma Davis", studentId: "STU005", subject: "Computer Science", instructor: "Dr. Smith", date: "2024-01-15", time: "09:00", status: "absent", room: "A101", sessionType: "Cours" },
-      ];
+    const fetchAttendanceData = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       
-      setAttendanceRecords(mockData);
-      setStats({
-        totalSessions: 45,
-        totalStudents: 320,
-        overallAttendanceRate: 87.5,
-        pendingJustifications: 12
-      });
-      setLoading(false);
-    }, 1000);
-  }, []);
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch all attendance records
+        const attendanceData = await apiGet(API_ENDPOINTS.ATTENDANCE.BASE, token || undefined);
+        
+        // Transform the data to match our interface
+        const transformedRecords: AttendanceRecord[] = attendanceData.map((record: any) => ({
+          id: record.id,
+          studentId: record.studentId,
+          sessionId: record.sessionId,
+          status: record.status,
+          recordedAt: record.recordedAt,
+          studentName: record.studentName,
+          subjectName: record.subjectName,
+          instructorName: record.instructorName,
+          sessionDate: record.sessionDate,
+          sessiontype: record.sessiontype,
+          roomNumber: record.roomNumber,
+          startTime: record.startTime,
+          endTime: record.endTime,
+          justification: record.justification
+        }));
+        
+        setAttendanceRecords(transformedRecords);
+        
+        // Calculate stats
+        const totalRecords = transformedRecords.length;
+        const presentCount = transformedRecords.filter(r => r.status === 'oui').length;
+        const absentCount = transformedRecords.filter(r => r.status === 'non').length;
+        const attendanceRate = totalRecords > 0 ? (presentCount / totalRecords) * 100 : 0;
+        
+        setStats({
+          totalSessions: totalRecords,
+          totalStudents: new Set(transformedRecords.map(r => r.studentId)).size,
+          overallAttendanceRate: Math.round(attendanceRate * 10) / 10,
+          pendingJustifications: transformedRecords.filter(r => r.justification).length
+        });
+        
+      } catch (err) {
+        console.error("Error fetching attendance data:", err);
+        setError("Failed to load attendance data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchAttendanceData();
+  }, [token]);
+
+  const handleUpdateAttendance = async (recordId: number, newStatus: string) => {
+    try {
+      const updateData = {
+        status: newStatus
+      };
+      
+      await apiPut(`${API_ENDPOINTS.ATTENDANCE.BASE}/${recordId}`, updateData, token || undefined);
+      
+      // Refresh the data
+      const updatedRecords = attendanceRecords.map(record => 
+        record.id === recordId ? { ...record, status: newStatus } : record
+      );
+      setAttendanceRecords(updatedRecords);
+      
+      // Close dialog if open
+      setSelectedRecord(null);
+      
+    } catch (error) {
+      console.error('Error updating attendance:', error);
+      setError('Failed to update attendance record');
+    }
+  };
 
   const filteredRecords = attendanceRecords.filter(record => {
     const matchesSearch = record.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         record.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         record.instructor.toLowerCase().includes(searchTerm.toLowerCase());
+                         record.subjectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         record.instructorName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || record.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'present': return "bg-green-500/20 text-green-300 border-green-400/30";
-      case 'absent': return "bg-red-500/20 text-red-300 border-red-400/30";
-      case 'pending': return "bg-yellow-500/20 text-yellow-300 border-yellow-400/30";
+      case 'oui': return "bg-green-500/20 text-green-300 border-green-400/30";
+      case 'non': return "bg-red-500/20 text-red-300 border-red-400/30";
       default: return "bg-gray-500/20 text-gray-300 border-gray-400/30";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'present': return <CheckCircle className="h-4 w-4 text-green-400" />;
-      case 'absent': return <XCircle className="h-4 w-4 text-red-400" />;
-      case 'pending': return <Clock className="h-4 w-4 text-yellow-400" />;
+      case 'oui': return <CheckCircle className="h-4 w-4 text-green-400" />;
+      case 'non': return <XCircle className="h-4 w-4 text-red-400" />;
       default: return <AlertTriangle className="h-4 w-4 text-gray-400" />;
     }
   };
@@ -109,7 +174,7 @@ export default function AttendancePage() {
             </div>
             <div>
               <h3 className="font-medium text-white">{record.studentName}</h3>
-              <p className="text-xs text-blue-300">{record.studentId}</p>
+              <p className="text-xs text-blue-300">ID: {record.studentId}</p>
             </div>
           </div>
           <Badge className={`border ${getStatusColor(record.status)} flex items-center gap-1`}>
@@ -121,19 +186,19 @@ export default function AttendancePage() {
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-blue-200">Subject:</span>
-            <span className="text-white">{record.subject}</span>
+            <span className="text-white">{record.subjectName}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-blue-200">Instructor:</span>
-            <span className="text-white">{record.instructor}</span>
+            <span className="text-white">{record.instructorName}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-blue-200">Date & Time:</span>
-            <span className="text-white">{record.date} at {record.time}</span>
+            <span className="text-white">{record.sessionDate} at {record.startTime}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-blue-200">Room:</span>
-            <span className="text-white">{record.room}</span>
+            <span className="text-white">{record.roomNumber}</span>
           </div>
           {record.justification && (
             <div className="pt-2 border-t border-white/10">
@@ -152,17 +217,19 @@ export default function AttendancePage() {
             <Eye className="h-3 w-3 mr-1" />
             View
           </Button>
-          {record.status === 'pending' && (
+          {record.justification && (
             <>
               <Button 
                 size="sm" 
                 className="bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-400/30"
+                onClick={() => handleUpdateAttendance(record.id, 'oui')}
               >
                 Approve
               </Button>
               <Button 
                 size="sm" 
                 className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-400/30"
+                onClick={() => handleUpdateAttendance(record.id, 'non')}
               >
                 Reject
               </Button>
@@ -248,20 +315,31 @@ export default function AttendancePage() {
               </SelectTrigger>
               <SelectContent className="bg-slate-800/95 backdrop-blur-md border-blue-500/30">
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="present">Present</SelectItem>
-                <SelectItem value="absent">Absent</SelectItem>
-                <SelectItem value="pending">Pending Review</SelectItem>
+                <SelectItem value="oui">Present</SelectItem>
+                <SelectItem value="non">Absent</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </CardContent>
       </Card>
 
+      {/* Error Display */}
+      {error && (
+        <Card className="bg-red-500/20 backdrop-blur-md border-red-400/30">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-red-300">
+              <AlertTriangle className="h-4 w-4" />
+              <span>{error}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Attendance Records */}
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="bg-white/10 backdrop-blur-md border border-white/20">
           <TabsTrigger value="overview" className="data-[state=active]:bg-blue-500/30">Overview</TabsTrigger>
-          <TabsTrigger value="pending" className="data-[state=active]:bg-yellow-500/30">Pending Reviews</TabsTrigger>
+          <TabsTrigger value="pending" className="data-[state=active]:bg-yellow-500/30">Justifications</TabsTrigger>
           <TabsTrigger value="analytics" className="data-[state=active]:bg-purple-500/30">Analytics</TabsTrigger>
         </TabsList>
 
@@ -283,7 +361,7 @@ export default function AttendancePage() {
 
         <TabsContent value="pending" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredRecords.filter(record => record.status === 'pending').map((record) => (
+            {filteredRecords.filter(record => record.justification).map((record) => (
               <AttendanceRecordCard key={record.id} record={record} />
             ))}
           </div>
@@ -328,15 +406,15 @@ export default function AttendancePage() {
                 </div>
                 <div>
                   <label className="text-sm text-blue-200">Subject</label>
-                  <p className="text-white font-medium">{selectedRecord.subject}</p>
+                  <p className="text-white font-medium">{selectedRecord.subjectName}</p>
                 </div>
                 <div>
                   <label className="text-sm text-blue-200">Instructor</label>
-                  <p className="text-white font-medium">{selectedRecord.instructor}</p>
+                  <p className="text-white font-medium">{selectedRecord.instructorName}</p>
                 </div>
                 <div>
                   <label className="text-sm text-blue-200">Date & Time</label>
-                  <p className="text-white font-medium">{selectedRecord.date} at {selectedRecord.time}</p>
+                  <p className="text-white font-medium">{selectedRecord.sessionDate} at {selectedRecord.startTime}</p>
                 </div>
                 <div>
                   <label className="text-sm text-blue-200">Status</label>
@@ -352,10 +430,16 @@ export default function AttendancePage() {
                 </div>
               )}
               <div className="flex gap-2 pt-4">
-                <Button className="flex-1 bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-400/30">
+                <Button 
+                  className="flex-1 bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-400/30"
+                  onClick={() => selectedRecord && handleUpdateAttendance(selectedRecord.id, 'oui')}
+                >
                   Approve
                 </Button>
-                <Button className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-400/30">
+                <Button 
+                  className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-400/30"
+                  onClick={() => selectedRecord && handleUpdateAttendance(selectedRecord.id, 'non')}
+                >
                   Reject
                 </Button>
               </div>

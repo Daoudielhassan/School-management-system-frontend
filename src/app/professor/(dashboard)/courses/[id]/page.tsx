@@ -8,10 +8,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, Users, FileText, Calendar, BarChart3, Settings, Plus } from "lucide-react"
 
+interface Course {
+  id: string;
+  name: string;
+  code: string;
+  class_level: string;
+  description: string;
+  students_count: number;
+  sessions_count: number;
+  documents_count: number;
+}
+
 export default function CourseDetailPage() {
   const params = useParams()
   const courseId = params.id as string
-  const [course, setCourse] = useState(null)
+  const [course, setCourse] = useState<Course | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

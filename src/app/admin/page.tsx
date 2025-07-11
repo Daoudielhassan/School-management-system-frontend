@@ -432,7 +432,7 @@ const AddUserForm = ({ onClose }: { onClose: () => void }) => {
 
 // Broadcast Form Component
 const BroadcastForm = ({ onClose }: { onClose: () => void }) => {
-  const { token } = useAuth();
+  const { token, userId } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     subject: '',
@@ -446,7 +446,7 @@ const BroadcastForm = ({ onClose }: { onClose: () => void }) => {
     setLoading(true);
     try {
       const messageData = {
-        senderId: 1, // Admin user ID
+        senderId: userId, // Admin user ID
         receiverId: null, // null for broadcast
         messageText: formData.messageText,
         scope: formData.scope,
