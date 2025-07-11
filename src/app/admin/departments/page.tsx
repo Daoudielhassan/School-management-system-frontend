@@ -17,6 +17,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from "@/config/api";
 
 interface Department {
   id: number;
@@ -46,32 +47,35 @@ export default function DepartmentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Mock data - Replace with actual API calls
+  // Fetch departments
   useEffect(() => {
-    // Simulated API call for departments
-    setTimeout(() => {
-      setDepartments([
-        { id: 1, name: "Computer Science", description: "Advanced computing and software development", headId: 1, headName: "Dr. Smith", studentCount: 450, classCount: 12, professorCount: 25 },
-        { id: 2, name: "Mathematics", description: "Pure and applied mathematics", headId: 2, headName: "Dr. Johnson", studentCount: 320, classCount: 8, professorCount: 18 },
-        { id: 3, name: "Physics", description: "Theoretical and experimental physics", headId: 3, headName: "Dr. Williams", studentCount: 280, classCount: 10, professorCount: 20 },
-        { id: 4, name: "Engineering", description: "Mechanical and electrical engineering", headId: 4, headName: "Dr. Brown", studentCount: 380, classCount: 15, professorCount: 22 },
-      ]);
-      setLoading(false);
-    }, 1000);
-  }, []);
+    const fetchDepartments = async () => {
+      try {
+        const data = await apiGet(API_ENDPOINTS.DEPARTMENTS, token);
+        setDepartments(data);
+      } catch (error) {
+        console.error("Error fetching departments:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDepartments();
+  }, [token]);
 
+  // Fetch classes for the selected department
   useEffect(() => {
-    if (selectedDepartment) {
-      // Simulated API call for classes
-      setClasses([
-        { id: 1, name: "L1 Info", level: 1, studentCount: 45, departmentId: selectedDepartment },
-        { id: 2, name: "L2 Info", level: 2, studentCount: 38, departmentId: selectedDepartment },
-        { id: 3, name: "L3 Info", level: 3, studentCount: 42, departmentId: selectedDepartment },
-        { id: 4, name: "M1 Info", level: 4, studentCount: 35, departmentId: selectedDepartment },
-        { id: 5, name: "M2 Info", level: 5, studentCount: 30, departmentId: selectedDepartment },
-      ]);
-    }
-  }, [selectedDepartment]);
+    const fetchClasses = async () => {
+      if (selectedDepartment) {
+        try {
+          const data = await apiGet(API_ENDPOINTS.CLASSES, token);
+          setClasses(data);
+        } catch (error) {
+          console.error("Error fetching classes:", error);
+        }
+      }
+    };
+    fetchClasses();
+  }, [selectedDepartment, token]);
 
   const filteredDepartments = departments.filter(dept =>
     dept.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

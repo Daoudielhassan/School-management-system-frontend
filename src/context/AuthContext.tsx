@@ -125,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (credentials: LoginCredentials) => {
     try {
       const response = await axios.post(
-        API_ENDPOINTS.LOGIN,
+        API_ENDPOINTS.AUTH.LOGIN,
         credentials,
         {
           headers: {

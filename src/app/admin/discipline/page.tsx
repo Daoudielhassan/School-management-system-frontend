@@ -32,6 +32,8 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from "@/config/api";
+import { useAuth } from "@/context/AuthContext";
 
 interface DisciplinaryCase {
   id: number;
@@ -69,79 +71,31 @@ export default function DisciplinePage() {
   const [loading, setLoading] = useState(true);
   const [selectedCase, setSelectedCase] = useState<DisciplinaryCase | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { token } = useAuth();
 
-  // Mock data - Replace with actual API calls
   useEffect(() => {
-    setTimeout(() => {
-      const mockCases: DisciplinaryCase[] = [
-        {
-          id: 1,
-          studentName: "John Smith",
-          studentId: "STU001",
-          violation: "Academic Misconduct",
-          description: "Caught cheating during final examination",
-          severity: "severe",
-          status: "under_review",
-          reportedBy: "Dr. Johnson",
-          dateReported: "2024-01-15",
-          lastUpdate: "2024-01-16",
-          action: "Pending disciplinary committee review",
-          evidence: ["exam_footage.mp4", "witness_statement.pdf"]
-        },
-        {
-          id: 2,
-          studentName: "Sarah Wilson",
-          studentId: "STU002",
-          violation: "Disruptive Behavior",
-          description: "Repeatedly disrupting lectures and showing disrespect to faculty",
-          severity: "moderate",
-          status: "resolved",
-          reportedBy: "Prof. Davis",
-          dateReported: "2024-01-10",
-          lastUpdate: "2024-01-14",
-          action: "Warning issued, mandatory behavioral counseling",
-          evidence: ["incident_report.pdf"]
-        },
-        {
-          id: 3,
-          studentName: "Mike Brown",
-          studentId: "STU003",
-          violation: "Plagiarism",
-          description: "Submitted plagiarized assignment for Computer Science course",
-          severity: "severe",
-          status: "appealed",
-          reportedBy: "Dr. Smith",
-          dateReported: "2024-01-08",
-          lastUpdate: "2024-01-12",
-          action: "Grade reduction, appeal under review",
-          evidence: ["plagiarism_report.pdf", "original_source.pdf"]
-        },
-        {
-          id: 4,
-          studentName: "Lisa Chen",
-          studentId: "STU004",
-          violation: "Attendance Violation",
-          description: "Excessive absences without valid justification",
-          severity: "minor",
-          status: "pending",
-          reportedBy: "Academic Office",
-          dateReported: "2024-01-12",
-          lastUpdate: "2024-01-12",
-          action: "Awaiting student response",
-          evidence: ["attendance_record.pdf"]
-        }
-      ];
-      
-      setCases(mockCases);
-      setStats({
-        totalCases: 45,
-        pendingCases: 12,
-        resolvedCases: 28,
-        appealedCases: 5
-      });
-      setLoading(false);
-    }, 1000);
-  }, []);
+    const fetchDisciplinaryCases = async () => {
+      try {
+        if (!token) return;
+        const response: DisciplinaryCase[] = await apiGet(API_ENDPOINTS.DISCIPLINE, token ?? '');
+        setCases(response);
+        setStats({
+          totalCases: response.length,
+          pendingCases: response.filter((c) => c.status === 'pending').length,
+          resolvedCases: response.filter((c) => c.status === 'resolved').length,
+          appealedCases: response.filter((c) => c.status === 'appealed').length
+        });
+      } catch (error) {
+        console.error("Error fetching disciplinary cases:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDisciplinaryCases();
+    const interval = setInterval(fetchDisciplinaryCases, 5000); // Poll every 5 seconds
+    return () => clearInterval(interval);
+  }, [token]);
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {

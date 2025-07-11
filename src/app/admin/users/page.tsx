@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { useAuth } from "@/context/AuthContext";
 import { Edit, Trash2 } from "lucide-react";
+import { apiGet, API_ENDPOINTS } from "@/config/api";
 
 export default function AdminUsersPage() {
   interface User {
@@ -63,33 +64,19 @@ export default function AdminUsersPage() {
         }
 
         const backendRole = filter === "all" ? "" : roleMapping[filter];
-        let url = `http://localhost:8080/api/users?page=${page - 1}&size=10`;
+        let url = `${API_ENDPOINTS.USERS}?page=${page - 1}&size=10`;
         if (backendRole) {
           url += `&role=${encodeURIComponent(backendRole)}`;
         }
         if (debouncedSearchTerm) {
-          url += `&search=${encodeURIComponent(debouncedSearchTerm)}`;
+          url += `&searchTerm=${encodeURIComponent(debouncedSearchTerm)}`;
         }
 
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`Server responded with ${response.status}: ${errorText}`);
-          throw new Error(`Failed to fetch users (Status: ${response.status})`);
-        }
-
-        const data = await response.json();
+        const data = await apiGet(url, token);
         setUsers(data.content || []);
         setTotalPages(data.totalPages || 1);
-      } catch (err) {
-        console.error("Error fetching users:", err);
-        setError("Failed to load users. Please try again later.");
+      } catch (err: any) {
+        setError(err.message || "Failed to load users. Please try again later.");
       } finally {
         setLoading(false);
       }

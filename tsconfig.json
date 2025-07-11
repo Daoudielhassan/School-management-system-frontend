@@ -18,6 +18,7 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
       "@/hooks/*": ["src/hooks/*"],
       "@/lib/*": ["src/lib/*"],

@@ -33,6 +33,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from "@/config/api";
 
 interface ReportData {
   id: number;
@@ -52,6 +55,7 @@ interface ChartData {
 }
 
 export default function ReportsPage() {
+  const { token } = useContext(AuthContext);
   const [reports, setReports] = useState<ReportData[]>([]);
   const [attendanceData, setAttendanceData] = useState<ChartData[]>([]);
   const [gradeData, setGradeData] = useState<ChartData[]>([]);
@@ -61,82 +65,36 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<ReportData | null>(null);
   const [isNewReportOpen, setIsNewReportOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  // Mock data - Replace with actual API calls
   useEffect(() => {
-    setTimeout(() => {
-      const mockReports: ReportData[] = [
-        {
-          id: 1,
-          name: "Monthly Attendance Report",
-          type: "attendance",
-          description: "Comprehensive attendance analysis for all students and courses",
-          lastGenerated: "2024-01-16 14:30",
-          status: "ready",
-          size: "2.4 MB",
-          format: "pdf"
-        },
-        {
-          id: 2,
-          name: "Grade Distribution Analysis",
-          type: "grades",
-          description: "Statistical analysis of grade distributions across all departments",
-          lastGenerated: "2024-01-15 16:45",
-          status: "ready",
-          size: "1.8 MB",
-          format: "excel"
-        },
-        {
-          id: 3,
-          name: "Enrollment Trends Report",
-          type: "enrollment",
-          description: "Student enrollment patterns and demographic analysis",
-          lastGenerated: "2024-01-14 11:20",
-          status: "generating",
-          size: "Processing...",
-          format: "pdf"
-        },
-        {
-          id: 4,
-          name: "Financial Overview",
-          type: "financial",
-          description: "Budget allocation and spending analysis for the semester",
-          lastGenerated: "2024-01-13 09:15",
-          status: "scheduled",
-          size: "3.2 MB",
-          format: "excel"
-        }
-      ];
+    const fetchReports = async () => {
+      try {
+        const response = await apiGet(API_ENDPOINTS.reports, token);
+        setReports(response.data);
+      } catch (err) {
+        setError("Failed to fetch reports.");
+        console.error(err);
+      }
+    };
+    fetchReports();
+  }, [token]);
 
-      const mockAttendanceData: ChartData[] = [
-        { name: "Present", value: 85, color: "#10B981" },
-        { name: "Absent", value: 12, color: "#EF4444" },
-        { name: "Late", value: 3, color: "#F59E0B" }
-      ];
-
-      const mockGradeData: ChartData[] = [
-        { name: "A (90-100)", value: 25, color: "#10B981" },
-        { name: "B (80-89)", value: 35, color: "#3B82F6" },
-        { name: "C (70-79)", value: 25, color: "#F59E0B" },
-        { name: "D (60-69)", value: 10, color: "#EF4444" },
-        { name: "F (<60)", value: 5, color: "#991B1B" }
-      ];
-
-      const mockEnrollmentData: ChartData[] = [
-        { name: "Computer Science", value: 450, color: "#3B82F6" },
-        { name: "Engineering", value: 380, color: "#10B981" },
-        { name: "Mathematics", value: 320, color: "#F59E0B" },
-        { name: "Physics", value: 280, color: "#EF4444" },
-        { name: "Other", value: 170, color: "#8B5CF6" }
-      ];
-      
-      setReports(mockReports);
-      setAttendanceData(mockAttendanceData);
-      setGradeData(mockGradeData);
-      setEnrollmentData(mockEnrollmentData);
-      setLoading(false);
-    }, 1000);
-  }, []);
+  useEffect(() => {
+    const fetchCharts = async () => {
+      try {
+        const response = await apiGet(API_ENDPOINTS.charts, token);
+        setAttendanceData(response.data.attendance);
+        setGradeData(response.data.grades);
+        setEnrollmentData(response.data.enrollment);
+      } catch (err) {
+        setError("Failed to fetch chart data.");
+        console.error(err);
+      }
+    };
+    fetchCharts();
+  }, [token]);
 
   const getTypeColor = (type: string) => {
     switch (type) {

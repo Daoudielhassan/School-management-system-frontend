@@ -81,58 +81,58 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+    <div className="admin-theme min-h-screen bg-[var(--background)] text-[var(--text)]">
       {/* Header */}
-      <header className="bg-black/20 backdrop-blur-md border-b border-blue-500/20 px-6 py-4 sticky top-0 z-50">
+      <header className="bg-[var(--secondary)]/20 backdrop-blur-md border-b border-[var(--accent)]/20 px-6 py-4 sticky top-0 z-50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/admin" className="flex items-center gap-3">
               <div className="relative">
-                <Shield className="h-8 w-8 text-cyan-400 drop-shadow-lg" />
-                <div className="absolute inset-0 h-8 w-8 bg-cyan-400/20 rounded-full blur-md"></div>
+                <Shield className="h-8 w-8 text-[var(--accent)] drop-shadow-lg" />
+                <div className="absolute inset-0 h-8 w-8 bg-[var(--accent)]/20 rounded-full blur-md"></div>
               </div>
               <div className="flex flex-col">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold text-[var(--primary)]">
                   EduPortal
                 </h1>
-                <span className="text-xs text-blue-300/80">Admin Control</span>
+                <span className="text-xs text-[var(--accent)]/80">Admin Control</span>
               </div>
             </Link>
             <Badge 
               variant="secondary" 
-              className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 shadow-lg"
+              className="bg-[var(--secondary)] text-[var(--text)] border-0 shadow-lg"
             >
               Administrator
             </Badge>
           </div>
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" className="relative hover:bg-white/10">
-              <Bell className="h-5 w-5 text-cyan-400" />
+              <Bell className="h-5 w-5 text-[var(--accent)]" />
               <div className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full animate-pulse"></div>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:bg-white/10">
-                  <Avatar className="h-8 w-8 border-2 border-cyan-400/50">
+                  <Avatar className="h-8 w-8 border-2 border-[var(--accent)]/50">
                     <AvatarImage src="/user.png" alt="Admin User" />
-                    <AvatarFallback className="bg-gradient-to-br from-cyan-400 to-blue-600 text-white">
+                    <AvatarFallback className="bg-[var(--accent)] text-[var(--text)]">
                       {user ? `${user.firstname.charAt(0)}${user.lastname.charAt(0)}` : "A"}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-slate-800/95 backdrop-blur-md border-blue-500/30" align="end" forceMount>
+              <DropdownMenuContent className="w-56 bg-[var(--background)]/95 backdrop-blur-md border-[var(--accent)]/30" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none text-cyan-300">
+                    <p className="text-sm font-medium leading-none text-[var(--accent)]">
                       {user ? `${user.firstname} ${user.lastname}` : "Administrateur"}
                     </p>
-                    <p className="text-xs leading-none text-blue-300/70">
+                    <p className="text-xs leading-none text-[var(--accent)]/70">
                       admin@university.edu
                     </p>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-blue-500/30" />
+                <DropdownMenuSeparator className="bg-[var(--accent)]/30" />
                 <DropdownMenuItem asChild className="hover:bg-blue-500/20">
                   <Link href="/admin/profile">
                     <Settings className="mr-2 h-4 w-4" />
@@ -145,7 +145,7 @@ export default function AdminLayout({
                     <span>Paramètres</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-blue-500/30" />
+                <DropdownMenuSeparator className="bg-[var(--accent)]/30" />
                 <DropdownMenuItem onClick={handleLogout} className="hover:bg-red-500/20">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Déconnexion</span>
@@ -158,7 +158,7 @@ export default function AdminLayout({
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-72 bg-black/20 backdrop-blur-md border-r border-blue-500/20 min-h-screen sticky top-[80px] overflow-y-auto">
+        <aside className="w-72 bg-[var(--secondary)]/20 backdrop-blur-md border-r border-[var(--accent)]/20 min-h-screen sticky top-[80px] overflow-y-auto">
           <nav className="p-4 space-y-2">
             {navigation.map((item) => {
               const isActive = pathname === item.href
@@ -168,21 +168,21 @@ export default function AdminLayout({
                     variant="ghost" 
                     className={`w-full justify-start group transition-all duration-300 ${
                       isActive 
-                        ? "bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 shadow-lg shadow-cyan-500/20" 
-                        : "hover:bg-white/10 border border-transparent"
+                        ? "bg-[var(--accent)]/10 border border-[var(--accent)]/30 shadow-lg shadow-[var(--accent)]/20" 
+                        : "hover:bg-[var(--secondary)]/10 border border-transparent"
                     }`}
                   >
-                    <div className={`relative mr-3 ${isActive ? `bg-gradient-to-r ${item.gradient}` : ''} p-1 rounded-md`}>
-                      <item.icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-cyan-400'} group-hover:scale-110 transition-transform`} />
+                    <div className={`relative mr-3 ${isActive ? `bg-[var(--primary)]` : ''} p-1 rounded-md`}>
+                      <item.icon className={`h-4 w-4 ${isActive ? 'text-[var(--background)]' : 'text-[var(--accent)]'} group-hover:scale-110 transition-transform`} />
                       {isActive && (
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-md blur-sm"></div>
+                        <div className="absolute inset-0 bg-[var(--accent)]/20 rounded-md blur-sm"></div>
                       )}
                     </div>
-                    <span className={`${isActive ? 'text-cyan-300 font-medium' : 'text-blue-200'} group-hover:text-white transition-colors`}>
+                    <span className={`${isActive ? 'text-[var(--primary)] font-medium' : 'text-[var(--accent)]'} group-hover:text-[var(--primary)] transition-colors`}>
                       {item.name}
                     </span>
                     {isActive && (
-                      <div className="ml-auto w-2 h-2 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full animate-pulse"></div>
+                      <div className="ml-auto w-2 h-2 bg-[var(--primary)] rounded-full animate-pulse"></div>
                     )}
                   </Button>
                 </Link>

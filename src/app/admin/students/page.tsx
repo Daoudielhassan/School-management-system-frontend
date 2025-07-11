@@ -31,6 +31,7 @@ import {
 import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/context/AuthContext";
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from "@/config/api";
 
 interface Class {
   id: number
@@ -62,8 +63,8 @@ interface StudentData {
 
 // AddStudent Component
 const AddStudent = () => {
-  const { token, isAuthenticated } = useAuth();
-  const [classes, setClasses] = useState<Class[]>([])
+  const { token } = useAuth();
+  const [classes, setClasses] = useState<Class[]>([]);
   const [manualStudent, setManualStudent] = useState<Student>({
     firstName: "",
     lastName: "",
@@ -72,51 +73,39 @@ const AddStudent = () => {
     status: "active",
     dateOfBirth: "",
     classeId: 0,
-  })
-  const [error, setError] = useState<string>("")
-  const [loading, setLoading] = useState<boolean>(false)
-  const [uploadLoading, setUploadLoading] = useState<boolean>(false)
-  const [uploadError, setUploadError] = useState<string>("")
-  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  });
+  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [uploadLoading, setUploadLoading] = useState<boolean>(false);
+  const [uploadError, setUploadError] = useState<string>("");
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
-    console.log("AddStudent useEffect - token:", token ? "present" : "missing", "isAuthenticated:", isAuthenticated);
     const fetchClasses = async () => {
-      if (!token) {
-        console.log("No token available, skipping fetchClasses");
-        return;
-      }
-      setLoading(true)
+      if (!token) return;
+      setLoading(true);
       try {
-        const response = await fetch("http://localhost:8080/api/classes", {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-        if (!response.ok) throw new Error("Failed to fetch classes")
-        const data = await response.json()
-        setClasses(data)
-      } catch (error) {
-        console.error("Error fetching classes:", error)
-        toast.error("Failed to load class data")
+        const data = await apiGet(API_ENDPOINTS.CLASSES, token);
+        setClasses(data);
+      } catch (error: any) {
+        toast.error("Failed to load class data");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchClasses()
-  }, [token, isAuthenticated])
+    };
+    fetchClasses();
+  }, [token]);
 
   const handleManualInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setManualStudent({ ...manualStudent, [name]: value })
-  }
+    const { name, value } = e.target;
+    setManualStudent({ ...manualStudent, [name]: value });
+  };
 
   const handleClassChange = (value: string) => {
-    setManualStudent({ ...manualStudent, classeId: Number.parseInt(value) })
-  }
+    setManualStudent({ ...manualStudent, classeId: Number.parseInt(value) });
+  };
 
   const validateForm = () => {
     if (
@@ -126,48 +115,34 @@ const AddStudent = () => {
       !manualStudent.phoneNumber ||
       !manualStudent.dateOfBirth
     ) {
-      setError("All fields are required")
-      return false
+      setError("All fields are required");
+      return false;
     }
-    setError("")
-    return true
-  }
+    setError("");
+    return true;
+  };
 
   const handleManualSubmit = async () => {
-    if (!validateForm()) return
+    if (!validateForm()) return;
     if (!token) {
-      toast.error("Authentication token not available")
-      return
+      toast.error("Authentication token not available");
+      return;
     }
-
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await fetch("http://localhost:8080/api/students", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          ...manualStudent,
-          departmentId: classes.find((c) => c.id === manualStudent.classeId)?.departmentId,
-        }),
-      })
-
-      const responseData = await response.json()
-
-      if (!response.ok) throw new Error(responseData.message || "Failed to add student")
-
-      toast.success("Student added successfully!")
-      resetForm()
-      setIsDialogOpen(false)
-    } catch (error) {
-      console.error("Error adding student:", error)
-      toast.error(`Failed to add student: ${(error as Error).message}`)
+      const response = await apiPost(API_ENDPOINTS.STUDENTS, {
+        ...manualStudent,
+        departmentId: classes.find((c) => c.id === manualStudent.classeId)?.departmentId,
+      }, token);
+      toast.success("Student added successfully!");
+      resetForm();
+      setIsDialogOpen(false);
+    } catch (error: any) {
+      toast.error(`Failed to add student: ${error.message}`);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const resetForm = () => {
     setManualStudent({
@@ -178,64 +153,56 @@ const AddStudent = () => {
       status: "active",
       dateOfBirth: "",
       classeId: 0,
-    })
-    setError("")
-  }
+    });
+    setError("");
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null
-    setSelectedFile(file)
-    setUploadError("")
-  }
+    const file = e.target.files?.[0] || null;
+    setSelectedFile(file);
+    setUploadError("");
+  };
 
   const handleFileUpload = async () => {
     if (!selectedFile) {
-      setUploadError("Please select a file to upload")
-      return
+      setUploadError("Please select a file to upload");
+      return;
     }
     if (!token) {
-      setUploadError("Authentication token not available")
-      return
+      setUploadError("Authentication token not available");
+      return;
     }
-
-    const fileExtension = selectedFile.name.split(".").pop()?.toLowerCase()
+    const fileExtension = selectedFile.name.split(".").pop()?.toLowerCase();
     if (fileExtension !== "csv" && fileExtension !== "xlsx") {
-      setUploadError("Only CSV or Excel files are supported")
-      return
+      setUploadError("Only CSV or Excel files are supported");
+      return;
     }
-
-    setUploadLoading(true)
-    setUploadError("")
-
+    setUploadLoading(true);
+    setUploadError("");
     try {
-      const formData = new FormData()
-      formData.append("file", selectedFile)
-
-      const response = await fetch("http://localhost:8080/api/students/bulk-upload", {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      const res = await fetch(`${API_ENDPOINTS.STUDENTS}/bulk-upload`, {
         method: "POST",
         headers: {
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
-      })
-
-      const responseData = await response.json()
-
-      if (!response.ok) throw new Error(responseData.message || "Failed to upload students")
-
-      toast.success(`Successfully uploaded ${responseData.count || "multiple"} students!`)
-      setSelectedFile(null)
+      });
+      const responseData = await res.json();
+      if (!res.ok) throw new Error(responseData.message || "Failed to upload students");
+      toast.success(`Successfully uploaded ${responseData.count || "multiple"} students!`);
+      setSelectedFile(null);
       if (fileInputRef.current) {
-        fileInputRef.current.value = ""
+        fileInputRef.current.value = "";
       }
-    } catch (error) {
-      console.error("Error uploading students:", error)
-      setUploadError(`Failed to upload: ${(error as Error).message}`)
-      toast.error(`Upload failed: ${(error as Error).message}`)
+    } catch (error: any) {
+      setUploadError(`Failed to upload: ${error.message}`);
+      toast.error(`Upload failed: ${error.message}`);
     } finally {
-      setUploadLoading(false)
+      setUploadLoading(false);
     }
-  }
+  };
 
   return (
     <Card className="bg-white border border-gray-200 shadow-md rounded-lg overflow-hidden">
@@ -479,33 +446,28 @@ const StudentManagement = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<StudentData | null>(null);
   const [studentToDeleteId, setStudentToDeleteId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchStudents = async () => {
-    if (!token) {
-      console.log("No token available, skipping fetchStudents");
-      return;
-    }
+    if (!token) return;
+    setLoading(true);
+    setError(null);
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/students?page=${page}&size=10&searchTerm=${searchTerm}&status=${filter}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      if (!response.ok) throw new Error("Failed to fetch students");
-      const data = await response.json();
+      const url = `${API_ENDPOINTS.STUDENTS}?page=${page}&size=10&searchTerm=${searchTerm}&status=${filter}`;
+      const data = await apiGet(url, token);
       setStudents(data.content);
       setTotalPages(data.totalPages);
-    } catch (error) {
-      console.error("Error fetching students:", error);
+    } catch (error: any) {
+      setError(error.message || "Failed to fetch students");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchStudents();
+    // eslint-disable-next-line
   }, [page, searchTerm, filter, token]);
 
   const handleEdit = (student: StudentData) => {
@@ -519,48 +481,31 @@ const StudentManagement = () => {
   };
 
   const handleDeleteConfirm = async () => {
-    if (studentToDeleteId === null) return;
-    if (!token) {
-      console.error("No token available for delete operation");
-      return;
-    }
-
+    if (studentToDeleteId === null || !token) return;
+    setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8080/api/students/${studentToDeleteId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!response.ok) throw new Error("Failed to delete student");
+      await apiDelete(`${API_ENDPOINTS.STUDENTS}/${studentToDeleteId}`, token);
       fetchStudents();
-    } catch (error) {
-      console.error("Error deleting student:", error);
+    } catch (error: any) {
+      setError(error.message || "Failed to delete student");
     } finally {
       setIsDeleteModalOpen(false);
       setStudentToDeleteId(null);
+      setLoading(false);
     }
   };
 
   const handleSave = async (updatedStudent: StudentData) => {
-    if (!token) {
-      console.error("No token available for update operation");
-      return;
-    }
+    if (!token) return;
+    setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8080/api/students/${updatedStudent.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(updatedStudent),
-      });
-      if (!response.ok) throw new Error("Failed to update student");
+      await apiPut(`${API_ENDPOINTS.STUDENTS}/${updatedStudent.id}`, updatedStudent, token);
       fetchStudents();
-    } catch (error) {
-      console.error("Error updating student:", error);
+    } catch (error: any) {
+      setError(error.message || "Failed to update student");
+    } finally {
+      setIsEditModalOpen(false);
+      setLoading(false);
     }
   };
 
@@ -609,7 +554,15 @@ const StudentManagement = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {students.length > 0 ? (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-gray-400">Loading students...</TableCell>
+              </TableRow>
+            ) : error ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-red-400">{error}</TableCell>
+              </TableRow>
+            ) : students.length > 0 ? (
               students.map((student) => (
                 <TableRow key={student.id}>
                   <TableCell>{student.firstName} {student.lastName}</TableCell>
@@ -713,16 +666,6 @@ const StudentManagement = () => {
 
 export default function AdminStudentsPage() {
   const { token, isAuthenticated, role, userId } = useAuth();
-  
-  // Temporary debugging
-  console.log("AdminStudentsPage - Auth state:", {
-    token: token ? "present" : "missing",
-    isAuthenticated,
-    role,
-    userId
-  });
-  
-  // Show loading state while auth is being determined
   if (!isAuthenticated || !token) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -742,7 +685,6 @@ export default function AdminStudentsPage() {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       <div>

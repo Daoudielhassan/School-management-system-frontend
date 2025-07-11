@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import Schedule from '@/components/shared/schedule';
+import { apiGet, API_ENDPOINTS } from '@/config/api';
 
 interface Department {
     id: number;
@@ -35,17 +36,10 @@ const SessionManagement = () => {
             if (!token) return;
             setLoading(prev => ({ ...prev, departments: true }));
             try {
-                const response = await fetch('http://localhost:8080/api/departments', {
-                    headers: { 
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                });
-                if (!response.ok) throw new Error('Failed to fetch departments');
-                const data = await response.json();
+                const data = await apiGet(API_ENDPOINTS.DEPARTMENTS, token);
                 setDepartments(data);
-            } catch (err) {
-                setError((err as Error).message);
+            } catch (err: any) {
+                setError(err.message);
             } finally {
                 setLoading(prev => ({ ...prev, departments: false }));
             }
@@ -62,17 +56,10 @@ const SessionManagement = () => {
             }
             setLoading(prev => ({ ...prev, classes: true }));
             try {
-                const response = await fetch(`http://localhost:8080/api/classes/department/${selectedDepartment}`, {
-                    headers: { 
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                });
-                if (!response.ok) throw new Error('Failed to fetch classes');
-                const data = await response.json();
+                const data = await apiGet(`${API_ENDPOINTS.CLASSES}/department/${selectedDepartment}`, token);
                 setClasses(data);
-            } catch (err) {
-                setError((err as Error).message);
+            } catch (err: any) {
+                setError(err.message);
             } finally {
                 setLoading(prev => ({ ...prev, classes: false }));
             }

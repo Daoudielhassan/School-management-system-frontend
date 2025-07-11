@@ -33,7 +33,20 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/context/AuthContext";
+import { apiGet, apiPost, apiPut, API_ENDPOINTS } from "@/config/api";
 
+// Backend DTO interface
+interface MessageDTO {
+  senderId: number;
+  receiverId?: number;
+  messageText: string;
+  scope: string;
+  subject: string;
+  priority: string;
+}
+
+// Frontend interface for display
 interface Message {
   id: number;
   from: string;
@@ -57,101 +70,153 @@ interface Notification {
 }
 
 export default function MessagesPage() {
+  const { token, userId } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [isNewMessageOpen, setIsNewMessageOpen] = useState(false);
+  
+  // Form state for new message
+  const [newMessage, setNewMessage] = useState({
+    receiverId: '',
+    scope: 'PRIVATE',
+    subject: '',
+    messageText: '',
+    priority: 'normal'
+  });
 
-  // Mock data - Replace with actual API calls
+  // Fetch messages and notifications on mount
   useEffect(() => {
-    setTimeout(() => {
-      const mockMessages: Message[] = [
-        {
-          id: 1,
-          from: "Dr. Sarah Johnson",
-          fromRole: "Professor",
-          to: "Admin Team",
-          subject: "Urgent: Grade Submission Deadline",
-          content: "Please be reminded that the grade submission deadline is approaching. All professors must submit their final grades by end of week.",
-          timestamp: "2024-01-16 14:30",
-          status: "unread",
-          priority: "urgent",
-          category: "academic"
-        },
-        {
-          id: 2,
-          from: "Mike Wilson",
-          fromRole: "Student",
-          to: "Academic Office",
-          subject: "Appeal Request for Final Grade",
-          content: "I would like to formally request an appeal for my final grade in Computer Science 301. I believe there may have been an error in the calculation.",
-          timestamp: "2024-01-16 11:15",
-          status: "read",
-          priority: "high",
-          category: "academic"
-        },
-        {
-          id: 3,
-          from: "IT Department",
-          fromRole: "Staff",
-          to: "All Users",
-          subject: "System Maintenance Notice",
-          content: "The student portal will be undergoing scheduled maintenance this weekend from 2 AM to 6 AM. Please plan accordingly.",
-          timestamp: "2024-01-15 16:45",
-          status: "read",
-          priority: "normal",
-          category: "administrative"
-        },
-        {
-          id: 4,
-          from: "Lisa Chen",
-          fromRole: "Parent",
-          to: "Student Affairs",
-          subject: "Accommodation Request",
-          content: "I am writing to request special accommodations for my daughter due to her medical condition. Please let me know the process.",
-          timestamp: "2024-01-15 09:20",
-          status: "replied",
-          priority: "high",
-          category: "administrative"
-        }
-      ];
-
-      const mockNotifications: Notification[] = [
-        {
-          id: 1,
-          title: "New Grade Submissions",
-          message: "12 new grade submissions awaiting approval",
-          type: "info",
-          timestamp: "5 minutes ago",
-          isRead: false
-        },
-        {
-          id: 2,
-          title: "System Alert",
-          message: "High server load detected - monitoring",
-          type: "warning",
-          timestamp: "15 minutes ago",
-          isRead: false
-        },
-        {
-          id: 3,
-          title: "Backup Completed",
-          message: "Daily database backup completed successfully",
-          type: "success",
-          timestamp: "1 hour ago",
-          isRead: true
-        }
-      ];
+    const fetchData = async () => {
+      if (!token || !userId) {
+        setLoading(false);
+        return;
+      }
       
-      setMessages(mockMessages);
-      setNotifications(mockNotifications);
-      setLoading(false);
-    }, 1000);
-  }, []);
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch received messages for the current user
+        const messagesRes = await apiGet(`${API_ENDPOINTS.MESSAGES.RECEIVED}/${userId}`, token);
+        
+        // Ensure messagesRes is an array
+        const messagesArray = Array.isArray(messagesRes) ? messagesRes : [];
+        
+        // Transform backend data to frontend format
+        const transformedMessages: Message[] = messagesArray.map((msg: any) => ({
+          id: msg.id || Math.random(),
+          from: msg.senderName || 'Unknown Sender',
+          fromRole: msg.senderRole || 'User',
+          to: msg.receiverName || 'You',
+          subject: msg.subject || 'No Subject',
+          content: msg.messageText || '',
+          timestamp: msg.timestamp || new Date().toISOString(),
+          status: msg.seen ? 'read' : 'unread',
+          priority: msg.priority || 'normal',
+          category: 'general'
+        }));
+        
+        setMessages(transformedMessages);
+
+        // Fetch notifications
+        try {
+          const notificationsRes = await apiGet(API_ENDPOINTS.NOTIFICATIONS, token);
+          setNotifications(notificationsRes || []);
+        } catch (notifError) {
+          console.warn("Could not fetch notifications:", notifError);
+          setNotifications([]);
+        }
+      } catch (error: any) {
+        console.error("Error fetching data:", error);
+        if (error.message.includes('403') || error.message.includes('401')) {
+          setError("Authentication error. Please log in again.");
+        } else if (error.message.includes('Failed to fetch')) {
+          setError("Cannot connect to server. Please check your connection.");
+        } else {
+          setError("Failed to load messages. Please try again.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 30000); // Poll every 30 seconds
+    return () => clearInterval(interval);
+  }, [token, userId]);
+
+    const handleSendMessage = async () => {
+    if (!token || !userId) return;
+    
+    try {
+      const messageData: MessageDTO = {
+        senderId: userId,
+        receiverId: newMessage.receiverId ? parseInt(newMessage.receiverId) : undefined,
+        messageText: newMessage.messageText,
+        scope: newMessage.scope,
+        subject: newMessage.subject,
+        priority: newMessage.priority
+      };
+
+      await apiPost(API_ENDPOINTS.MESSAGES.BASE, messageData, token);
+      
+      // Reset form
+      setNewMessage({
+        receiverId: '',
+        scope: 'PRIVATE',
+        subject: '',
+        messageText: '',
+        priority: 'normal'
+      });
+      setIsNewMessageOpen(false);
+      
+      // Refresh messages
+      const messagesRes = await apiGet(`${API_ENDPOINTS.MESSAGES.RECEIVED}/${userId}`, token);
+      const messagesArray = Array.isArray(messagesRes) ? messagesRes : [];
+      const transformedMessages: Message[] = messagesArray.map((msg: any) => ({
+        id: msg.id || Math.random(),
+        from: msg.senderName || 'Unknown Sender',
+        fromRole: msg.senderRole || 'User',
+        to: msg.receiverName || 'You',
+        subject: msg.subject || 'No Subject',
+        content: msg.messageText || '',
+        timestamp: msg.timestamp || new Date().toISOString(),
+        status: msg.seen ? 'read' : 'unread',
+        priority: msg.priority || 'normal',
+        category: 'general'
+      }));
+      setMessages(transformedMessages);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setError("Failed to send message. Please try again.");
+    }
+  };
+
+  const handleMarkAsRead = async (messageId: number) => {
+    if (!token || !userId) return;
+    
+    try {
+      await apiPut(`${API_ENDPOINTS.MESSAGES.MARK_READ}/${messageId}/seen/${userId}`, {}, token);
+      
+      // Update the message status locally
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          msg.id === messageId 
+            ? { ...msg, status: 'read' as const }
+            : msg
+        )
+      );
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+      // Don't show error to user for this action as it's not critical
+    }
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -233,24 +298,22 @@ export default function MessagesPage() {
         <div className="flex items-center justify-between mt-4 pt-3 border-t border-purple-500/20">
           <div className="flex items-center gap-2 text-xs text-purple-300">
             <Clock className="h-3 w-3" />
-            {message.timestamp}
+            {new Date(message.timestamp).toLocaleDateString()}
           </div>
-          <div className="flex gap-2">
+                    <div className="flex gap-2">
             <Button 
               size="sm" 
               variant="outline" 
               className="border-cyan-400/30 hover:bg-cyan-500/20 text-cyan-300"
-              onClick={() => setSelectedMessage(message)}
+              onClick={() => {
+                setSelectedMessage(message);
+                if (message.status === 'unread') {
+                  handleMarkAsRead(message.id);
+                }
+              }}
             >
               <Eye className="h-3 w-3 mr-1" />
               Read
-            </Button>
-            <Button 
-              size="sm" 
-              className="bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30"
-            >
-              <Send className="h-3 w-3 mr-1" />
-              Reply
             </Button>
           </div>
         </div>
@@ -280,50 +343,70 @@ export default function MessagesPage() {
     </Card>
   );
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-gray-900 to-black flex items-center justify-center">
+        <Card className="bg-red-900/20 backdrop-blur-md border-red-500/30 max-w-md">
+          <CardContent className="p-6 text-center">
+            <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-white mb-2">Error Loading Messages</h3>
+            <p className="text-gray-300 mb-4">{error}</p>
+            <Button 
+              onClick={() => window.location.reload()}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-gray-900 to-black">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <div className="space-y-6 p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
               Communication Center
             </h1>
-            <p className="text-gray-300 mt-2">Advanced messaging hub for seamless communication</p>
+            <p className="text-slate-600 mt-2">Advanced messaging hub for seamless communication</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Dialog open={isNewMessageOpen} onOpenChange={setIsNewMessageOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white shadow-lg shadow-purple-500/20">
+                <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20">
                   <Plus className="mr-2 h-4 w-4" />
                   Compose Message
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-gray-900/95 backdrop-blur-md border-purple-500/30">
+              <DialogContent className="bg-white/95 backdrop-blur-md border-blue-500/30 max-w-2xl shadow-xl">
                 <DialogHeader>
-                  <DialogTitle className="text-purple-300">New Message</DialogTitle>
-                  <DialogDescription className="text-gray-300">
+                  <DialogTitle className="text-blue-700">New Message</DialogTitle>
+                  <DialogDescription className="text-slate-600">
                     Send a message to users or broadcast to all
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="recipient" className="text-gray-300">Recipient</Label>
-                      <Select>
+                      <Label htmlFor="scope" className="text-gray-300">Scope</Label>
+                      <Select value={newMessage.scope} onValueChange={(value) => setNewMessage({...newMessage, scope: value})}>
                         <SelectTrigger className="bg-purple-900/20 border-purple-400/30 text-white">
-                          <SelectValue placeholder="Select recipient" />
+                          <SelectValue placeholder="Select scope" />
                         </SelectTrigger>
                         <SelectContent className="bg-gray-800/95 border-purple-500/30">
-                          <SelectItem value="all">All Users</SelectItem>
-                          <SelectItem value="students">All Students</SelectItem>
-                          <SelectItem value="professors">All Professors</SelectItem>
-                          <SelectItem value="staff">All Staff</SelectItem>
+                          <SelectItem value="PRIVATE">Private</SelectItem>
+                          <SelectItem value="STUDENTS">All Students</SelectItem>
+                          <SelectItem value="PROFESSORS">All Professors</SelectItem>
+                          <SelectItem value="ALL">All Users</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
                       <Label htmlFor="priority" className="text-gray-300">Priority</Label>
-                      <Select>
+                      <Select value={newMessage.priority} onValueChange={(value) => setNewMessage({...newMessage, priority: value})}>
                         <SelectTrigger className="bg-purple-900/20 border-purple-400/30 text-white">
                           <SelectValue placeholder="Select priority" />
                         </SelectTrigger>
@@ -341,6 +424,8 @@ export default function MessagesPage() {
                     <Input 
                       id="subject" 
                       placeholder="Message subject" 
+                      value={newMessage.subject}
+                      onChange={(e) => setNewMessage({...newMessage, subject: e.target.value})}
                       className="bg-purple-900/20 border-purple-400/30 text-white placeholder-gray-400"
                     />
                   </div>
@@ -349,17 +434,23 @@ export default function MessagesPage() {
                     <Textarea 
                       id="message" 
                       placeholder="Type your message here..." 
+                      value={newMessage.messageText}
+                      onChange={(e) => setNewMessage({...newMessage, messageText: e.target.value})}
                       className="bg-purple-900/20 border-purple-400/30 text-white placeholder-gray-400 min-h-32"
                     />
                   </div>
-                  <Button className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700">
+                  <Button 
+                    onClick={handleSendMessage}
+                    disabled={!newMessage.subject || !newMessage.messageText}
+                    className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 disabled:opacity-50"
+                  >
                     <Send className="mr-2 h-4 w-4" />
                     Send Message
                   </Button>
                 </div>
               </DialogContent>
             </Dialog>
-            <Button variant="outline" className="border-cyan-400/30 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30">
+            <Button variant="outline" className="border-blue-400 bg-blue-50 text-blue-700 hover:bg-blue-100">
               <Bell className="mr-2 h-4 w-4" />
               Broadcast
             </Button>
@@ -367,88 +458,90 @@ export default function MessagesPage() {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="bg-purple-900/20 backdrop-blur-md border-purple-500/30 hover:border-cyan-400/50 transition-all duration-300 group">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+          <Card className="bg-white/80 backdrop-blur-md border-blue-200 hover:border-blue-300 transition-all duration-300 group shadow-lg">
             <CardContent className="p-6 text-center">
               <div className="relative">
-                <MessageSquare className="h-8 w-8 text-purple-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                <div className="absolute inset-0 bg-purple-400/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <MessageSquare className="h-8 w-8 text-blue-600 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                <div className="absolute inset-0 bg-blue-100 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
-              <div className="text-2xl font-bold text-white">{messages.length}</div>
-              <div className="text-sm text-purple-300">Total Messages</div>
+              <div className="text-2xl font-bold text-slate-800">{messages.length}</div>
+              <div className="text-sm text-blue-600">Total Messages</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-purple-900/20 backdrop-blur-md border-cyan-500/30 hover:border-cyan-400/50 transition-all duration-300 group">
+          <Card className="bg-white/80 backdrop-blur-md border-indigo-200 hover:border-indigo-300 transition-all duration-300 group shadow-lg">
             <CardContent className="p-6 text-center">
               <div className="relative">
-                <Bell className="h-8 w-8 text-cyan-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                <div className="absolute inset-0 bg-cyan-400/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <Bell className="h-8 w-8 text-indigo-600 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                <div className="absolute inset-0 bg-indigo-100 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
-              <div className="text-2xl font-bold text-white">{messages.filter(m => m.status === 'unread').length}</div>
-              <div className="text-sm text-cyan-300">Unread</div>
+              <div className="text-2xl font-bold text-slate-800">{messages.filter(m => m.status === 'unread').length}</div>
+              <div className="text-sm text-indigo-600">Unread</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-purple-900/20 backdrop-blur-md border-pink-500/30 hover:border-pink-400/50 transition-all duration-300 group">
+          <Card className="bg-white/80 backdrop-blur-md border-orange-200 hover:border-orange-300 transition-all duration-300 group shadow-lg">
             <CardContent className="p-6 text-center">
               <div className="relative">
-                <AlertCircle className="h-8 w-8 text-pink-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                <div className="absolute inset-0 bg-pink-400/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <AlertCircle className="h-8 w-8 text-orange-600 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                <div className="absolute inset-0 bg-orange-100 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
-              <div className="text-2xl font-bold text-white">{messages.filter(m => m.priority === 'urgent').length}</div>
-              <div className="text-sm text-pink-300">Urgent</div>
+              <div className="text-2xl font-bold text-slate-800">{messages.filter(m => m.priority === 'urgent').length}</div>
+              <div className="text-sm text-orange-600">Urgent</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-purple-900/20 backdrop-blur-md border-green-500/30 hover:border-green-400/50 transition-all duration-300 group">
+          <Card className="bg-white/80 backdrop-blur-md border-green-200 hover:border-green-300 transition-all duration-300 group shadow-lg">
             <CardContent className="p-6 text-center">
               <div className="relative">
-                <CheckCircle className="h-8 w-8 text-green-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                <div className="absolute inset-0 bg-green-400/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                <div className="absolute inset-0 bg-green-100 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
-              <div className="text-2xl font-bold text-white">{messages.filter(m => m.status === 'replied').length}</div>
-              <div className="text-sm text-green-300">Replied</div>
+              <div className="text-2xl font-bold text-slate-800">{messages.filter(m => m.status === 'replied').length}</div>
+              <div className="text-sm text-green-600">Replied</div>
             </CardContent>
           </Card>
         </div>
 
         {/* Search and Filter */}
-        <Card className="bg-purple-900/20 backdrop-blur-md border-purple-500/30">
+        <Card className="bg-white/80 backdrop-blur-md border-blue-200 shadow-lg">
           <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-purple-400" />
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-blue-500" />
                 <Input
                   placeholder="Search messages by sender, subject, or content..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-purple-900/20 border-purple-400/30 text-white placeholder-gray-400 focus:border-cyan-400"
+                  className="pl-10 bg-white border-blue-200 text-slate-800 placeholder-slate-500 focus:border-blue-400"
                 />
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-48 bg-purple-900/20 border-purple-400/30 text-white">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800/95 backdrop-blur-md border-purple-500/30">
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="unread">Unread</SelectItem>
-                  <SelectItem value="read">Read</SelectItem>
-                  <SelectItem value="replied">Replied</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                <SelectTrigger className="w-48 bg-purple-900/20 border-purple-400/30 text-white">
-                  <SelectValue placeholder="Filter by priority" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800/95 backdrop-blur-md border-purple-500/30">
-                  <SelectItem value="all">All Priority</SelectItem>
-                  <SelectItem value="urgent">Urgent</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="low">Low</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full sm:w-48 bg-white border-blue-200 text-slate-800">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-blue-200">
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="unread">Unread</SelectItem>
+                    <SelectItem value="read">Read</SelectItem>
+                    <SelectItem value="replied">Replied</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                  <SelectTrigger className="w-full sm:w-48 bg-white border-blue-200 text-slate-800">
+                    <SelectValue placeholder="Filter by priority" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-blue-200">
+                    <SelectItem value="all">All Priority</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -463,13 +556,30 @@ export default function MessagesPage() {
 
           <TabsContent value="messages" className="space-y-4">
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="animate-pulse bg-purple-900/20 backdrop-blur-md rounded-xl h-48 border border-purple-500/30"></div>
                 ))}
               </div>
+            ) : filteredMessages.length === 0 ? (
+              <Card className="bg-purple-900/20 backdrop-blur-md border-purple-500/30">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <MessageSquare className="h-12 w-12 text-purple-400/50 mb-4" />
+                  <h3 className="text-lg font-semibold text-white mb-2">No messages found</h3>
+                  <p className="text-gray-300 text-center mb-4">
+                    {searchTerm ? "Try adjusting your search terms" : "You don't have any messages yet"}
+                  </p>
+                  <Button 
+                    onClick={() => setIsNewMessageOpen(true)}
+                    className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Compose Message
+                  </Button>
+                </CardContent>
+              </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredMessages.map((message) => (
                   <MessageCard key={message.id} message={message} />
                 ))}
@@ -478,11 +588,21 @@ export default function MessagesPage() {
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {notifications.map((notification) => (
-                <NotificationCard key={notification.id} notification={notification} />
-              ))}
-            </div>
+            {notifications.length === 0 ? (
+              <Card className="bg-purple-900/20 backdrop-blur-md border-purple-500/30">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Bell className="h-12 w-12 text-purple-400/50 mb-4" />
+                  <h3 className="text-lg font-semibold text-white mb-2">No notifications</h3>
+                  <p className="text-gray-300">You're all caught up!</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {notifications.map((notification) => (
+                  <NotificationCard key={notification.id} notification={notification} />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="alerts" className="space-y-4">
@@ -526,7 +646,7 @@ export default function MessagesPage() {
                   <div className="flex-1">
                     <h3 className="text-white font-medium">{selectedMessage.from}</h3>
                     <p className="text-sm text-purple-300">{selectedMessage.fromRole}</p>
-                    <p className="text-xs text-gray-400">{selectedMessage.timestamp}</p>
+                    <p className="text-xs text-gray-400">{new Date(selectedMessage.timestamp).toLocaleString()}</p>
                   </div>
                   <Badge className={`${getPriorityBg(selectedMessage.priority)} border`}>
                     {selectedMessage.priority}
@@ -541,10 +661,6 @@ export default function MessagesPage() {
                 </div>
                 
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700">
-                    <Send className="mr-2 h-4 w-4" />
-                    Reply
-                  </Button>
                   <Button variant="outline" className="border-purple-400/30 text-purple-300 hover:bg-purple-500/20">
                     <Star className="mr-2 h-4 w-4" />
                     Star

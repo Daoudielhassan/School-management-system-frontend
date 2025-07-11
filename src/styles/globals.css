@@ -30,4 +30,13 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+.admin-theme {
+  --background: #ffffff;
+  --foreground: #000000;
+  --text: #000000;
+  --primary: #000d3a;
+  --secondary: #ffd800;
+  --accent: #576cab;
 } 
