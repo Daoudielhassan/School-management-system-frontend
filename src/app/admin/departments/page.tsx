@@ -50,8 +50,9 @@ export default function DepartmentsPage() {
   // Fetch departments
   useEffect(() => {
     const fetchDepartments = async () => {
+      const tokenSanitized = token || undefined;
       try {
-        const data = await apiGet(API_ENDPOINTS.DEPARTMENTS, token);
+        const data = await apiGet(API_ENDPOINTS.DEPARTMENTS, tokenSanitized);
         setDepartments(data);
       } catch (error) {
         console.error("Error fetching departments:", error);
@@ -66,8 +67,9 @@ export default function DepartmentsPage() {
   useEffect(() => {
     const fetchClasses = async () => {
       if (selectedDepartment) {
+        const tokenSanitized = token || undefined;
         try {
-          const data = await apiGet(API_ENDPOINTS.CLASSES, token);
+          const data = await apiGet(API_ENDPOINTS.CLASSES, tokenSanitized);
           setClasses(data);
         } catch (error) {
           console.error("Error fetching classes:", error);

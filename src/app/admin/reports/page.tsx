@@ -55,7 +55,11 @@ interface ChartData {
 }
 
 export default function ReportsPage() {
-  const { token } = useContext(AuthContext);
+  const authContext = useContext(AuthContext);
+  
+  if (!authContext) {
+    return <div>Loading...</div>;
+  }
   const [reports, setReports] = useState<ReportData[]>([]);
   const [attendanceData, setAttendanceData] = useState<ChartData[]>([]);
   const [gradeData, setGradeData] = useState<ChartData[]>([]);
@@ -68,33 +72,45 @@ export default function ReportsPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // Mock data for charts since there's no charts endpoint
+  useEffect(() => {
+    setAttendanceData([
+      { name: 'Present', value: 85, color: '#10B981' },
+      { name: 'Absent', value: 10, color: '#EF4444' },
+      { name: 'Late', value: 5, color: '#F59E0B' }
+    ]);
+    setGradeData([
+      { name: 'A', value: 25, color: '#10B981' },
+      { name: 'B', value: 35, color: '#3B82F6' },
+      { name: 'C', value: 25, color: '#F59E0B' },
+      { name: 'D', value: 10, color: '#EF4444' },
+      { name: 'F', value: 5, color: '#DC2626' }
+    ]);
+    setEnrollmentData([
+      { name: 'Computer Science', value: 120, color: '#8B5CF6' },
+      { name: 'Engineering', value: 95, color: '#06B6D4' },
+      { name: 'Business', value: 85, color: '#10B981' },
+      { name: 'Arts', value: 65, color: '#F59E0B' }
+    ]);
+  }, []);
+
   useEffect(() => {
     const fetchReports = async () => {
+      if (!authContext.token) return;
+      
       try {
-        const response = await apiGet(API_ENDPOINTS.reports, token);
-        setReports(response.data);
+        setLoading(true);
+        const response = await apiGet(API_ENDPOINTS.REPORTS, authContext.token);
+        setReports(response.data || []);
       } catch (err) {
         setError("Failed to fetch reports.");
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchReports();
-  }, [token]);
-
-  useEffect(() => {
-    const fetchCharts = async () => {
-      try {
-        const response = await apiGet(API_ENDPOINTS.charts, token);
-        setAttendanceData(response.data.attendance);
-        setGradeData(response.data.grades);
-        setEnrollmentData(response.data.enrollment);
-      } catch (err) {
-        setError("Failed to fetch chart data.");
-        console.error(err);
-      }
-    };
-    fetchCharts();
-  }, [token]);
+  }, [authContext.token]);
 
   const getTypeColor = (type: string) => {
     switch (type) {

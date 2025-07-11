@@ -9,7 +9,7 @@ import { setCookie, deleteCookie, getCookie } from 'cookies-next';
 import { isTokenExpired } from '@/lib/utils';
 import { toast } from 'react-toastify';
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
