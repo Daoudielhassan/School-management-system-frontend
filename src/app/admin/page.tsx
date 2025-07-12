@@ -85,25 +85,26 @@ const UserCard = ({ user }: { user: User }) => {
   };
 
   return (
-    <div className="bg-white/90 backdrop-blur-md rounded-xl p-4 border border-gray-200 hover:border-cyan-400 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20 group">
+    <div style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-light)' }} className="backdrop-blur-md rounded-xl p-4 border hover:border-[var(--accent)] transition-all duration-300 hover:shadow-lg group">
       <div className="flex items-center gap-3">
         <div className="relative">
           <img
             src="/user.png"
             alt={`${user.firstname || "Unknown"} ${user.lastname || "User"}`}
-            className="rounded-full w-12 h-12 border-2 border-cyan-400/50 group-hover:border-cyan-500 transition-colors"
+            className="rounded-full w-12 h-12 border-2 transition-colors"
+            style={{ borderColor: 'var(--accent)' }}
           />
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400/20 to-blue-400/20 group-hover:from-cyan-400/30 group-hover:to-blue-400/30 transition-all"></div>
+          <div className="absolute inset-0 rounded-full transition-all" style={{ backgroundColor: 'var(--bg-secondary)' }}></div>
         </div>
         <div className="flex-1">
-          <h3 className="font-medium text-gray-900 group-hover:text-cyan-600 transition-colors">
+          <h3 className="font-medium transition-colors" style={{ color: 'var(--text-primary)' }}>
             {user.firstname || "Unknown"} {user.lastname || "User"}
           </h3>
           <div className="flex items-center gap-2 mt-1">
             <span className={`text-xs px-2 py-1 rounded-full border ${role.color}`}>
               {role.name}
             </span>
-            <span className="text-xs text-gray-600">Active</span>
+            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Active</span>
           </div>
         </div>
       </div>
@@ -111,16 +112,18 @@ const UserCard = ({ user }: { user: User }) => {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="h-8 w-8 p-0 hover:bg-cyan-100 hover:text-cyan-600 transition-colors"
+          className="h-8 w-8 p-0 transition-colors"
+          style={{ color: 'var(--text-primary)' }}
         >
-          <Settings className="h-4 w-4 text-gray-600" />
+          <Settings className="h-4 w-4" />
         </Button>
         <Button 
           variant="ghost" 
           size="sm" 
-          className="h-8 w-8 p-0 hover:bg-orange-100 hover:text-orange-600 transition-colors"
+          className="h-8 w-8 p-0 transition-colors"
+          style={{ color: 'var(--text-primary)' }}
         >
-          <Bell className="h-4 w-4 text-gray-600" />
+          <Bell className="h-4 w-4" />
         </Button>
       </div>
     </div>
@@ -187,12 +190,12 @@ const DashboardStats = () => {
   if (loading) return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       {[...Array(4)].map((_, i) => (
-        <div key={i} className="animate-pulse bg-white/5 backdrop-blur-md rounded-xl p-6 border border-white/10 h-32"></div>
+        <div key={i} className="animate-pulse backdrop-blur-md rounded-xl p-6 border h-32" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)' }}></div>
       ))}
     </div>
   );
   
-  if (error) return <p className="text-red-400">{error}</p>;
+  if (error) return <p style={{ color: 'var(--accent)' }}>{error}</p>;
 
   const statsConfig = [
     { 
@@ -269,23 +272,23 @@ const DashboardStats = () => {
       {/* Main Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {statsConfig.map((stat, index) => (
-          <Card key={index} className="bg-white/95 backdrop-blur-md border-gray-200 hover:border-cyan-400 transition-all duration-300 group hover:shadow-lg hover:shadow-cyan-500/10">
+          <Card key={index} style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-light)' }} className="backdrop-blur-md hover:border-[var(--accent)] transition-all duration-300 group hover:shadow-lg">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                  <p className="text-sm font-medium text-gray-700 mb-1">{stat.title}</p>
+                  <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{stat.title}</p>
                 <div className="flex items-baseline gap-2">
-                    <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                    <span className="text-xs text-emerald-600 flex items-center">
+                    <p className="text-3xl font-bold" style={{ color: 'var(--primary)' }}>{stat.value}</p>
+                    <span className="text-xs flex items-center" style={{ color: 'var(--accent)' }}>
                     <TrendingUp className="h-3 w-3 mr-1" />
                     {stat.change}
                   </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">vs last month</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>vs last month</p>
                 </div>
-                <div className={`relative p-3 rounded-xl bg-gradient-to-r ${stat.bgGradient} group-hover:scale-110 transition-transform`}>
-                  <stat.icon className={`h-6 w-6 text-white`} />
-                  <div className={`absolute inset-0 bg-gradient-to-r ${stat.gradient} opacity-20 rounded-xl blur-md group-hover:opacity-30 transition-opacity`}></div>
+                <div className="relative p-3 rounded-xl group-hover:scale-110 transition-transform" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                  <stat.icon className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                  <div className="absolute inset-0 opacity-20 rounded-xl blur-md group-hover:opacity-30 transition-opacity" style={{ backgroundColor: 'var(--accent)' }}></div>
                 </div>
               </div>
             </CardContent>
@@ -296,23 +299,23 @@ const DashboardStats = () => {
       {/* Additional Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {additionalStatsConfig.map((stat, index) => (
-          <Card key={`additional-${index}`} className="bg-white/95 backdrop-blur-md border-gray-200 hover:border-cyan-400 transition-all duration-300 group hover:shadow-lg hover:shadow-cyan-500/10">
+          <Card key={`additional-${index}`} style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-light)' }} className="backdrop-blur-md hover:border-[var(--accent)] transition-all duration-300 group hover:shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-700 mb-1">{stat.title}</p>
+                  <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{stat.title}</p>
                   <div className="flex items-baseline gap-2">
-                    <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                    <span className="text-xs text-emerald-600 flex items-center">
+                    <p className="text-3xl font-bold" style={{ color: 'var(--primary)' }}>{stat.value}</p>
+                    <span className="text-xs flex items-center" style={{ color: 'var(--accent)' }}>
                       <TrendingUp className="h-3 w-3 mr-1" />
                       {stat.change}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">vs last month</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>vs last month</p>
               </div>
-              <div className={`relative p-3 rounded-xl bg-gradient-to-r ${stat.bgGradient} group-hover:scale-110 transition-transform`}>
-                  <stat.icon className={`h-6 w-6 text-white`} />
-                <div className={`absolute inset-0 bg-gradient-to-r ${stat.gradient} opacity-20 rounded-xl blur-md group-hover:opacity-30 transition-opacity`}></div>
+              <div className="relative p-3 rounded-xl group-hover:scale-110 transition-transform" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                  <stat.icon className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                <div className="absolute inset-0 opacity-20 rounded-xl blur-md group-hover:opacity-30 transition-opacity" style={{ backgroundColor: 'var(--accent)' }}></div>
               </div>
             </div>
           </CardContent>
@@ -1009,43 +1012,45 @@ const UserManagementCard = () => {
   };
 
   return (
-    <Card className="bg-white/95 backdrop-blur-md border-gray-200 hover:border-cyan-400 transition-all duration-300">
-      <CardHeader className="border-b border-gray-200">
+    <Card style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-light)' }} className="backdrop-blur-md hover:border-[var(--accent)] transition-all duration-300">
+      <CardHeader style={{ borderColor: 'var(--border-light)' }} className="border-b">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-              <Users className="h-5 w-5 text-cyan-600" />
+            <CardTitle className="text-xl font-semibold flex items-center gap-2" style={{ color: 'var(--primary)' }}>
+              <Users className="h-5 w-5" style={{ color: 'var(--accent)' }} />
               User Management
             </CardTitle>
-            <CardDescription className="text-gray-600">
+            <CardDescription style={{ color: 'var(--text-secondary)' }}>
               Manage system users and permissions
             </CardDescription>
           </div>
           <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
             <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400"/>
+              <Search className="absolute left-2 top-2.5 h-4 w-4" style={{ color: 'var(--accent)' }}/>
               <Input
                 type="text"
                 placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 pr-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-cyan-500 focus:ring-cyan-500"
+                style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-medium)', color: 'var(--text-primary)' }}
+                className="pl-8 pr-4 py-2 rounded-lg placeholder-[var(--text-tertiary)] focus:border-[var(--accent)] focus:ring-[var(--accent)]"
               />
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="border-gray-300 bg-white hover:bg-gray-50 text-gray-700">
+                <Button variant="outline" style={{ borderColor: 'var(--border-medium)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} className="hover:bg-[var(--hover-bg)]">
                   Filter <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-white border-gray-200 shadow-lg">
-                <DropdownMenuLabel className="text-gray-900">Filter by Role</DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-gray-200" />
+              <DropdownMenuContent align="end" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-light)' }} className="shadow-lg">
+                <DropdownMenuLabel style={{ color: 'var(--primary)' }}>Filter by Role</DropdownMenuLabel>
+                <DropdownMenuSeparator style={{ backgroundColor: 'var(--border-light)' }} />
                 {(Object.keys(roleMapping) as RoleType[]).map((key) => (
                   <DropdownMenuItem
                     key={key}
                     onClick={() => setFilter(key)}
-                    className="hover:bg-gray-100 cursor-pointer text-gray-700 hover:text-gray-900"
+                    style={{ color: 'var(--text-primary)' }}
+                    className="hover:bg-[var(--hover-bg)] cursor-pointer hover:text-[var(--primary)]"
                   >
                     {displayRoleName(key)}
                   </DropdownMenuItem>
@@ -1058,7 +1063,7 @@ const UserManagementCard = () => {
 
       <CardContent className="p-6">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-4">
+          <div style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--accent)', color: 'var(--text-primary)' }} className="border p-4 rounded-lg mb-4">
             <p>{error}</p>
             <Button
               onClick={() => {
@@ -1066,7 +1071,8 @@ const UserManagementCard = () => {
                 setPage(page);
               }}
               variant="outline"
-              className="mt-2 border-red-300 text-red-600 hover:bg-red-50"
+              style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}
+              className="mt-2 hover:bg-[var(--hover-bg)]"
             >
               Retry
             </Button>
@@ -1075,14 +1081,14 @@ const UserManagementCard = () => {
 
         {loading ? (
           <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: 'var(--accent)' }}></div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {users.length > 0 ? (
               users.map((user) => <UserCard key={user.id} user={user} />)
             ) : (
-              <div className="col-span-full text-center py-8 text-gray-500">
+              <div className="col-span-full text-center py-8" style={{ color: 'var(--text-tertiary)' }}>
                 No users found
               </div>
             )}
@@ -1090,19 +1096,21 @@ const UserManagementCard = () => {
         )}
       </CardContent>
 
-      <CardFooter className="flex justify-between pt-4 border-t border-gray-200">
+      <CardFooter className="flex justify-between pt-4 border-t" style={{ borderColor: 'var(--border-light)' }}>
         <Button
           variant="outline"
-          className="border-gray-300 bg-white hover:bg-gray-50 text-gray-700"
+          style={{ borderColor: 'var(--border-medium)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+          className="hover:bg-[var(--hover-bg)]"
           onClick={() => setPage(Math.max(1, page - 1))}
           disabled={page === 1 || loading}
         >
           Previous
         </Button>
-        <span className="text-gray-600">Page {page} of {totalPages}</span>
+        <span style={{ color: 'var(--text-secondary)' }}>Page {page} of {totalPages}</span>
         <Button
           variant="outline"
-          className="border-gray-300 bg-white hover:bg-gray-50 text-gray-700"
+          style={{ borderColor: 'var(--border-medium)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+          className="hover:bg-[var(--hover-bg)]"
           onClick={() => setPage(Math.min(totalPages, page + 1))}
           disabled={page >= totalPages || loading}
         >
@@ -1118,18 +1126,18 @@ export default function AdminDashboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold" style={{ color: 'var(--primary)' }}>
             Admin Dashboard
           </h1>
-          <p className="text-gray-600 mt-2">Advanced control center for system management</p>
+          <p className="mt-2" style={{ color: 'var(--text-secondary)' }}>Advanced control center for system management</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="border-cyan-500 bg-cyan-50 text-cyan-700 hover:bg-cyan-100">
-            <Activity className="mr-2 h-4 w-4 text-cyan-700" />
+          <Button variant="outline" style={{ borderColor: 'var(--accent)', backgroundColor: 'var(--bg-secondary)', color: 'var(--accent)' }} className="hover:bg-[var(--hover-bg)]">
+            <Activity className="mr-2 h-4 w-4" />
             System Status
           </Button>
-          <Button className="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white shadow-lg shadow-cyan-500/20">
-            <Award className="mr-2 h-4 w-4 text-white" />
+          <Button style={{ backgroundColor: 'var(--primary)', color: 'var(--background)' }} className="hover:bg-[var(--primary-dark)] shadow-lg">
+            <Award className="mr-2 h-4 w-4" />
             Generate Report
           </Button>
         </div>
@@ -1140,8 +1148,8 @@ export default function AdminDashboardPage() {
 
       {/* Quick Actions */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Settings className="h-5 w-5 text-cyan-600" />
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--primary)' }}>
+          <Settings className="h-5 w-5" style={{ color: 'var(--accent)' }} />
           Quick Actions
         </h2>
         <QuickActions />

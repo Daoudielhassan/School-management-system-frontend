@@ -61,23 +61,23 @@
 
 /* Admin Theme Variables */
 .admin-theme {
-  --background: #0a0f1c;
-  --foreground: #ffffff;
-  --text: #e2e8f0;
-  --primary: #3b82f6;
-  --secondary: #1e293b;
-  --accent: #06b6d4;
+  --background: #ffffff;
+  --foreground: #000000;
+  --text: #020522;
+  --primary: #000d3a;
+  --secondary: #ffd800;
+  --accent: #576cab;
   
   --bg-primary: var(--background);
-  --bg-secondary: #0f172a;
-  --bg-tertiary: #1e293b;
+  --bg-secondary: #f8f9ff;
+  --bg-tertiary: #f1f3ff;
   --text-primary: var(--text);
-  --text-secondary: #cbd5e1;
+  --text-secondary: var(--primary);
   --text-tertiary: var(--accent);
-  --hover-bg: #1e293b;
-  --active-bg: #334155;
-  --border-light: #334155;
-  --border-medium: #475569;
+  --hover-bg: #f8f9ff;
+  --active-bg: #f1f3ff;
+  --border-light: #e8eaff;
+  --border-medium: #d1d5ff;
   --border-dark: var(--accent);
 }
 

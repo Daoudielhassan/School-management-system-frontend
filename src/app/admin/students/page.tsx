@@ -214,10 +214,10 @@ const AddStudent = () => {
   };
 
   return (
-    <Card className="bg-white border border-gray-200 shadow-md rounded-lg overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white p-6">
+    <Card style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-light)' }} className="shadow-md rounded-lg overflow-hidden">
+      <CardHeader style={{ backgroundColor: 'var(--primary)', color: 'var(--background)' }} className="p-6">
         <CardTitle className="text-2xl font-bold">Student Management</CardTitle>
-        <CardDescription className="text-blue-100">Add new students individually or in bulk</CardDescription>
+        <CardDescription style={{ color: 'var(--background)' }}>Add new students individually or in bulk</CardDescription>
       </CardHeader>
       <CardContent className="p-6">
         <Tabs defaultValue="manual" className="w-full">
@@ -523,9 +523,9 @@ const StudentManagement = () => {
   };
 
   return (
-    <Card className="bg-gray border-[#2A3747] shadow-lg">
+    <Card style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-light)' }} className="shadow-lg">
       <CardHeader>
-        <CardTitle className="text-xl font-semibold text-blue-900">Student Management</CardTitle>
+        <CardTitle className="text-xl font-semibold" style={{ color: 'var(--primary)' }}>Student Management</CardTitle>
         <div className="flex gap-2 mt-4">
           <Input
             type="text"
@@ -701,8 +701,8 @@ export default function AdminStudentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Gestion des étudiants</h1>
-        <p className="text-gray-600">Ajout et gestion des étudiants du système</p>
+        <h1 className="text-3xl font-bold" style={{ color: 'var(--primary)' }}>Gestion des étudiants</h1>
+        <p style={{ color: 'var(--text-secondary)' }}>Ajout et gestion des étudiants du système</p>
       </div>
       <AddStudent />
       <StudentManagement />
