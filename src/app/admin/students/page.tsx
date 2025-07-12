@@ -138,7 +138,16 @@ const AddStudent = () => {
       resetForm();
       setIsDialogOpen(false);
     } catch (error: any) {
-      toast.error(`Failed to add student: ${error.message}`);
+      let message = error?.message || "Failed to add student";
+      if (error?.response?.data) {
+        if (typeof error.response.data === "string") {
+          message = error.response.data;
+        } else if (error.response.data.message) {
+          message = error.response.data.message;
+        }
+      }
+      toast.error(message);
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -454,10 +463,14 @@ const StudentManagement = () => {
     setLoading(true);
     setError(null);
     try {
-      const url = `${API_ENDPOINTS.STUDENTS}?page=${page}&size=10&searchTerm=${searchTerm}&status=${filter}`;
+      let url = `${API_ENDPOINTS.STUDENTS}?page=${page}&size=10`;
+      if (searchTerm) url += `&searchTerm=${encodeURIComponent(searchTerm)}`;
+      if (filter && filter !== "all") url += `&status=${encodeURIComponent(filter)}`;
+      else url += `&status=all`;
+
       const data = await apiGet(url, token);
-      setStudents(data.content);
-      setTotalPages(data.totalPages);
+      setStudents(data.content || []);
+      setTotalPages(data.totalPages || 1);
     } catch (error: any) {
       setError(error.message || "Failed to fetch students");
     } finally {

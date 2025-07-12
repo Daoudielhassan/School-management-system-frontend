@@ -8,6 +8,8 @@ export const API_ENDPOINTS = {
   STUDENTS: `${API_URL}/api/students`,
   DEPARTMENTS: `${API_URL}/api/departments`,
   CLASSES: `${API_URL}/api/classes`,
+  MODULES: `${API_URL}/api/modules`,
+  SUBJECTS: `${API_URL}/api/subjects`,
   SESSIONS: {
     BASE: `${API_URL}/api/sessions`,
     BY_INSTRUCTOR: `${API_URL}/api/sessions/instructor`,

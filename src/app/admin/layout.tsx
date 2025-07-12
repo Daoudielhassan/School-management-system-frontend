@@ -31,6 +31,7 @@ import {
   AlertTriangle,
   FileText,
   PieChart,
+  BookOpen,
 } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 
@@ -38,6 +39,7 @@ const navigation = [
   { name: "Dashboard", href: "/admin", icon: BarChart3, gradient: "from-blue-500 to-purple-600" },
   { name: "Utilisateurs", href: "/admin/users", icon: Users, gradient: "from-blue-400 to-cyan-500" },
   { name: "Étudiants", href: "/admin/students", icon: GraduationCap, gradient: "from-green-400 to-blue-500" },
+  { name: "Classes", href: "/admin/classes", icon: BookOpen, gradient: "from-indigo-500 to-purple-600" },
   { name: "Départements", href: "/admin/departments", icon: Building, gradient: "from-teal-400 to-yellow-500" },
   { name: "Sessions", href: "/admin/sessions", icon: Calendar, gradient: "from-gray-600 to-cyan-400" },
   { name: "Présences", href: "/admin/attendance", icon: ClipboardList, gradient: "from-blue-800 to-purple-700" },

@@ -300,7 +300,7 @@ export default function MessagesPage() {
             <Clock className="h-3 w-3" />
             {new Date(message.timestamp).toLocaleDateString()}
           </div>
-                    <div className="flex gap-2">
+          <div className="flex gap-2">
             <Button 
               size="sm" 
               variant="outline" 
@@ -518,29 +518,29 @@ export default function MessagesPage() {
                 />
               </div>
               <div className="flex flex-col sm:flex-row gap-2">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-full sm:w-48 bg-white border-blue-200 text-slate-800">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
                   <SelectContent className="bg-white border-blue-200">
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="unread">Unread</SelectItem>
-                    <SelectItem value="read">Read</SelectItem>
-                    <SelectItem value="replied">Replied</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="unread">Unread</SelectItem>
+                  <SelectItem value="read">Read</SelectItem>
+                  <SelectItem value="replied">Replied</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
                   <SelectTrigger className="w-full sm:w-48 bg-white border-blue-200 text-slate-800">
-                    <SelectValue placeholder="Filter by priority" />
-                  </SelectTrigger>
+                  <SelectValue placeholder="Filter by priority" />
+                </SelectTrigger>
                   <SelectContent className="bg-white border-blue-200">
-                    <SelectItem value="all">All Priority</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="normal">Normal</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <SelectItem value="all">All Priority</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                </SelectContent>
+              </Select>
               </div>
             </div>
           </CardContent>
@@ -598,10 +598,10 @@ export default function MessagesPage() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {notifications.map((notification) => (
-                  <NotificationCard key={notification.id} notification={notification} />
-                ))}
-              </div>
+              {notifications.map((notification) => (
+                <NotificationCard key={notification.id} notification={notification} />
+              ))}
+            </div>
             )}
           </TabsContent>
 

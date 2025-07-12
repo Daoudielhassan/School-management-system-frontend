@@ -268,18 +268,18 @@ const DashboardStats = () => {
     <div className="space-y-6 mb-8">
       {/* Main Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statsConfig.map((stat, index) => (
+      {statsConfig.map((stat, index) => (
           <Card key={index} className="bg-white/95 backdrop-blur-md border-gray-200 hover:border-cyan-400 transition-all duration-300 group hover:shadow-lg hover:shadow-cyan-500/10">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
                   <p className="text-sm font-medium text-gray-700 mb-1">{stat.title}</p>
-                  <div className="flex items-baseline gap-2">
+                <div className="flex items-baseline gap-2">
                     <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
                     <span className="text-xs text-emerald-600 flex items-center">
-                      <TrendingUp className="h-3 w-3 mr-1" />
-                      {stat.change}
-                    </span>
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    {stat.change}
+                  </span>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">vs last month</p>
                 </div>
@@ -309,16 +309,16 @@ const DashboardStats = () => {
                     </span>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">vs last month</p>
-                </div>
-                <div className={`relative p-3 rounded-xl bg-gradient-to-r ${stat.bgGradient} group-hover:scale-110 transition-transform`}>
-                  <stat.icon className={`h-6 w-6 text-white`} />
-                  <div className={`absolute inset-0 bg-gradient-to-r ${stat.gradient} opacity-20 rounded-xl blur-md group-hover:opacity-30 transition-opacity`}></div>
-                </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              <div className={`relative p-3 rounded-xl bg-gradient-to-r ${stat.bgGradient} group-hover:scale-110 transition-transform`}>
+                  <stat.icon className={`h-6 w-6 text-white`} />
+                <div className={`absolute inset-0 bg-gradient-to-r ${stat.gradient} opacity-20 rounded-xl blur-md group-hover:opacity-30 transition-opacity`}></div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
     </div>
   );
 };
@@ -770,10 +770,10 @@ const QuickActions = () => {
   return (
     <>
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6 mb-8">
-        {actions.map((action, index) => (
-          <Button
-            key={index}
-            variant="ghost"
+      {actions.map((action, index) => (
+        <Button
+          key={index}
+          variant="ghost"
             onClick={action.action}
             disabled={action.loading}
             className={`h-32 bg-white/95 backdrop-blur-md border border-gray-200 hover:border-cyan-400 transition-all duration-300 group hover:shadow-lg hover:shadow-cyan-500/20 rounded-xl ${
@@ -799,10 +799,10 @@ const QuickActions = () => {
                   {action.description}
                 </span>
               </div>
-            </div>
-          </Button>
-        ))}
-      </div>
+          </div>
+        </Button>
+      ))}
+    </div>
 
       {/* Add User Dialog */}
       <Dialog open={showAddUserDialog} onOpenChange={setShowAddUserDialog}>
@@ -1151,7 +1151,7 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* User Management - Takes 2 columns */}
         <div className="lg:col-span-2">
-          <UserManagementCard />
+      <UserManagementCard />
         </div>
         
         {/* Recent Activity - Takes 1 column */}

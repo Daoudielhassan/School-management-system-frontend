@@ -57,6 +57,8 @@ export default function AttendancePage() {
   const [loading, setLoading] = useState(true);
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<number | null>(null);
+  const [studentId, setStudentId] = useState<number | null>(null);
 
   // Fetch attendance data from API
   useEffect(() => {
@@ -70,8 +72,15 @@ export default function AttendancePage() {
         setLoading(true);
         setError(null);
         
-        // Fetch all attendance records
-        const attendanceData = await apiGet(API_ENDPOINTS.ATTENDANCE.BASE, token || undefined);
+        let url = API_ENDPOINTS.ATTENDANCE.BASE;
+        if (sessionId) {
+          url += `/session/${sessionId}`;
+        } else if (studentId) {
+          url += `/students/${studentId}`;
+        }
+        // else: url is just /api/attendance (all records, if backend supports)
+
+        const attendanceData = await apiGet(url, token || undefined);
         
         // Transform the data to match our interface
         const transformedRecords: AttendanceRecord[] = attendanceData.map((record: any) => ({
@@ -115,7 +124,7 @@ export default function AttendancePage() {
     };
     
     fetchAttendanceData();
-  }, [token]);
+  }, [token, sessionId, studentId]);
 
   const handleUpdateAttendance = async (recordId: number, newStatus: string) => {
     try {
@@ -164,6 +173,14 @@ export default function AttendancePage() {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'oui': return "Justified";
+      case 'non': return "Unjustified";
+      default: return "Unknown";
+    }
+  };
+
   const AttendanceRecordCard = ({ record }: { record: AttendanceRecord }) => (
     <Card className="bg-white/5 backdrop-blur-md border-white/10 hover:border-blue-400/30 transition-all duration-300 group">
       <CardContent className="p-4">
@@ -179,7 +196,7 @@ export default function AttendancePage() {
           </div>
           <Badge className={`border ${getStatusColor(record.status)} flex items-center gap-1`}>
             {getStatusIcon(record.status)}
-            {record.status}
+            {getStatusLabel(record.status)}
           </Badge>
         </div>
         
@@ -315,8 +332,8 @@ export default function AttendancePage() {
               </SelectTrigger>
               <SelectContent className="bg-slate-800/95 backdrop-blur-md border-blue-500/30">
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="oui">Present</SelectItem>
-                <SelectItem value="non">Absent</SelectItem>
+                <SelectItem value="oui">Justified</SelectItem>
+                <SelectItem value="non">Unjustified</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -419,7 +436,7 @@ export default function AttendancePage() {
                 <div>
                   <label className="text-sm text-blue-200">Status</label>
                   <Badge className={`${getStatusColor(selectedRecord.status)} border`}>
-                    {selectedRecord.status}
+                    {getStatusLabel(selectedRecord.status)}
                   </Badge>
                 </div>
               </div>

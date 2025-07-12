@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useAuth } from "@/context/AuthContext"
 import type { LoginCredentials } from "@/types/auth"
 import { toast } from "react-toastify"
@@ -10,7 +10,7 @@ import { UserRole } from "@/types/auth"
 import Image from "next/image"
 import { Lock, LogIn, Loader2 } from "lucide-react"  // if using Lucide icons
 
-export default function Login() {
+function LoginForm() {
   const { login, isAuthenticated, role } = useAuth()
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: "",
@@ -178,5 +178,17 @@ export default function Login() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }
