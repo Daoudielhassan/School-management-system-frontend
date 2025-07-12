@@ -18,104 +18,345 @@ export const SidebarExample: React.FC = () => {
       onLogout={handleLogout}
     >
       <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+        <div className="rounded-xl shadow-sm border p-8"
+        style={{
+          backgroundColor: 'var(--bg-primary)',
+          borderColor: 'var(--border-light)',
+          boxShadow: 'var(--shadow-sm)'
+        }}
+        >
+          <h2 className="text-3xl font-bold mb-4"
+          style={{ color: 'var(--text-primary)' }}
+          >
             Welcome to AIAC Intranet
           </h2>
-          <p className="text-gray-600 mb-6">
-            This is an example of the responsive sidebar implementation with WCAG 2.1 AA compliance.
+          <p className="mb-6"
+          style={{ color: 'var(--text-secondary)' }}
+          >
+            This is the updated responsive sidebar implementation with your custom color scheme and WCAG 2.1 AA compliance.
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-semibold text-blue-900 mb-2">Responsive Design</h3>
-              <p className="text-blue-700 text-sm">
+            <div className="border rounded-xl p-6"
+            style={{
+              backgroundColor: 'var(--bg-tertiary)',
+              borderColor: 'var(--accent)',
+              borderWidth: '1px'
+            }}
+            >
+              <h3 className="font-semibold mb-3"
+              style={{ color: 'var(--primary)' }}
+              >
+                Responsive Design
+              </h3>
+              <p className="text-sm"
+              style={{ color: 'var(--text-secondary)' }}
+              >
                 Sidebar collapses to hamburger menu on mobile devices (≤768px)
               </p>
             </div>
             
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <h3 className="font-semibold text-green-900 mb-2">WCAG AA Compliant</h3>
-              <p className="text-green-700 text-sm">
-                All colors meet 4.5:1 contrast ratio requirements
+            <div className="border rounded-xl p-6"
+            style={{
+              backgroundColor: 'var(--bg-tertiary)',
+              borderColor: 'var(--accent)',
+              borderWidth: '1px'
+            }}
+            >
+              <h3 className="font-semibold mb-3"
+              style={{ color: 'var(--primary)' }}
+              >
+                WCAG AA Compliant
+              </h3>
+              <p className="text-sm"
+              style={{ color: 'var(--text-secondary)' }}
+              >
+                All colors meet 4.5:1 contrast ratio requirements with your custom palette
               </p>
             </div>
             
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-              <h3 className="font-semibold text-purple-900 mb-2">Smooth Transitions</h3>
-              <p className="text-purple-700 text-sm">
-                Cubic-bezier animations with reduced motion support
+            <div className="border rounded-xl p-6"
+            style={{
+              backgroundColor: 'var(--bg-tertiary)',
+              borderColor: 'var(--accent)',
+              borderWidth: '1px'
+            }}
+            >
+              <h3 className="font-semibold mb-3"
+              style={{ color: 'var(--primary)' }}
+              >
+                Custom Colors
+              </h3>
+              <p className="text-sm"
+              style={{ color: 'var(--text-secondary)' }}
+              >
+                Implemented with your specified color scheme and smooth transitions
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="rounded-xl shadow-sm border p-8"
+        style={{
+          backgroundColor: 'var(--bg-primary)',
+          borderColor: 'var(--border-light)',
+          boxShadow: 'var(--shadow-sm)'
+        }}
+        >
+          <h3 className="text-2xl font-semibold mb-6"
+          style={{ color: 'var(--text-primary)' }}
+          >
+            Your Custom Color Palette
+          </h3>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            <div className="text-center">
+              <div className="w-full h-20 rounded-xl mb-3 border"
+              style={{ 
+                backgroundColor: 'var(--background)',
+                borderColor: 'var(--border-medium)'
+              }}
+              ></div>
+              <p className="text-sm font-medium"
+              style={{ color: 'var(--text-primary)' }}
+              >
+                Background
+              </p>
+              <p className="text-xs"
+              style={{ color: 'var(--text-tertiary)' }}
+              >
+                #ffffff
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-full h-20 rounded-xl mb-3"
+              style={{ backgroundColor: 'var(--foreground)' }}
+              ></div>
+              <p className="text-sm font-medium"
+              style={{ color: 'var(--text-primary)' }}
+              >
+                Foreground
+              </p>
+              <p className="text-xs"
+              style={{ color: 'var(--text-tertiary)' }}
+              >
+                #000000
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-full h-20 rounded-xl mb-3"
+              style={{ backgroundColor: 'var(--text)' }}
+              ></div>
+              <p className="text-sm font-medium"
+              style={{ color: 'var(--text-primary)' }}
+              >
+                Text
+              </p>
+              <p className="text-xs"
+              style={{ color: 'var(--text-tertiary)' }}
+              >
+                #020522
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-full h-20 rounded-xl mb-3"
+              style={{ backgroundColor: 'var(--primary)' }}
+              ></div>
+              <p className="text-sm font-medium"
+              style={{ color: 'var(--text-primary)' }}
+              >
+                Primary
+              </p>
+              <p className="text-xs"
+              style={{ color: 'var(--text-tertiary)' }}
+              >
+                #000d3a
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-full h-20 rounded-xl mb-3"
+              style={{ backgroundColor: 'var(--secondary)' }}
+              ></div>
+              <p className="text-sm font-medium"
+              style={{ color: 'var(--text-primary)' }}
+              >
+                Secondary
+              </p>
+              <p className="text-xs"
+              style={{ color: 'var(--text-tertiary)' }}
+              >
+                #ffd800
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-full h-20 rounded-xl mb-3"
+              style={{ backgroundColor: 'var(--accent)' }}
+              ></div>
+              <p className="text-sm font-medium"
+              style={{ color: 'var(--text-primary)' }}
+              >
+                Accent
+              </p>
+              <p className="text-xs"
+              style={{ color: 'var(--text-tertiary)' }}
+              >
+                #576cab
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl shadow-sm border p-8"
+        style={{
+          backgroundColor: 'var(--bg-primary)',
+          borderColor: 'var(--border-light)',
+          boxShadow: 'var(--shadow-sm)'
+        }}
+        >
+          <h3 className="text-2xl font-semibold mb-6"
+          style={{ color: 'var(--text-primary)' }}
+          >
             Design Specifications
           </h3>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div>
-              <h4 className="font-medium text-gray-900 mb-3">Breakpoints</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li><code className="bg-gray-100 px-2 py-1 rounded">Mobile:</code> ≤768px</li>
-                <li><code className="bg-gray-100 px-2 py-1 rounded">Tablet:</code> 769px - 1024px</li>
-                <li><code className="bg-gray-100 px-2 py-1 rounded">Desktop:</code> ≥1025px</li>
+              <h4 className="font-semibold mb-4"
+              style={{ color: 'var(--primary)' }}
+              >
+                Responsive Breakpoints
+              </h4>
+              <ul className="space-y-3 text-sm">
+                <li className="flex justify-between">
+                  <code className="px-3 py-1 rounded-lg"
+                  style={{ 
+                    backgroundColor: 'var(--bg-tertiary)',
+                    color: 'var(--text-primary)'
+                  }}
+                  >
+                    Mobile:
+                  </code>
+                  <span style={{ color: 'var(--text-secondary)' }}>≤768px</span>
+                </li>
+                <li className="flex justify-between">
+                  <code className="px-3 py-1 rounded-lg"
+                  style={{ 
+                    backgroundColor: 'var(--bg-tertiary)',
+                    color: 'var(--text-primary)'
+                  }}
+                  >
+                    Tablet:
+                  </code>
+                  <span style={{ color: 'var(--text-secondary)' }}>769px - 1024px</span>
+                </li>
+                <li className="flex justify-between">
+                  <code className="px-3 py-1 rounded-lg"
+                  style={{ 
+                    backgroundColor: 'var(--bg-tertiary)',
+                    color: 'var(--text-primary)'
+                  }}
+                  >
+                    Desktop:
+                  </code>
+                  <span style={{ color: 'var(--text-secondary)' }}>≥1025px</span>
+                </li>
               </ul>
             </div>
             
             <div>
-              <h4 className="font-medium text-gray-900 mb-3">Sidebar Dimensions</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li><code className="bg-gray-100 px-2 py-1 rounded">Expanded:</code> 280px</li>
-                <li><code className="bg-gray-100 px-2 py-1 rounded">Collapsed:</code> 64px</li>
-                <li><code className="bg-gray-100 px-2 py-1 rounded">Mobile:</code> 320px (85% max-width)</li>
+              <h4 className="font-semibold mb-4"
+              style={{ color: 'var(--primary)' }}
+              >
+                Sidebar Dimensions
+              </h4>
+              <ul className="space-y-3 text-sm">
+                <li className="flex justify-between">
+                  <code className="px-3 py-1 rounded-lg"
+                  style={{ 
+                    backgroundColor: 'var(--bg-tertiary)',
+                    color: 'var(--text-primary)'
+                  }}
+                  >
+                    Expanded:
+                  </code>
+                  <span style={{ color: 'var(--text-secondary)' }}>280px</span>
+                </li>
+                <li className="flex justify-between">
+                  <code className="px-3 py-1 rounded-lg"
+                  style={{ 
+                    backgroundColor: 'var(--bg-tertiary)',
+                    color: 'var(--text-primary)'
+                  }}
+                  >
+                    Collapsed:
+                  </code>
+                  <span style={{ color: 'var(--text-secondary)' }}>64px</span>
+                </li>
+                <li className="flex justify-between">
+                  <code className="px-3 py-1 rounded-lg"
+                  style={{ 
+                    backgroundColor: 'var(--bg-tertiary)',
+                    color: 'var(--text-primary)'
+                  }}
+                  >
+                    Mobile:
+                  </code>
+                  <span style={{ color: 'var(--text-secondary)' }}>320px (85% max)</span>
+                </li>
               </ul>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Color Palette (WCAG AA Compliant)
+        <div className="rounded-xl shadow-sm border p-8"
+        style={{
+          backgroundColor: 'var(--bg-primary)',
+          borderColor: 'var(--border-light)',
+          boxShadow: 'var(--shadow-sm)'
+        }}
+        >
+          <h3 className="text-2xl font-semibold mb-6"
+          style={{ color: 'var(--text-primary)' }}
+          >
+            Accessibility Features
           </h3>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <div className="text-center">
-              <div className="w-full h-16 bg-blue-600 rounded-lg mb-2"></div>
-              <p className="text-xs font-medium text-gray-900">Primary</p>
-              <p className="text-xs text-gray-500">#2563eb</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h4 className="font-semibold"
+              style={{ color: 'var(--primary)' }}
+              >
+                WCAG 2.1 AA Compliance
+              </h4>
+              <ul className="space-y-2 text-sm"
+              style={{ color: 'var(--text-secondary)' }}
+              >
+                <li>• Minimum 4.5:1 contrast ratio</li>
+                <li>• Focus indicators on all interactive elements</li>
+                <li>• Screen reader compatible</li>
+                <li>• Keyboard navigation support</li>
+              </ul>
             </div>
             
-            <div className="text-center">
-              <div className="w-full h-16 bg-gray-600 rounded-lg mb-2"></div>
-              <p className="text-xs font-medium text-gray-900">Secondary</p>
-              <p className="text-xs text-gray-500">#4b5563</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-full h-16 bg-green-600 rounded-lg mb-2"></div>
-              <p className="text-xs font-medium text-gray-900">Accent</p>
-              <p className="text-xs text-gray-500">#059669</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-full h-16 bg-white border border-gray-300 rounded-lg mb-2"></div>
-              <p className="text-xs font-medium text-gray-900">Background</p>
-              <p className="text-xs text-gray-500">#ffffff</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-full h-16 bg-gray-900 rounded-lg mb-2"></div>
-              <p className="text-xs font-medium text-gray-900">Text Primary</p>
-              <p className="text-xs text-gray-500">#0f172a</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-full h-16 bg-gray-600 rounded-lg mb-2"></div>
-              <p className="text-xs font-medium text-gray-900">Text Secondary</p>
-              <p className="text-xs text-gray-500">#334155</p>
+            <div className="space-y-4">
+              <h4 className="font-semibold"
+              style={{ color: 'var(--primary)' }}
+              >
+                Responsive Features
+              </h4>
+              <ul className="space-y-2 text-sm"
+              style={{ color: 'var(--text-secondary)' }}
+              >
+                <li>• Touch-friendly mobile interface</li>
+                <li>• Smooth transitions and animations</li>
+                <li>• Reduced motion support</li>
+                <li>• Cross-browser compatibility</li>
+              </ul>
             </div>
           </div>
         </div>
