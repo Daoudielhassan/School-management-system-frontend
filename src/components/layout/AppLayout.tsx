@@ -14,6 +14,13 @@ import {
   FileText,
   Bell,
   User,
+  GraduationCap,
+  Clock,
+  Building,
+  ClipboardList,
+  AlertTriangle,
+  PieChart,
+  Briefcase,
 } from 'lucide-react';
 
 interface AppLayoutProps {
@@ -39,7 +46,7 @@ const getNavigationItems = (role: string = 'student') => {
       {
         id: 'schedule',
         label: 'Schedule',
-        href: '/student/schedule',
+        href: '/student/Schedule',
         icon: Calendar,
       },
       {
@@ -53,6 +60,12 @@ const getNavigationItems = (role: string = 'student') => {
         label: 'Grades',
         href: '/student/grades',
         icon: BarChart3,
+      },
+      {
+        id: 'absence',
+        label: 'Absences',
+        href: '/student/absence',
+        icon: Clock,
       },
       {
         id: 'messages',
@@ -85,7 +98,7 @@ const getNavigationItems = (role: string = 'student') => {
         id: 'attendance',
         label: 'Attendance',
         href: '/professor/absences',
-        icon: Calendar,
+        icon: Clock,
       },
       {
         id: 'grades',
@@ -104,6 +117,12 @@ const getNavigationItems = (role: string = 'student') => {
         id: 'opportunities',
         label: 'Opportunities',
         href: '/professor/opportunities',
+        icon: Briefcase,
+      },
+      {
+        id: 'documents',
+        label: 'Documents',
+        href: '/professor/documents',
         icon: FileText,
       },
     ],
@@ -118,7 +137,7 @@ const getNavigationItems = (role: string = 'student') => {
         id: 'students',
         label: 'Students',
         href: '/admin/students',
-        icon: Users,
+        icon: GraduationCap,
       },
       {
         id: 'classes',
@@ -130,7 +149,7 @@ const getNavigationItems = (role: string = 'student') => {
         id: 'departments',
         label: 'Departments',
         href: '/admin/departments',
-        icon: FileText,
+        icon: Building,
       },
       {
         id: 'sessions',
@@ -142,7 +161,7 @@ const getNavigationItems = (role: string = 'student') => {
         id: 'attendance',
         label: 'Attendance',
         href: '/admin/attendance',
-        icon: BarChart3,
+        icon: ClipboardList,
       },
       {
         id: 'grades',
@@ -154,7 +173,7 @@ const getNavigationItems = (role: string = 'student') => {
         id: 'discipline',
         label: 'Discipline',
         href: '/admin/discipline',
-        icon: FileText,
+        icon: AlertTriangle,
       },
       {
         id: 'messages',
@@ -167,7 +186,7 @@ const getNavigationItems = (role: string = 'student') => {
         id: 'reports',
         label: 'Reports',
         href: '/admin/reports',
-        icon: FileText,
+        icon: PieChart,
       },
     ],
     manager: [
@@ -218,7 +237,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   const navigationItems = getNavigationItems(userRole);
 
   return (
-    <div className={cn("min-h-screen bg-gray-50 flex", className)}>
+    <div className={cn("min-h-screen flex", className)} style={{ backgroundColor: 'var(--bg-secondary)' }}>
       {/* Sidebar */}
       <Sidebar
         items={navigationItems}
@@ -227,25 +246,57 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       />
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="flex-1 flex flex-col min-w-0" id="main-content">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <header className="border-b px-6 py-4 flex items-center justify-between"
+        style={{
+          backgroundColor: 'var(--bg-primary)',
+          borderColor: 'var(--border-light)',
+          boxShadow: 'var(--shadow-sm)'
+        }}
+        >
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold text-gray-900 capitalize">
+            <h1 className="text-2xl font-bold capitalize"
+            style={{ color: 'var(--text-primary)' }}
+            >
               {userRole} Portal
             </h1>
+            <div className="px-3 py-1 rounded-full text-sm font-medium"
+            style={{
+              backgroundColor: 'var(--secondary)',
+              color: 'var(--text-primary)'
+            }}
+            >
+              AIAC Intranet
+            </div>
           </div>
           
           <div className="flex items-center gap-4">
             {/* Notifications */}
-            <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 relative focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <Bell className="w-5 h-5 text-gray-600" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+            <button className="p-3 rounded-xl transition-all duration-200 relative focus:outline-none focus:ring-2"
+            style={{
+              backgroundColor: 'transparent',
+              color: 'var(--accent)',
+              '--tw-ring-color': 'var(--focus-ring)'
+            } as React.CSSProperties}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--hover-bg)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+            >
+              <Bell className="w-6 h-6" />
+              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
+              style={{ backgroundColor: 'var(--secondary)' }}
+              ></span>
             </button>
             
             {/* User Avatar */}
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center">
-              <span className="text-white font-medium text-sm">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: 'var(--primary)' }}
+            >
+              <span className="text-white font-bold text-lg">
                 {userRole.charAt(0).toUpperCase()}
               </span>
             </div>
@@ -253,7 +304,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 p-6 overflow-auto">
+        <div className="flex-1 p-6 overflow-auto"
+        style={{ backgroundColor: 'var(--bg-secondary)' }}
+        >
           <div className="max-w-7xl mx-auto">
             {children}
           </div>
