@@ -127,16 +127,6 @@ body {
   transition: background-color 0.2s ease;
 }
 
-<<<<<<< HEAD
-.admin-theme {
-  --background: #ffffff;
-  --foreground: #000000;
-  --text: #020522;
-  --primary: #000d3a;
-  --secondary: #ffd800;
-  --accent: #576cab;
-} 
-=======
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-dark);
 }
@@ -199,9 +189,6 @@ body {
     width: 100% !important;
   }
 }
-<<<<<<< HEAD
->>>>>>> 78a9cdbd23c4c1c921e998f54a322f5478db7a51
-=======
 
 /* Custom Button Styles */
 .btn-primary {
@@ -440,4 +427,3 @@ body {
 .skip-link:focus {
   top: 6px;
 }
->>>>>>> e1525640aa8abf9f694674077cc7930d806b3fdf
