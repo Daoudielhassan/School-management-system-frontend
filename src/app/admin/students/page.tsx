@@ -87,7 +87,7 @@ const AddStudent = () => {
       if (!token) return;
       setLoading(true);
       try {
-        const data = await apiGet(API_ENDPOINTS.CLASSES, token);
+        const data = await apiGet(API_ENDPOINTS.CLASSES.BASE, token);
         setClasses(data);
       } catch (error: any) {
         toast.error("Failed to load class data");
@@ -130,7 +130,7 @@ const AddStudent = () => {
     }
     setLoading(true);
     try {
-      const response = await apiPost(API_ENDPOINTS.STUDENTS, {
+      const response = await apiPost(API_ENDPOINTS.STUDENTS.BASE, {
         ...manualStudent,
         departmentId: classes.find((c) => c.id === manualStudent.classeId)?.departmentId,
       }, token);
@@ -191,7 +191,7 @@ const AddStudent = () => {
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
-      const res = await fetch(`${API_ENDPOINTS.STUDENTS}/bulk-upload`, {
+      const res = await fetch(API_ENDPOINTS.STUDENTS.BULK_UPLOAD, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -462,7 +462,7 @@ const StudentManagement = () => {
     setLoading(true);
     setError(null);
     try {
-      let url = `${API_ENDPOINTS.STUDENTS}?page=${page}&size=10`;
+      let url = `${API_ENDPOINTS.STUDENTS.BASE}?page=${page}&size=10`;
       if (searchTerm) url += `&searchTerm=${encodeURIComponent(searchTerm)}`;
       if (filter && filter !== "all") url += `&status=${encodeURIComponent(filter)}`;
       else url += `&status=all`;
@@ -496,7 +496,7 @@ const StudentManagement = () => {
     if (studentToDeleteId === null || !token) return;
     setLoading(true);
     try {
-      await apiDelete(`${API_ENDPOINTS.STUDENTS}/${studentToDeleteId}`, token);
+      await apiDelete(API_ENDPOINTS.STUDENTS.BY_ID(studentToDeleteId), token);
       toast.success("Student deleted successfully!");
       fetchStudents();
     } catch (error: any) {
@@ -527,7 +527,7 @@ const StudentManagement = () => {
     if (!token) return;
     setLoading(true);
     try {
-      await apiPut(`${API_ENDPOINTS.STUDENTS}/${updatedStudent.id}`, updatedStudent, token);
+      await apiPut(API_ENDPOINTS.STUDENTS.BY_ID(updatedStudent.id), updatedStudent, token);
       fetchStudents();
     } catch (error: any) {
       setError(error.message || "Failed to update student");

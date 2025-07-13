@@ -156,9 +156,9 @@ const DashboardStats = () => {
           messageStats
         ] = await Promise.all([
           apiGet(API_ENDPOINTS.USERS + "/admin/stats", token),
-          apiGet(API_ENDPOINTS.STUDENTS, token),
+          apiGet(API_ENDPOINTS.STUDENTS.BASE, token),
           apiGet(API_ENDPOINTS.DEPARTMENTS, token),
-          apiGet(API_ENDPOINTS.CLASSES, token),
+          apiGet(API_ENDPOINTS.CLASSES.BASE, token),
           apiGet(API_ENDPOINTS.SESSIONS.BASE, token),
           apiGet(API_ENDPOINTS.MESSAGES.STATS + "/" + userId, token) // Using admin user ID 1 for stats
         ]);
