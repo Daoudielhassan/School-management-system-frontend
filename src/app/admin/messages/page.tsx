@@ -112,7 +112,7 @@ export default function MessagesPage() {
   const { token, userId } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<User[]>([]); // Initialize as empty array
   const [classes, setClasses] = useState<Class[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -175,8 +175,8 @@ export default function MessagesPage() {
         }));
         
         setMessages(transformedMessages);
-        setNotifications(notificationsRes || []);
-        setUsers(usersRes || []);
+          setNotifications(notificationsRes || []);
+        setUsers(Array.isArray(usersRes) ? usersRes : []);
         setClasses(classesRes || []);
         setDepartments(departmentsRes || []);
 
@@ -199,13 +199,13 @@ export default function MessagesPage() {
     return () => clearInterval(interval);
   }, [token, userId]);
 
-  const handleSendMessage = async () => {
+    const handleSendMessage = async () => {
     if (!token || !userId) return;
     
     try {
       const messageData: MessageDTO = {
         senderId: userId,
-        receiverId: newMessage.receiverId ? parseInt(newMessage.receiverId) : undefined,
+        receiverId: newMessage.scope === 'PRIVATE' ? parseInt(newMessage.receiverId) : undefined,
         messageText: newMessage.messageText,
         scope: newMessage.scope,
         subject: newMessage.subject,
@@ -214,7 +214,10 @@ export default function MessagesPage() {
         departmentId: newMessage.departmentId ? parseInt(newMessage.departmentId) : undefined
       };
 
-      await apiPost(API_ENDPOINTS.MESSAGES.BASE, messageData, token);
+      console.log('Sending message data:', messageData);
+
+      const response = await apiPost(API_ENDPOINTS.MESSAGES.BASE, messageData, token);
+      console.log('Message sent successfully:', response);
       
       // Reset form
       setNewMessage({
@@ -244,9 +247,10 @@ export default function MessagesPage() {
         category: 'general'
       }));
       setMessages(transformedMessages);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending message:", error);
-      setError("Failed to send message. Please try again.");
+      console.error("Error details:", error.message);
+      setError(`Failed to send message: ${error.message}`);
     }
   };
 
@@ -318,7 +322,7 @@ export default function MessagesPage() {
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
-  const filteredUsers = users.filter(user => 
+  const filteredUsers = (users || []).filter(user => 
     user.firstname.toLowerCase().includes(userSearchValue.toLowerCase()) ||
     user.lastname.toLowerCase().includes(userSearchValue.toLowerCase()) ||
     user.email.toLowerCase().includes(userSearchValue.toLowerCase())

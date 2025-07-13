@@ -21,7 +21,7 @@ export const API_ENDPOINTS = {
     BULK_UPDATE: `${API_URL}/api/attendance/bulk-update`,
     INITIALIZE: `${API_URL}/api/attendance/initialize`,
   },
-  DISCIPLINE: `${API_URL}/api/discipline`,
+  DISCIPLINE: `${API_URL}/api/admin/discipline`,
   REPORTS: `${API_URL}/api/admin/reports`,
   MESSAGES: {
     BASE: `${API_URL}/api/messages`,
@@ -64,13 +64,40 @@ export const API_ENDPOINTS = {
 
 async function handleResponse(response: Response) {
   const contentType = response.headers.get('content-type');
-  const data = contentType?.includes('application/json')
-    ? await response.json()
-    : await response.text();
+  let data;
+  
+  try {
+    if (response.status === 204) {
+      data = null;
+    } else if (contentType?.includes('application/json')) {
+      data = await response.json();
+    } else {
+      data = await response.text();
+    }
+  } catch (parseError) {
+    console.error('Error parsing response:', parseError);
+    data = await response.text();
+  }
 
   if (!response.ok) {
-    const error = (data && data.message) || response.statusText || 'API Error';
-    throw new Error(error);
+    console.error('API Error Response:', {
+      status: response.status,
+      statusText: response.statusText,
+      data: data
+    });
+    
+    let errorMessage = 'API Error';
+    if (data) {
+      if (typeof data === 'string') {
+        errorMessage = data;
+      } else if (data.message) {
+        errorMessage = data.message;
+      } else if (data.error) {
+        errorMessage = data.error;
+      }
+    }
+    
+    throw new Error(`${response.status}: ${errorMessage}`);
   }
   return data;
 }

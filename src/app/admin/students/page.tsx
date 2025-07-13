@@ -14,7 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
-import { toast, ToastContainer } from "react-toastify"
+import { toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Upload, UserPlus, FileSpreadsheet, AlertCircle } from "lucide-react"
@@ -438,7 +438,6 @@ const AddStudent = () => {
           </a>
         </p>
       </CardFooter>
-      <ToastContainer position="top-right" autoClose={5000} />
     </Card>
   )
 }
@@ -498,9 +497,25 @@ const StudentManagement = () => {
     setLoading(true);
     try {
       await apiDelete(`${API_ENDPOINTS.STUDENTS}/${studentToDeleteId}`, token);
+      toast.success("Student deleted successfully!");
       fetchStudents();
     } catch (error: any) {
-      setError(error.message || "Failed to delete student");
+      console.error("Delete error:", error);
+      let errorMessage = "Failed to delete student";
+      
+      if (error.message) {
+        if (error.message.includes("404")) {
+          errorMessage = "Student not found";
+        } else if (error.message.includes("403")) {
+          errorMessage = "You don't have permission to delete this student";
+        } else if (error.message.includes("500")) {
+          errorMessage = "Server error occurred while deleting student";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsDeleteModalOpen(false);
       setStudentToDeleteId(null);
@@ -656,7 +671,7 @@ const StudentManagement = () => {
         </Dialog>
       )}
 
-  {/* Delete Modal */}
+        {/* Delete Modal */}
   {isDeleteModalOpen && (
         <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
           <DialogContent>
@@ -671,8 +686,6 @@ const StudentManagement = () => {
           </DialogContent>
         </Dialog>
       )}
-
-      <ToastContainer position="top-right" autoClose={4000} />
     </Card>
   );
 };

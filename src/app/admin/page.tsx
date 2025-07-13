@@ -135,7 +135,7 @@ const DashboardStats = () => {
   const [stats, setStats] = useState<ExtendedStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { token } = useAuth();
+  const { token, userId } = useAuth();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -160,7 +160,7 @@ const DashboardStats = () => {
           apiGet(API_ENDPOINTS.DEPARTMENTS, token),
           apiGet(API_ENDPOINTS.CLASSES, token),
           apiGet(API_ENDPOINTS.SESSIONS.BASE, token),
-          apiGet(API_ENDPOINTS.MESSAGES.STATS + "/1", token) // Using admin user ID 1 for stats
+          apiGet(API_ENDPOINTS.MESSAGES.STATS + "/" + userId, token) // Using admin user ID 1 for stats
         ]);
 
         const extendedStats: ExtendedStats = {
@@ -449,8 +449,8 @@ const BroadcastForm = ({ onClose }: { onClose: () => void }) => {
     setLoading(true);
     try {
       const messageData = {
-        senderId: userId, // Admin user ID
-        receiverId: null, // null for broadcast
+        senderId: userId, // Use actual logged-in user ID
+        receiverId: undefined, // undefined for broadcast
         messageText: formData.messageText,
         scope: formData.scope,
         subject: formData.subject,

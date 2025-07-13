@@ -36,7 +36,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/AuthContext";
 import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from "@/config/api";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 interface Department {
@@ -610,8 +610,6 @@ export default function AdminClassesPage() {
           )}
         </DialogContent>
       </Dialog>
-
-      <ToastContainer position="top-right" autoClose={5000} />
     </div>
   );
 } 
