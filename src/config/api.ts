@@ -21,7 +21,7 @@ export const API_ENDPOINTS = {
     BULK_UPDATE: `${API_URL}/api/attendance/bulk-update`,
     INITIALIZE: `${API_URL}/api/attendance/initialize`,
   },
-  DISCIPLINE: `${API_URL}/api/admin/discipline`,
+  DISCIPLINE: `${API_URL}/api/discipline`,
   REPORTS: `${API_URL}/api/admin/reports`,
   MESSAGES: {
     BASE: `${API_URL}/api/messages`,

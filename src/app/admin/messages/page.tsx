@@ -18,7 +18,9 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  Zap
+  Zap,
+  Building,
+  GraduationCap
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,11 +32,25 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AuthContext";
 import { apiGet, apiPost, apiPut, API_ENDPOINTS } from "@/config/api";
+import { cn } from "@/lib/utils";
 
 // Backend DTO interface
 interface MessageDTO {
@@ -44,6 +60,8 @@ interface MessageDTO {
   scope: string;
   subject: string;
   priority: string;
+  classId?: number;
+  departmentId?: number;
 }
 
 // Frontend interface for display
@@ -69,10 +87,34 @@ interface Notification {
   isRead: boolean;
 }
 
+interface User {
+  id: number;
+  firstname: string;
+  lastname: string;
+  email: string;
+  identity: string;
+}
+
+interface Class {
+  id: number;
+  name: string;
+  level: number;
+  departmentId: number;
+}
+
+interface Department {
+  id: number;
+  name: string;
+  description: string;
+}
+
 export default function MessagesPage() {
   const { token, userId } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [classes, setClasses] = useState<Class[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -80,6 +122,8 @@ export default function MessagesPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [isNewMessageOpen, setIsNewMessageOpen] = useState(false);
+  const [userSearchOpen, setUserSearchOpen] = useState(false);
+  const [userSearchValue, setUserSearchValue] = useState("");
   
   // Form state for new message
   const [newMessage, setNewMessage] = useState({
@@ -87,10 +131,12 @@ export default function MessagesPage() {
     scope: 'PRIVATE',
     subject: '',
     messageText: '',
-    priority: 'normal'
+    priority: 'normal',
+    classId: '',
+    departmentId: ''
   });
 
-  // Fetch messages and notifications on mount
+  // Fetch messages, notifications, users, classes, and departments on mount
   useEffect(() => {
     const fetchData = async () => {
       if (!token || !userId) {
@@ -102,8 +148,14 @@ export default function MessagesPage() {
         setLoading(true);
         setError(null);
         
-        // Fetch received messages for the current user
-        const messagesRes = await apiGet(`${API_ENDPOINTS.MESSAGES.RECEIVED}/${userId}`, token);
+        // Fetch all data in parallel
+        const [messagesRes, notificationsRes, usersRes, classesRes, departmentsRes] = await Promise.all([
+          apiGet(`${API_ENDPOINTS.MESSAGES.RECEIVED}/${userId}`, token),
+          apiGet(API_ENDPOINTS.NOTIFICATIONS, token).catch(() => []),
+          apiGet(API_ENDPOINTS.USERS, token),
+          apiGet(API_ENDPOINTS.CLASSES, token),
+          apiGet(API_ENDPOINTS.DEPARTMENTS, token)
+        ]);
         
         // Ensure messagesRes is an array
         const messagesArray = Array.isArray(messagesRes) ? messagesRes : [];
@@ -123,15 +175,11 @@ export default function MessagesPage() {
         }));
         
         setMessages(transformedMessages);
+        setNotifications(notificationsRes || []);
+        setUsers(usersRes || []);
+        setClasses(classesRes || []);
+        setDepartments(departmentsRes || []);
 
-        // Fetch notifications
-        try {
-          const notificationsRes = await apiGet(API_ENDPOINTS.NOTIFICATIONS, token);
-          setNotifications(notificationsRes || []);
-        } catch (notifError) {
-          console.warn("Could not fetch notifications:", notifError);
-          setNotifications([]);
-        }
       } catch (error: any) {
         console.error("Error fetching data:", error);
         if (error.message.includes('403') || error.message.includes('401')) {
@@ -151,7 +199,7 @@ export default function MessagesPage() {
     return () => clearInterval(interval);
   }, [token, userId]);
 
-    const handleSendMessage = async () => {
+  const handleSendMessage = async () => {
     if (!token || !userId) return;
     
     try {
@@ -161,7 +209,9 @@ export default function MessagesPage() {
         messageText: newMessage.messageText,
         scope: newMessage.scope,
         subject: newMessage.subject,
-        priority: newMessage.priority
+        priority: newMessage.priority,
+        classId: newMessage.classId ? parseInt(newMessage.classId) : undefined,
+        departmentId: newMessage.departmentId ? parseInt(newMessage.departmentId) : undefined
       };
 
       await apiPost(API_ENDPOINTS.MESSAGES.BASE, messageData, token);
@@ -172,7 +222,9 @@ export default function MessagesPage() {
         scope: 'PRIVATE',
         subject: '',
         messageText: '',
-        priority: 'normal'
+        priority: 'normal',
+        classId: '',
+        departmentId: ''
       });
       setIsNewMessageOpen(false);
       
@@ -265,6 +317,18 @@ export default function MessagesPage() {
     const matchesPriority = priorityFilter === "all" || message.priority === priorityFilter;
     return matchesSearch && matchesStatus && matchesPriority;
   });
+
+  const filteredUsers = users.filter(user => 
+    user.firstname.toLowerCase().includes(userSearchValue.toLowerCase()) ||
+    user.lastname.toLowerCase().includes(userSearchValue.toLowerCase()) ||
+    user.email.toLowerCase().includes(userSearchValue.toLowerCase())
+  );
+
+  const getSelectedUserName = () => {
+    if (!newMessage.receiverId) return "Select user...";
+    const user = users.find(u => u.id.toString() === newMessage.receiverId);
+    return user ? `${user.firstname} ${user.lastname} (${user.email})` : "Select user...";
+  };
 
   const MessageCard = ({ message }: { message: Message }) => (
     <Card className="bg-purple-900/20 backdrop-blur-md border-purple-500/30 hover:border-cyan-400/50 transition-all duration-300 group hover:shadow-lg hover:shadow-cyan-500/20">
@@ -391,26 +455,31 @@ export default function MessagesPage() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="scope" className="text-gray-300">Scope</Label>
-                      <Select value={newMessage.scope} onValueChange={(value) => setNewMessage({...newMessage, scope: value})}>
-                        <SelectTrigger className="bg-purple-900/20 border-purple-400/30 text-white">
+                      <Label htmlFor="scope" className="text-gray-700">Scope</Label>
+                      <Select value={newMessage.scope} onValueChange={(value) => {
+                        setNewMessage({...newMessage, scope: value, receiverId: '', classId: '', departmentId: ''});
+                      }}>
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-900">
                           <SelectValue placeholder="Select scope" />
                         </SelectTrigger>
-                        <SelectContent className="bg-gray-800/95 border-purple-500/30">
+                        <SelectContent className="bg-white border-gray-300">
                           <SelectItem value="PRIVATE">Private</SelectItem>
                           <SelectItem value="STUDENTS">All Students</SelectItem>
                           <SelectItem value="PROFESSORS">All Professors</SelectItem>
+                          <SelectItem value="MANAGERS">All Managers</SelectItem>
                           <SelectItem value="ALL">All Users</SelectItem>
+                          <SelectItem value="CLASS">Specific Class</SelectItem>
+                          <SelectItem value="DEPARTMENT">Specific Department</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
-                      <Label htmlFor="priority" className="text-gray-300">Priority</Label>
+                      <Label htmlFor="priority" className="text-gray-700">Priority</Label>
                       <Select value={newMessage.priority} onValueChange={(value) => setNewMessage({...newMessage, priority: value})}>
-                        <SelectTrigger className="bg-purple-900/20 border-purple-400/30 text-white">
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-900">
                           <SelectValue placeholder="Select priority" />
                         </SelectTrigger>
-                        <SelectContent className="bg-gray-800/95 border-purple-500/30">
+                        <SelectContent className="bg-white border-gray-300">
                           <SelectItem value="low">Low</SelectItem>
                           <SelectItem value="normal">Normal</SelectItem>
                           <SelectItem value="high">High</SelectItem>
@@ -419,30 +488,134 @@ export default function MessagesPage() {
                       </Select>
                     </div>
                   </div>
+
+                  {/* User Selection for Private Messages */}
+                  {newMessage.scope === 'PRIVATE' && (
+                    <div>
+                      <Label htmlFor="receiver" className="text-gray-700">Select User</Label>
+                      <Popover open={userSearchOpen} onOpenChange={setUserSearchOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={userSearchOpen}
+                            className="w-full justify-between bg-white border-gray-300 text-gray-900"
+                          >
+                            {getSelectedUserName()}
+                            <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0" align="start">
+                          <Command>
+                            <CommandInput 
+                              placeholder="Search users..." 
+                              value={userSearchValue}
+                              onValueChange={setUserSearchValue}
+                            />
+                            <CommandList>
+                              <CommandEmpty>No user found.</CommandEmpty>
+                              <CommandGroup>
+                                {filteredUsers.map((user) => (
+                                  <CommandItem
+                                    key={user.id}
+                                    value={user.id.toString()}
+                                    onSelect={(value) => {
+                                      setNewMessage({...newMessage, receiverId: value});
+                                      setUserSearchOpen(false);
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <Avatar className="h-6 w-6">
+                                        <AvatarFallback className="text-xs">
+                                          {user.firstname.charAt(0)}{user.lastname.charAt(0)}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div>
+                                        <div className="font-medium">{user.firstname} {user.lastname}</div>
+                                        <div className="text-xs text-gray-500">{user.email}</div>
+                                      </div>
+                                    </div>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  )}
+
+                  {/* Class Selection for CLASS scope */}
+                  {newMessage.scope === 'CLASS' && (
+                    <div>
+                      <Label htmlFor="class" className="text-gray-700">Select Class</Label>
+                      <Select value={newMessage.classId} onValueChange={(value) => setNewMessage({...newMessage, classId: value})}>
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                          <SelectValue placeholder="Select class" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-gray-300">
+                          {classes.map((classe) => (
+                            <SelectItem key={classe.id} value={classe.id.toString()}>
+                              <div className="flex items-center gap-2">
+                                <GraduationCap className="h-4 w-4" />
+                                {classe.name} (Level {classe.level})
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {/* Department Selection for DEPARTMENT scope */}
+                  {newMessage.scope === 'DEPARTMENT' && (
+                    <div>
+                      <Label htmlFor="department" className="text-gray-700">Select Department</Label>
+                      <Select value={newMessage.departmentId} onValueChange={(value) => setNewMessage({...newMessage, departmentId: value})}>
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                          <SelectValue placeholder="Select department" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-gray-300">
+                          {departments.map((dept) => (
+                            <SelectItem key={dept.id} value={dept.id.toString()}>
+                              <div className="flex items-center gap-2">
+                                <Building className="h-4 w-4" />
+                                {dept.name}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
                   <div>
-                    <Label htmlFor="subject" className="text-gray-300">Subject</Label>
+                    <Label htmlFor="subject" className="text-gray-700">Subject</Label>
                     <Input 
                       id="subject" 
                       placeholder="Message subject" 
                       value={newMessage.subject}
                       onChange={(e) => setNewMessage({...newMessage, subject: e.target.value})}
-                      className="bg-purple-900/20 border-purple-400/30 text-white placeholder-gray-400"
+                      className="bg-white border-gray-300 text-gray-900 placeholder-gray-500"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="message" className="text-gray-300">Message</Label>
+                    <Label htmlFor="message" className="text-gray-700">Message</Label>
                     <Textarea 
                       id="message" 
                       placeholder="Type your message here..." 
                       value={newMessage.messageText}
                       onChange={(e) => setNewMessage({...newMessage, messageText: e.target.value})}
-                      className="bg-purple-900/20 border-purple-400/30 text-white placeholder-gray-400 min-h-32"
+                      className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 min-h-32"
                     />
                   </div>
                   <Button 
                     onClick={handleSendMessage}
-                    disabled={!newMessage.subject || !newMessage.messageText}
-                    className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 disabled:opacity-50"
+                    disabled={!newMessage.subject || !newMessage.messageText || 
+                             (newMessage.scope === 'PRIVATE' && !newMessage.receiverId) ||
+                             (newMessage.scope === 'CLASS' && !newMessage.classId) ||
+                             (newMessage.scope === 'DEPARTMENT' && !newMessage.departmentId)}
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50"
                   >
                     <Send className="mr-2 h-4 w-4" />
                     Send Message

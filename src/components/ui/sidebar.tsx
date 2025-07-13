@@ -226,13 +226,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }}
               aria-current={isActive ? "page" : undefined}
             >
-              <Icon className={cn(
-                "w-5 h-5 transition-colors duration-200 flex-shrink-0",
-                isActive ? "sidebar-icon-active" : "sidebar-icon"
-              )} 
-              style={{
-                color: isActive ? 'var(--primary)' : 'var(--accent)'
-              }}
+              <Icon
+                className={cn(
+                  "w-5 h-5 transition-colors duration-200 flex-shrink-0",
+                  isActive ? "sidebar-icon-active text-[var(--primary)]" : "sidebar-icon text-[var(--accent)]"
+                )}
               />
               
               <span className={cn(
