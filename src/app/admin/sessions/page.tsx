@@ -56,7 +56,7 @@ const SessionManagement = () => {
             }
             setLoading(prev => ({ ...prev, classes: true }));
             try {
-                const data = await apiGet(`${API_ENDPOINTS.CLASSES}/department/${selectedDepartment}`, token);
+                const data = await apiGet(API_ENDPOINTS.CLASSES.BY_DEPARTMENT(selectedDepartment), token);
                 setClasses(data);
             } catch (err: any) {
                 setError(err.message);

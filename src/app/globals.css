@@ -75,3 +75,23 @@
   }
 }
 
+/* Skip link accessibility - hidden by default, visible on focus */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #000;
+  color: white;
+  padding: 8px 12px;
+  text-decoration: none;
+  z-index: 9999;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
