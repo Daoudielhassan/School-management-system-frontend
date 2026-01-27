@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { AuthContextType, AuthState, LoginCredentials, UserRole } from '@/types/auth';
-import { API_ENDPOINTS } from '@/config/api';
+import { IdentityServiceClient } from '@/lib/api-clients';
 import { setCookie, deleteCookie, getCookie } from 'cookies-next';
 import { isTokenExpired } from '@/lib/utils';
 import { toast } from 'react-toastify';
@@ -26,15 +26,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleTokenExpiration = () => {
     // Show notification to user
     toast.warning('Your session has expired. Please log in again.');
-    
+
     // Remove cookies
     deleteCookie('token');
     deleteCookie('role');
     deleteCookie('userId');
-    
+
     // Remove axios header
     delete axios.defaults.headers.common['Authorization'];
-    
+
     // Reset auth state
     setAuthState({
       token: null,
@@ -42,7 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       userId: null,
       isAuthenticated: false,
     });
-    
+
     // Redirect to login page
     router.push('/login');
   };
@@ -95,9 +95,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const token = getCookie('token');
     const role = getCookie('role') as UserRole | null;
     const userId = Number(getCookie('userId')) || null;
-    
+
     console.log("AuthContext: Cookies found - token:", token ? "present" : "missing", "role:", role, "userId:", userId);
-    
+
     if (token && role && userId) {
       // Check if token is expired before setting auth state
       if (typeof token === 'string' && isTokenExpired(token)) {
@@ -108,7 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteCookie('userId');
         return;
       }
-      
+
       console.log("AuthContext: Setting authenticated state");
       setAuthState({
         token: token.toString(),
@@ -124,68 +124,63 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (credentials: LoginCredentials) => {
     try {
-      const response = await axios.post(
-        API_ENDPOINTS.AUTH.LOGIN,
-        credentials,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-        }
-      );
-      
-      if (response.status === 200) {
-        const { token, role, id } = response.data;
-        
-        // Set cookies
-        setCookie('token', token);
-        setCookie('role', role);
-        setCookie('userId', id);
-        
-        // Set auth state
-        setAuthState({
-          token,
-          role,
-          userId: id,
-          isAuthenticated: true,
-        });
+      // Use IdentityServiceClient for microservices
+      const response = await IdentityServiceClient.login(credentials);
 
-        // Set axios default header
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        
-        // Redirect based on role
-        const rolePathMap: Record<UserRole, string> = {
-          [UserRole.ETUDIANT]: '/student',
-          [UserRole.PROFESSEUR]: '/professor',
-          [UserRole.MANAGER]: '/manager',
-          [UserRole.ADMINISTRATEUR]: '/admin'
-        };
-        router.push(`${rolePathMap[role as UserRole]}/`);
-      } else {
-        throw new Error(response.data.message || 'Login failed');
-      }
-    } catch (error) {
+      const { token, role, id } = response;
+
+      // Set cookies
+      setCookie('token', token);
+      setCookie('role', role);
+      setCookie('userId', id);
+
+      // Set auth state
+      setAuthState({
+        token,
+        role,
+        userId: id,
+        isAuthenticated: true,
+      });
+
+      // Set axios default header
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+      // Redirect based on role
+      const rolePathMap: Record<UserRole, string> = {
+        [UserRole.ETUDIANT]: '/student',
+        [UserRole.PROFESSEUR]: '/professor',
+        [UserRole.MANAGER]: '/manager',
+        [UserRole.ADMINISTRATEUR]: '/admin'
+      };
+      router.push(`${rolePathMap[role as UserRole]}/`);
+    } catch (error: any) {
       console.error('Login error:', error);
-      if (axios.isAxiosError(error)) {
-        if (error.response) {
-          switch (error.response.status) {
-            case 401:
-              throw new Error('Invalid email or password');
-            case 403:
-              throw new Error('Account is disabled');
-            case 404:
-              throw new Error('Login service not found');
-            case 500:
-              throw new Error('Server error. Please try again later.');
-            default:
-              throw new Error(error.response.data?.message || 'Login failed');
-          }
-        } else if (error.request) {
-          throw new Error('No response from server. Please try again later.');
+
+      // Enhanced error handling for microservices
+      if (error.status) {
+        switch (error.status) {
+          case 401:
+            throw new Error('Invalid email or password');
+          case 403:
+            throw new Error('Account is disabled');
+          case 404:
+            throw new Error('Login service not found');
+          case 500:
+          case 502:
+          case 503:
+          case 504:
+            throw new Error('Server error. Please try again later.');
+          default:
+            throw new Error(error.message || 'Login failed');
         }
       }
-      throw new Error('Network error. Please check your connection.');
+
+      // Handle network errors
+      if (error.message.includes('fetch')) {
+        throw new Error('No response from server. Please try again later.');
+      }
+
+      throw new Error(error.message || 'Network error. Please check your connection.');
     }
   };
 
@@ -194,10 +189,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     deleteCookie('token');
     deleteCookie('role');
     deleteCookie('userId');
-    
+
     // Remove axios header
     delete axios.defaults.headers.common['Authorization'];
-    
+
     // Reset auth state
     setAuthState({
       token: null,

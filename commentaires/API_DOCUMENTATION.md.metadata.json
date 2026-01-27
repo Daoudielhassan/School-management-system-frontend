@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Documentation API complète des 11 microservices SMS. Couvre services (Identity, Academic, Student, Instructor, Attendance, Messaging, Notification, Report, Admin, Manager) avec 35 controllers et ~210 endpoints REST. Inclut méthodes HTTP, paramètres, exemples request/response, codes statuts, authentification JWT, et fonctionnalités avancées (caching, circuit breaker, batch fetching). Organisé par service avec table des matières complète.",
+  "updatedAt": "2026-01-25T11:51:30.852743Z"
+}

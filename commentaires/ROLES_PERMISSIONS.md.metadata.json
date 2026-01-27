@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Analyse complète des rôles utilisateurs dans le système SMS avec matrice détaillée des permissions. Couvre 4 rôles principaux (STUDENT, INSTRUCTOR, MANAGER, ADMIN) avec permissions par module (authentification, structure académique, étudiants, présences, notes, messagerie, notifications, rapports). Inclut workflows complets, niveaux de managers, responsabilités spécifiques, types d'actions auditées, et hiérarchie de validation. Document la séparation des préoccupations et contrôles d'accès pour chaque service.",
+  "updatedAt": "2026-01-25T14:39:12.229330300Z"
+}

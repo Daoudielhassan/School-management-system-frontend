@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Guide complet pour développeurs frontend couvrant l'intégration avec l'architecture microservices SMS via API Gateway. Inclut configuration de base, authentification JWT, intercepteurs HTTP, gestion des erreurs, exemples de code React/Vue/Angular, appels API par domaine fonctionnel (authentification, étudiants, présences, messagerie, notifications), bonnes pratiques, optimisations de performance, sécurité, et workflows utilisateur complets.",
+  "updatedAt": "2026-01-25T14:22:42.977582800Z"
+}

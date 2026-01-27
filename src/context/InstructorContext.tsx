@@ -1,7 +1,7 @@
 "use client"
 import React, { createContext, useContext, useState, useEffect } from "react"
 import { useAuth } from "@/context/AuthContext"
-import axios from "axios"
+import { API_ENDPOINTS, apiGet } from "@/lib/api-clients"
 
 // Define the instructor data type
 type InstructorData = {
@@ -31,7 +31,7 @@ export function InstructorProvider({ children }: { children: React.ReactNode }) 
   const [error, setError] = useState<string | null>(null)
   const { token, role, isAuthenticated, userId } = useAuth()
 
-  // Fetch instructor data from the API
+  // Fetch instructor data from the API using microservices
   const fetchInstructorData = async () => {
     if (!isAuthenticated || role !== "PROFESSEUR" || !userId) {
       setError("Not authorized to access instructor data")
@@ -42,18 +42,12 @@ export function InstructorProvider({ children }: { children: React.ReactNode }) 
     setError(null)
 
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/instructors/user/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setInstructorData(response.data)
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "Failed to fetch instructor data")
-      } else {
-        setError("An unexpected error occurred")
-      }
+      // Use API_ENDPOINTS for microservices
+      const data = await apiGet(API_ENDPOINTS.INSTRUCTORS.BY_USER_ID(userId), token!)
+      setInstructorData(data)
+    } catch (err: any) {
+      console.error('Error fetching instructor data:', err)
+      setError(err.message || "Failed to fetch instructor data")
     } finally {
       setIsLoading(false)
     }
@@ -66,12 +60,12 @@ export function InstructorProvider({ children }: { children: React.ReactNode }) 
   }, [isAuthenticated, role, userId])
 
   return (
-    <InstructorContext.Provider value={{ 
-      instructorData, 
+    <InstructorContext.Provider value={{
+      instructorData,
       instructorId: instructorData?.id || null,
-      isLoading, 
-      error, 
-      fetchInstructorData 
+      isLoading,
+      error,
+      fetchInstructorData
     }}>
       {children}
     </InstructorContext.Provider>

@@ -2,7 +2,7 @@
 "use client"
 import React, { createContext, useContext, useState, useEffect } from "react"
 import { useAuth } from "@/context/AuthContext"
-import axios from "axios"
+import { StudentServiceClient } from "@/lib/api-clients"
 
 // Define the student data type
 type StudentData = {
@@ -32,7 +32,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null)
   const { token, role, isAuthenticated, userId } = useAuth()
 
-  // Fetch student data from the API
+  // Fetch student data from the API using StudentServiceClient
   const fetchStudentData = async () => {
     if (!isAuthenticated || role !== "ETUDIANT" || !userId) {
       setError("Not authorized to access student data")
@@ -43,18 +43,12 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     setError(null)
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/students/user/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      setStudentData(response.data)
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "Failed to fetch student data")
-      } else {
-        setError("An unexpected error occurred")
-      }
+      // Use StudentServiceClient for microservices
+      const data = await StudentServiceClient.getStudentByUserId(userId, token!)
+      setStudentData(data)
+    } catch (err: any) {
+      console.error('Error fetching student data:', err)
+      setError(err.message || "Failed to fetch student data")
     } finally {
       setIsLoading(false)
     }

@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Documentation complète de la configuration Docker/Docker Compose créée pour le projet SMS. Inclut docker-compose.yml principal avec 11 microservices + infrastructure, 14 Dockerfiles, guide de déploiement détaillé (DOCKER_README.md), scripts de démarrage (start.sh/start.bat), docker-compose.dev.yml pour développement, et template de variables d'environnement. Couvre l'architecture, l'ordre de démarrage, les commandes courantes, le troubleshooting, la sécurité, et les optimisations de performance.",
+  "updatedAt": "2026-01-25T12:08:42.021490500Z"
+}

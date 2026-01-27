@@ -1,0 +1,554 @@
+# 🐳 Docker Compose Setup - Summary
+
+**Date**: 25 janvier 2026  
+**Projet**: SMS Microservices
+
+---
+
+## ✅ Fichiers créés
+
+### 1. **docker-compose.yml** (Principal)
+**Emplacement**: `/docker-compose.yml`
+
+#### Configuration complète :
+- ✅ **PostgreSQL** avec initialisation automatique
+- ✅ **Kafka + Zookeeper** pour événements
+- ✅ **RabbitMQ** pour messaging
+- ✅ **Eureka Server** pour service discovery
+- ✅ **Config Server** pour configuration centralisée
+- ✅ **API Gateway** comme point d'entrée
+- ✅ **11 microservices** avec health checks
+
+#### Caractéristiques :
+- Health checks sur tous les services
+- Dependencies avec `condition: service_healthy`
+- Réseau isolé `sms-network`
+- Volume persistant pour PostgreSQL
+- Variables d'environnement configurées
+- Restart policy `unless-stopped`
+
+### 2. **docker-compose.dev.yml** (Développement)
+**Emplacement**: `/docker-compose.dev.yml`
+
+Configuration légère pour développement local :
+- PostgreSQL, Kafka, Zookeeper, RabbitMQ uniquement
+- Permet de développer les microservices dans l'IDE
+- Network séparé `sms-dev-network`
+
+**Usage** :
+```bash
+docker-compose -f docker-compose.dev.yml up -d
+```
+
+### 3. **Dockerfiles** (14 fichiers)
+
+#### Microservices (11) :
+- `services/identity-service/Dockerfile`
+- `services/academic-year-service/Dockerfile`
+- `services/academic-structure-service/Dockerfile`
+- `services/student-service/Dockerfile`
+- `services/instructor-service/Dockerfile`
+- `services/attendance-service/Dockerfile`
+- `services/messaging-service/Dockerfile`
+- `services/notification-service/Dockerfile`
+- `services/report-service/Dockerfile`
+- `services/admin-service/Dockerfile`
+- `services/manager-service/Dockerfile`
+
+#### Infrastructure (3) :
+- `infra/eureka-server/Dockerfile`
+- `infra/config-server/Dockerfile`
+- `infra/api-gateway/Dockerfile`
+
+#### Caractéristiques des Dockerfiles :
+- ✅ **Multi-stage build** (builder + runtime)
+- ✅ **Maven build** avec cache des dépendances
+- ✅ **JRE Alpine** (~200MB vs ~800MB)
+- ✅ **Non-root user** (spring:spring)
+- ✅ **Health checks** intégrés
+- ✅ **JVM optimizations** pour containers
+
+### 4. **DOCKER_README.md** (Documentation)
+**Emplacement**: `/DOCKER_README.md`
+
+Documentation complète (~400 lignes) :
+- 🚀 Quick Start
+- 📊 Service URLs
+- 🔍 Monitoring & Health Checks
+- 🛠️ Common Commands
+- 🗄️ Database Management
+- 🔧 Troubleshooting
+- 🔐 Security Considerations
+- 📦 Build Optimization
+- 📈 Performance Tuning
+
+### 5. **.dockerignore**
+**Emplacement**: `/.dockerignore`
+
+Optimisation du build context :
+- Exclusion des fichiers Maven (`target/`)
+- Exclusion des IDE (`.idea/`, `.vscode/`)
+- Exclusion des logs et fichiers temporaires
+
+### 6. **.env.example**
+**Emplacement**: `/.env.example`
+
+Template de variables d'environnement :
+- Configuration de la base de données
+- Configuration Kafka
+- Configuration RabbitMQ
+- Secrets JWT (à changer en production)
+
+### 7. **Scripts de démarrage**
+
+#### start.sh (Linux/Mac)
+**Emplacement**: `/start.sh`
+- Démarrage séquentiel avec health checks
+- Colored output (vert/jaune/rouge)
+- Vérification des prérequis
+- Wait for service readiness
+
+**Usage** :
+```bash
+chmod +x start.sh
+./start.sh
+```
+
+#### start.bat (Windows)
+**Emplacement**: `/start.bat`
+- Version Windows du script
+- Démarrage séquentiel avec timeouts
+- Messages de progression
+
+**Usage** :
+```bash
+start.bat
+```
+
+---
+
+## 🏗️ Architecture Docker
+
+### Ordre de démarrage
+
+```mermaid
+graph TD
+    A[PostgreSQL] --> D[Eureka Server]
+    B[Zookeeper] --> C[Kafka]
+    C --> D
+    E[RabbitMQ] --> D
+    D --> F[Config Server]
+    F --> G[API Gateway]
+    G --> H[Microservices]
+    A --> H
+    C --> H
+```
+
+### Timeline de démarrage
+
+| Étape | Services | Durée | Total |
+|-------|----------|-------|-------|
+| 1 | PostgreSQL, Zookeeper, Kafka, RabbitMQ | 30-60s | 60s |
+| 2 | Eureka Server | 60s | 120s |
+| 3 | Config Server | 30s | 150s |
+| 4 | API Gateway | 30s | 180s |
+| 5 | 11 Microservices | 60s | 240s |
+
+**Total** : ~4 minutes pour un démarrage complet
+
+---
+
+## 🚀 Commandes rapides
+
+### Démarrage complet
+
+```bash
+# Méthode 1: Script automatique
+./start.sh  # Linux/Mac
+start.bat   # Windows
+
+# Méthode 2: Docker Compose direct
+docker-compose up -d --build
+
+# Méthode 3: Infrastructure seulement (développement)
+docker-compose -f docker-compose.dev.yml up -d
+```
+
+### Arrêt
+
+```bash
+# Arrêt gracieux
+docker-compose down
+
+# Arrêt + suppression volumes (⚠️ perte de données)
+docker-compose down -v
+
+# Arrêt + suppression images
+docker-compose down --rmi all
+```
+
+### Logs
+
+```bash
+# Tous les services
+docker-compose logs -f
+
+# Service spécifique
+docker-compose logs -f identity-service
+
+# Dernières 100 lignes
+docker-compose logs --tail=100 identity-service
+```
+
+### Status
+
+```bash
+# Vue d'ensemble
+docker-compose ps
+
+# Health checks
+docker inspect --format='{{.State.Health.Status}}' sms-identity-service
+```
+
+### Rebuild
+
+```bash
+# Rebuild tous les services
+docker-compose up -d --build
+
+# Rebuild service spécifique
+docker-compose up -d --build identity-service
+
+# Force recreate
+docker-compose up -d --build --force-recreate
+```
+
+---
+
+## 📊 Services exposés
+
+### Ports publics
+
+| Service | Port | URL | Description |
+|---------|------|-----|-------------|
+| API Gateway | 8080 | http://localhost:8080 | Point d'entrée principal |
+| Eureka Server | 8761 | http://localhost:8761 | Dashboard registry |
+| RabbitMQ UI | 15672 | http://localhost:15672 | Management UI (guest/guest) |
+| PostgreSQL | 5432 | localhost:5432 | Database (postgres/postgres) |
+| Kafka | 9092 | localhost:9092 | Message broker |
+
+### Microservices (accès direct)
+
+| Service | Port | URL |
+|---------|------|-----|
+| Identity | 8084 | http://localhost:8084 |
+| Academic Year | 8085 | http://localhost:8085 |
+| Student | 8086 | http://localhost:8086 |
+| Academic Structure | 8087 | http://localhost:8087 |
+| Instructor | 8088 | http://localhost:8088 |
+| Attendance | 8090 | http://localhost:8090 |
+| Messaging | 8091 | http://localhost:8091 |
+| Notification | 8092 | http://localhost:8092 |
+| Report | 8093 | http://localhost:8093 |
+| Admin | 8094 | http://localhost:8094 |
+| Manager | 8095 | http://localhost:8095 |
+
+---
+
+## 🔧 Configuration
+
+### Variables d'environnement
+
+#### Par défaut (dans docker-compose.yml)
+```yaml
+SPRING_PROFILES_ACTIVE: docker
+SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/{db_name}
+EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+```
+
+#### Personnalisées (via .env)
+1. Copier `.env.example` vers `.env`
+2. Modifier les valeurs
+3. Redémarrer : `docker-compose up -d`
+
+### Profils Spring
+
+Trois profils disponibles :
+- **default** : Développement local (sans Docker)
+- **docker** : Déploiement Docker (utilisé par défaut)
+- **production-docker** : Production avec sécurité renforcée
+
+---
+
+## 🗄️ Base de données
+
+### Bases créées automatiquement
+
+Le script `database/init-all-databases.sql` crée :
+- `identity_db`
+- `academic_year_db`
+- `academic_structure_db`
+- `student_db`
+- `instructor_db`
+- `attendance_db`
+- `messaging_db`
+- `notification_db`
+- `report_db`
+- `admin_db`
+- `manager_db`
+
+### Connexion
+
+```bash
+# Ligne de commande
+docker exec -it sms-postgres psql -U postgres
+
+# GUI (DBeaver, pgAdmin, etc.)
+Host: localhost
+Port: 5432
+User: postgres
+Password: postgres
+```
+
+### Backup
+
+```bash
+# Toutes les bases
+docker exec sms-postgres pg_dumpall -U postgres > backup.sql
+
+# Base spécifique
+docker exec sms-postgres pg_dump -U postgres identity_db > identity.sql
+```
+
+---
+
+## 🔐 Sécurité
+
+### ⚠️ Configuration de développement
+
+Le setup actuel est pour **développement uniquement** :
+- Mots de passe par défaut (`postgres`)
+- JWT secret en clair
+- Pas de SSL/TLS
+- Tous les ports exposés
+
+### ✅ Pour la production
+
+1. **Changer tous les secrets** :
+   ```bash
+   # Générer un secret JWT sécurisé
+   openssl rand -base64 64
+   ```
+
+2. **Utiliser Docker Secrets** :
+   ```yaml
+   secrets:
+     db_password:
+       external: true
+   ```
+
+3. **Enable SSL** :
+   - PostgreSQL SSL
+   - HTTPS sur services
+   - Kafka SSL
+
+4. **Limiter les ressources** :
+   ```yaml
+   deploy:
+     resources:
+       limits:
+         cpus: '1.0'
+         memory: 1G
+   ```
+
+5. **Réseau segmenté** :
+   ```yaml
+   networks:
+     frontend:  # API Gateway seulement
+     backend:   # Services internes
+   ```
+
+---
+
+## 📈 Performance
+
+### JVM Tuning
+
+Chaque service utilise :
+```bash
+-XX:+UseContainerSupport      # Détecte limites container
+-XX:MaxRAMPercentage=75.0     # Utilise 75% RAM container
+```
+
+### Ressources recommandées
+
+| Composant | CPU | RAM | Disk |
+|-----------|-----|-----|------|
+| PostgreSQL | 1 | 1GB | 10GB |
+| Kafka + Zookeeper | 1 | 2GB | 5GB |
+| Eureka | 0.5 | 512MB | 100MB |
+| Chaque microservice | 0.5 | 512MB | 200MB |
+| **Total** | **8** | **8GB** | **20GB** |
+
+---
+
+## 🧪 Tests
+
+### Tests d'intégration
+
+```bash
+# Démarrer infrastructure seulement
+docker-compose -f docker-compose.dev.yml up -d
+
+# Lancer tests
+cd services/identity-service
+mvn verify
+
+# Cleanup
+docker-compose -f docker-compose.dev.yml down
+```
+
+### Tests end-to-end
+
+```bash
+# Démarrer tous les services
+docker-compose up -d
+
+# Attendre le démarrage complet (~4 minutes)
+sleep 240
+
+# Tester l'API Gateway
+curl http://localhost:8080/actuator/health
+
+# Tester un service
+curl http://localhost:8084/api/auth/validate?token=test
+```
+
+---
+
+## 🔍 Monitoring
+
+### Health Checks
+
+Tous les services exposent :
+```bash
+# Health
+curl http://localhost:8084/actuator/health
+
+# Metrics
+curl http://localhost:8084/actuator/metrics
+
+# Info
+curl http://localhost:8084/actuator/info
+```
+
+### Logs centralisés
+
+```bash
+# Tous ensemble
+docker-compose logs -f
+
+# Filtrer par service
+docker-compose logs -f | grep "identity-service"
+
+# Exporter vers fichier
+docker-compose logs > logs.txt
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Service ne démarre pas
+
+1. Vérifier les logs :
+   ```bash
+   docker-compose logs service-name
+   ```
+
+2. Vérifier les dépendances :
+   ```bash
+   docker-compose ps
+   ```
+
+3. Rebuild :
+   ```bash
+   docker-compose up -d --build --force-recreate service-name
+   ```
+
+### Port déjà utilisé
+
+```bash
+# Windows: Trouver le processus
+netstat -ano | findstr :8080
+taskkill /PID <PID> /F
+
+# Linux: Trouver et tuer
+lsof -ti:8080 | xargs kill -9
+```
+
+### Out of Memory
+
+Augmenter la RAM Docker :
+- Docker Desktop → Settings → Resources → Memory → 8GB+
+
+### Cleanup complet
+
+```bash
+# Arrêt + suppression containers
+docker-compose down -v
+
+# Suppression images
+docker-compose down --rmi all
+
+# Cleanup Docker global
+docker system prune -a --volumes
+```
+
+---
+
+## 📝 Checklist de déploiement
+
+### Avant le premier démarrage
+
+- [ ] Docker et Docker Compose installés
+- [ ] Au moins 8GB RAM disponibles
+- [ ] Au moins 20GB d'espace disque
+- [ ] Ports 5432, 8080-8095, 9092, 15672 disponibles
+- [ ] Fichier `.env` créé (copie de `.env.example`)
+
+### Démarrage normal
+
+- [ ] `docker-compose up -d --build`
+- [ ] Attendre 4 minutes
+- [ ] Vérifier : `docker-compose ps`
+- [ ] Tester Eureka : http://localhost:8761
+- [ ] Tester API Gateway : http://localhost:8080/actuator/health
+
+### En cas de problème
+
+- [ ] Vérifier logs : `docker-compose logs -f`
+- [ ] Vérifier health : `docker inspect --format='{{.State.Health.Status}}' sms-postgres`
+- [ ] Rebuild si nécessaire
+- [ ] Consulter DOCKER_README.md
+
+---
+
+## 🎯 Prochaines étapes
+
+### Améliorations possibles
+
+- [ ] Ajouter Prometheus pour métriques
+- [ ] Ajouter Grafana pour dashboards
+- [ ] Ajouter Zipkin pour distributed tracing
+- [ ] Ajouter ELK pour centralized logging
+- [ ] Implémenter CI/CD (GitHub Actions)
+- [ ] Créer Kubernetes manifests
+- [ ] Ajouter tests de charge (JMeter)
+
+---
+
+**Dernière mise à jour**: 25 janvier 2026  
+**Docker Compose**: 3.8  
+**Services**: 11 microservices + 3 infrastructure + 4 dépendances

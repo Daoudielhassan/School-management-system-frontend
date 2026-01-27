@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Récapitulatif de l'analyse des controllers et mise à jour de la documentation. Liste les fichiers mis à jour (README.md academic-structure-service avec entité Session), fichiers créés (analysis.md, API_DOCUMENTATION.md), statistiques détaillées des 35 controllers par service, fonctionnalités avancées documentées (caching Caffeine, circuit breaker Resilience4j), et instructions d'utilisation des documents.",
+  "updatedAt": "2026-01-25T11:52:52.131566900Z"
+}

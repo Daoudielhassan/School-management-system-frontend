@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Analyse complète et détaillée du projet microservices de gestion scolaire. Couvre l'architecture globale, les 11 microservices (Identity, Academic Structure, Attendance, etc.), la stack technique (Java 23, Spring Boot 3.4.1, Kafka, PostgreSQL), les patterns utilisés (CQRS, Event Sourcing), la sécurité JWT, les workflows métier (système de validation avec appels), et les recommandations d'amélioration. Document de référence complet pour comprendre l'ensemble du système.",
+  "updatedAt": "2026-01-25T11:37:25.455776Z"
+}
