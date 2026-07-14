@@ -98,6 +98,9 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `${EDUCATION_CORE_BASE}/api/attendance/${id}`,
     BY_SESSION: (sessionId: string) => `${EDUCATION_CORE_BASE}/api/attendance/session/${sessionId}`,
     BY_STUDENT: (studentId: string) => `${EDUCATION_CORE_BASE}/api/attendance/students/${studentId}`,
+    // JWT-scoped self-service (student portal) — resolved server-side, no id needed.
+    ME: `${EDUCATION_CORE_BASE}/api/attendance/me`,
+    JUSTIFY: (id: string) => `${EDUCATION_CORE_BASE}/api/attendance/${id}/justify`,
     INITIALIZE: (sessionId: string) => `${EDUCATION_CORE_BASE}/api/attendance/initialize/${sessionId}`,
     BULK_UPDATE: `${EDUCATION_CORE_BASE}/api/attendance/bulk-update`,
     UPDATE_STATUS: (id: string) => `${EDUCATION_CORE_BASE}/api/attendance/${id}/status`,
@@ -157,6 +160,8 @@ export const API_ENDPOINTS = {
     BASE: `${EDUCATION_CORE_BASE}/api/grades`,
     BY_ID: (id: string) => `${EDUCATION_CORE_BASE}/api/grades/${id}`,
     BY_STUDENT: (studentId: string) => `${EDUCATION_CORE_BASE}/api/grades/student/${studentId}`,
+    // JWT-scoped self-service (student portal) — resolved server-side, no id needed.
+    ME: `${EDUCATION_CORE_BASE}/api/grades/me`,
     BY_SUBJECT: (subjectId: string) => `${EDUCATION_CORE_BASE}/api/grades/subject/${subjectId}`,
     FILTER: (params?: { studentId?: string; subjectId?: string; page?: number; size?: number }) => {
       const query = new URLSearchParams();
@@ -175,6 +180,9 @@ export const API_ENDPOINTS = {
       `${EDUCATION_CORE_BASE}/api/reports/attendance/class-group/${classGroupId}`,
     GRADES_STUDENT: (studentId: string) => `${EDUCATION_CORE_BASE}/api/reports/grades/student/${studentId}`,
     GRADES_SUBJECT: (subjectId: string) => `${EDUCATION_CORE_BASE}/api/reports/grades/subject/${subjectId}`,
+    // JWT-scoped self-service (student portal) — resolved server-side, no id needed.
+    ATTENDANCE_ME: `${EDUCATION_CORE_BASE}/api/reports/attendance/me`,
+    GRADES_ME: `${EDUCATION_CORE_BASE}/api/reports/grades/me`,
   },
 
   // Core validations (`validation.api.ValidationController`, bean `coreValidationController`) — unchanged, stays at /api/validations.
@@ -286,6 +294,9 @@ export const API_ENDPOINTS = {
     ARCHIVED: (userId: string) => `${COMMUNICATION_HUB_BASE}/api/messages/archived/${userId}`,
     THREAD: (parentMessageId: string) => `${COMMUNICATION_HUB_BASE}/api/messages/thread/${parentMessageId}`,
     UNREAD_COUNT: (userId: string) => `${COMMUNICATION_HUB_BASE}/api/messages/unread/${userId}/count`,
+    // JWT-scoped self-service (student portal) — resolved server-side, no id needed.
+    INBOX_ME: `${COMMUNICATION_HUB_BASE}/api/messages/inbox/me`,
+    UNREAD_COUNT_ME: `${COMMUNICATION_HUB_BASE}/api/messages/unread/me/count`,
     READ: (messageId: string, receiverId: string) =>
       `${COMMUNICATION_HUB_BASE}/api/messages/${messageId}/read/${receiverId}`,
     STAR: (messageId: string, receiverId: string) =>
@@ -302,6 +313,9 @@ export const API_ENDPOINTS = {
     BY_USER: (userId: string) => `${COMMUNICATION_HUB_BASE}/api/notifications/user/${userId}`,
     UNREAD: (userId: string) => `${COMMUNICATION_HUB_BASE}/api/notifications/user/${userId}/unread`,
     UNREAD_COUNT: (userId: string) => `${COMMUNICATION_HUB_BASE}/api/notifications/user/${userId}/unread/count`,
+    // JWT-scoped self-service (student portal) — resolved server-side, no id needed.
+    BY_USER_ME: `${COMMUNICATION_HUB_BASE}/api/notifications/user/me`,
+    UNREAD_COUNT_ME: `${COMMUNICATION_HUB_BASE}/api/notifications/user/me/unread/count`,
     BY_TYPE: (userId: string, type: string) => `${COMMUNICATION_HUB_BASE}/api/notifications/user/${userId}/type/${type}`,
     BY_CHANNEL: (userId: string, channel: string) =>
       `${COMMUNICATION_HUB_BASE}/api/notifications/user/${userId}/channel/${channel}`,

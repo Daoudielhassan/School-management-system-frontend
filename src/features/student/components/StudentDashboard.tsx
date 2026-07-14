@@ -1,0 +1,77 @@
+'use client';
+
+import Link from 'next/link';
+import { Award, ClipboardList, Calendar, MessageSquare } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useStudentDashboard } from '../hooks/useStudentDashboard';
+import { DashboardStatCards } from './DashboardStatCards';
+import { TodaySessionsCard } from './TodaySessionsCard';
+
+const QUICK_LINKS = [
+  { href: '/student/grades', label: 'Mes notes', icon: Award },
+  { href: '/student/attendance', label: 'Mes présences', icon: ClipboardList },
+  { href: '/student/schedule', label: 'Emploi du temps', icon: Calendar },
+  { href: '/student/messages', label: 'Messages', icon: MessageSquare },
+];
+
+export function StudentDashboard() {
+  const { data, isLoading, isError } = useStudentDashboard();
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-slate-800">Tableau de bord</h1>
+        <p className="text-slate-500 mt-1">Vue d&apos;ensemble de votre scolarité</p>
+      </div>
+
+      {isLoading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-28 rounded-2xl" />
+          ))}
+        </div>
+      )}
+
+      {isError && (
+        <Card>
+          <CardContent className="p-6 text-center text-red-600">
+            Impossible de charger le tableau de bord.
+          </CardContent>
+        </Card>
+      )}
+
+      {data && (
+        <>
+          <DashboardStatCards
+            attendance={data.attendance}
+            grades={data.grades}
+            unreadMessages={data.unreadMessages}
+            unreadNotifications={data.unreadNotifications}
+          />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <TodaySessionsCard sessions={data.todaySchedule} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 content-start">
+              {QUICK_LINKS.map(({ href, label, icon: Icon }) => (
+                <Link key={href} href={href}>
+                  <Card className="hover:border-blue-300 hover:shadow-md transition-all duration-200 h-full">
+                    <CardContent className="p-5 flex flex-col items-center justify-center text-center gap-2">
+                      <div className="p-3 rounded-2xl bg-blue-50">
+                        <Icon className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <span className="text-sm font-semibold text-slate-700">{label}</span>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
