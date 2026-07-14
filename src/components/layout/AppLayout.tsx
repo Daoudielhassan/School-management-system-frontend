@@ -142,7 +142,7 @@ const getNavigationItems = (role: string = 'student') => {
       {
         id: 'classes',
         label: 'Classes',
-        href: '/admin/classes',
+        href: '/admin/class-groups',
         icon: BookOpen,
       },
       {
@@ -240,7 +240,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     <div className={cn("min-h-screen flex", className)} style={{ backgroundColor: 'var(--bg-secondary)' }}>
       {/* Sidebar */}
       <Sidebar
-        items={navigationItems}
+        sections={[{ title: userRole.toUpperCase(), items: navigationItems }]}
+        user={{ name: userRole.charAt(0).toUpperCase() + userRole.slice(1), role: userRole }}
         onLogout={onLogout}
         defaultCollapsed={sidebarCollapsed}
       />

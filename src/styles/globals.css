@@ -2,83 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
-/* WCAG 2.1 AA Compliant Color Variables */
+/* WCAG 2.1 AA Compliant Color Variables — unified blue theme */
 :root {
-  /* Custom Color Scheme */
+  /* Custom Color Scheme (blue-based) */
   --background: #ffffff;
   --foreground: #000000;
-  --text: #020522;
-  --primary: #000d3a;
-  --secondary: #ffd800;
-  --accent: #576cab;
+  --text: #0f172a;
+  --primary: #1d4ed8;
+  --secondary: #eff6ff;
+  --accent: #2563eb;
 
   /* Derived Colors for Better UX */
-  --primary-light: #1a2b5c;
-  --primary-dark: #000a2e;
-  --secondary-light: #fff066;
-  --secondary-dark: #ccac00;
-  --accent-light: #7a8bc7;
-  --accent-dark: #3d5489;
+  --primary-light: #2563eb;
+  --primary-dark: #1e3a8a;
+  --secondary-light: #f8fafc;
+  --secondary-dark: #bfdbfe;
+  --accent-light: #60a5fa;
+  --accent-dark: #1d4ed8;
 
   /* Background Variations */
   --bg-primary: var(--background);
-  --bg-secondary: #f8f9ff;
-  --bg-tertiary: #f1f3ff;
-  --bg-accent: #f4f6ff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --bg-accent: #eff6ff;
 
   /* Text Colors - WCAG AA Compliant */
-  --text-primary: var(--text); /* #020522 - Contrast ratio: 19.8:1 on white */
-  --text-secondary: var(--primary); /* #000d3a - Contrast ratio: 18.2:1 on white */
-  --text-tertiary: var(--accent); /* #576cab - Contrast ratio: 4.8:1 on white */
+  --text-primary: var(--text); /* #0f172a - Contrast ratio: 17.5:1 on white */
+  --text-secondary: var(--primary); /* #1d4ed8 - Contrast ratio: 6.3:1 on white */
+  --text-tertiary: #475569; /* slate-600 - Contrast ratio: 7.5:1 on white */
   --text-inverse: var(--background);
 
   /* Interactive States */
-  --hover-bg: #f8f9ff;
-  --active-bg: #f1f3ff;
+  --hover-bg: #eff6ff;
+  --active-bg: #dbeafe;
   --focus-ring: var(--accent);
 
   /* Border Colors */
-  --border-light: #e8eaff;
-  --border-medium: #d1d5ff;
+  --border-light: #e2e8f0;
+  --border-medium: #cbd5e1;
   --border-dark: var(--accent);
 
   /* Shadow Colors */
-  --shadow-sm: 0 1px 2px 0 rgb(2 5 34 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(2 5 34 / 0.1), 0 2px 4px -2px rgb(2 5 34 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(2 5 34 / 0.1), 0 4px 6px -4px rgb(2 5 34 / 0.1);
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(15 23 42 / 0.1), 0 2px 4px -2px rgb(15 23 42 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(15 23 42 / 0.1), 0 4px 6px -4px rgb(15 23 42 / 0.1);
 
   /* Sidebar Specific Variables */
   --sidebar-width: 280px;
   --sidebar-collapsed-width: 64px;
   --sidebar-mobile-width: 100vw;
   --sidebar-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
+
   /* Breakpoints */
   --mobile-breakpoint: 768px;
   --tablet-breakpoint: 1024px;
   --desktop-breakpoint: 1280px;
-}
-
-/* Admin Theme Variables */
-.admin-theme {
-  --background: #ffffff;
-  --foreground: #000000;
-  --text: #020522;
-  --primary: #000d3a;
-  --secondary: #ffd800;
-  --accent: #576cab;
-  
-  --bg-primary: var(--background);
-  --bg-secondary: #f8f9ff;
-  --bg-tertiary: #f1f3ff;
-  --text-primary: var(--text);
-  --text-secondary: var(--primary);
-  --text-tertiary: var(--accent);
-  --hover-bg: #f8f9ff;
-  --active-bg: #f1f3ff;
-  --border-light: #e8eaff;
-  --border-medium: #d1d5ff;
-  --border-dark: var(--accent);
 }
 
 /* Base Styles */
@@ -291,7 +269,7 @@ body {
 
 .form-input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgb(87 108 171 / 0.1);
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
 }
 
 .form-input::placeholder {

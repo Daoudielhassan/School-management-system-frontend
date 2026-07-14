@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Mail, ChevronRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
+import { API_CONFIG } from "@/config/api";
+import { useAuth } from "@/context/AuthContext";
 
 interface Notification {
   id: number;
@@ -20,12 +22,18 @@ export const MessagesCard = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth();
 
   // Fetch notifications from the backend
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/notifications");
+        const response = await fetch(`${API_CONFIG.GATEWAY_URL}/api/notifications`, {
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            'Content-Type': 'application/json',
+          },
+        });
         if (!response.ok) {
           throw new Error("Failed to fetch notifications");
         }
@@ -39,7 +47,7 @@ export const MessagesCard = () => {
     };
 
     fetchNotifications();
-  }, []);
+  }, [token]);
 
   // Transform notifications into message format
   const messagesData = notifications.map((notification) => ({
@@ -69,7 +77,7 @@ export const MessagesCard = () => {
             {unreadCount} unread {unreadCount === 1 ? "message" : "messages"}
           </CardDescription>
         </div>
-        <Button variant="ghost" className="text-cyan-400 hover:text-cyan-300 hover:bg-white/5">
+        <Button variant="ghost" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
           View All <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
       </CardHeader>
@@ -83,7 +91,7 @@ export const MessagesCard = () => {
           >
             <Avatar className="h-10 w-10 mr-3">
               <AvatarImage src={`/placeholder.svg?height=40&width=40&text=${message.name.charAt(0)}`} />
-              <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-purple-700">
+              <AvatarFallback className="bg-primary text-white">
                 {message.name.charAt(0)}
               </AvatarFallback>
             </Avatar>
@@ -94,12 +102,12 @@ export const MessagesCard = () => {
               </div>
               <p className="text-sm text-gray-600 truncate">{message.message}</p>
             </div>
-            {message.unread && <div className="w-2 h-2 bg-pink-500 rounded-full ml-2"></div>}
+            {message.unread && <div className="w-2 h-2 bg-blue-500 rounded-full ml-2"></div>}
           </div>
         ))}
       </CardContent>
       <CardFooter className="pt-0">
-        <Button className="w-full bg-gradient-to-r from-pink-600 to-cyan-600 hover:from-pink-700 hover:to-cyan-700 text-white border-0">
+        <Button className="w-full bg-primary hover:bg-primary/90 text-white border-0">
           <Mail className="mr-2 h-4 w-4" /> Compose Message
         </Button>
       </CardFooter>

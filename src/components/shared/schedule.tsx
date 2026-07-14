@@ -6,21 +6,33 @@ import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
+import { API_ENDPOINTS, apiGet } from "@/config/api"
 
 interface Session {
-  id: number;
-  sessionDate: string;
-  startTime: string;
-  endTime: string;
-  sessionType: string;
-  subject: {
-    name: string;
-  };
-  instructor: {
-    firstName: string;
-    lastName: string;
-  };
-  roomNumber: string;
+  id: string;
+  managerId: string;
+  departmentId: string;
+  classGroupId: string;
+  teachingModuleId: string | null;
+  subjectId: string;
+  instructorId: string;
+  startsAt: string;
+  endsAt: string;
+  room: string | null;
+  createdAt: string;
+}
+
+interface Subject {
+  id: string;
+  code: string;
+  name: string;
+}
+
+interface Instructor {
+  id: string;
+  code: string;
+  name: string;
+  email: string;
 }
 
 const days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
@@ -115,42 +127,42 @@ interface ScheduleProps {
 export default function Schedule({ departmentId, classeId }: ScheduleProps) {
   const { token } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [weekOffset, setWeekOffset] = useState(0);
 
+  const getSubjectName = (subjectId: string) =>
+    subjects.find((s) => s.id === subjectId)?.name ?? subjectId.substring(0, 8);
+
+  const getInstructorName = (instructorId: string) =>
+    instructors.find((i) => i.id === instructorId)?.name ?? instructorId.substring(0, 8);
+
   useEffect(() => {
-    const fetchSessions = async () => {
+    const fetchData = async () => {
       if (!departmentId || !classeId || !token) {
         setSessions([]);
         return;
       }
-
       setIsLoading(true);
       setError(null);
-
       try {
-        const response = await fetch(`http://localhost:8080/api/sessions/filter?departmentId=${departmentId}&classeId=${classeId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch sessions");
-        }
-
-        const data = await response.json();
-        setSessions(data);
+        const [sessionsData, subjectsData, instructorsData] = await Promise.all([
+          apiGet(API_ENDPOINTS.SESSIONS.BY_DEPARTMENT_AND_CLASS(departmentId, classeId), token),
+          apiGet(API_ENDPOINTS.SUBJECTS.BASE, token),
+          apiGet(API_ENDPOINTS.INSTRUCTORS.BASE, token),
+        ]);
+        setSessions(Array.isArray(sessionsData) ? sessionsData : []);
+        setSubjects(Array.isArray(subjectsData) ? subjectsData : []);
+        setInstructors(Array.isArray(instructorsData) ? instructorsData : []);
       } catch (err) {
         setError((err as Error).message);
       } finally {
         setIsLoading(false);
       }
     };
-
-    fetchSessions();
+    fetchData();
   }, [departmentId, classeId, token]);
 
   const handlePreviousWeek = () => {
@@ -171,11 +183,10 @@ export default function Schedule({ departmentId, classeId }: ScheduleProps) {
   const getSessionForSlot = (dayIndex: number, time: string) => {
     const targetDate = getDateForDay(dayIndex, weekOffset);
     const formattedTargetDate = formatDateForComparison(targetDate);
-
-    return sessions?.find((session: Session) => {
-      const sessionDate = new Date(session.sessionDate);
-      const formattedSessionDate = formatDateForComparison(sessionDate);
-      return formattedSessionDate === formattedTargetDate && session.startTime.startsWith(time);
+    return sessions.find((session) => {
+      const sessionDate = session.startsAt.split('T')[0];
+      const sessionTime = session.startsAt.split('T')[1]?.substring(0, 5) ?? '';
+      return sessionDate === formattedTargetDate && sessionTime === time;
     });
   };
 
@@ -250,13 +261,13 @@ export default function Schedule({ departmentId, classeId }: ScheduleProps) {
                   <div key={`${day}-${time}`} className="relative h-24 border border-gray-200">
                     {session && (
                       <div
-                        className={cn("absolute inset-0 p-1 text-xs border rounded overflow-hidden", getSessionStyle(session.sessionType))}
+                        className={cn("absolute inset-0 p-1 text-xs border rounded overflow-hidden", getSessionStyle(""))}
                       >
-                        <div className="font-bold">{session.subject.name}</div>
-                        <div>{session.startTime} - {session.endTime}</div>
-                        <div className="text-xs text-gray-600">{formatDate(session.sessionDate)}</div>
-                        <div>Salle: {session.roomNumber}</div>
-                        <div>Prof: {session.instructor.firstName} {session.instructor.lastName}</div>
+                        <div className="font-bold">{getSubjectName(session.subjectId)}</div>
+                        <div>{session.startsAt.split('T')[1]?.substring(0, 5)} - {session.endsAt.split('T')[1]?.substring(0, 5)}</div>
+                        <div className="text-xs text-gray-600">{formatDate(session.startsAt.split('T')[0])}</div>
+                        <div>Salle: {session.room ?? '-'}</div>
+                        <div>Prof: {getInstructorName(session.instructorId)}</div>
                       </div>
                     )}
                   </div>
@@ -287,20 +298,20 @@ export default function Schedule({ departmentId, classeId }: ScheduleProps) {
           sessionsForDay.map(session => (
             <div
               key={session.id}
-              className={cn("mb-3 p-3 text-xs border rounded-lg", getSessionStyle(session.sessionType))}
+              className={cn("mb-3 p-3 text-xs border rounded-lg", getSessionStyle(""))}
             >
-              <div className="font-bold text-sm mb-1">{session.subject.name}</div>
+              <div className="font-bold text-sm mb-1">{getSubjectName(session.subjectId)}</div>
               <div className="flex items-center text-xs mb-1">
                 <Calendar className="h-3 w-3 mr-1" />
-                {session.startTime} - {session.endTime}
+                {session.startsAt.split('T')[1]?.substring(0, 5)} - {session.endsAt.split('T')[1]?.substring(0, 5)}
               </div>
               <div className="flex items-center text-xs mb-1">
                 <span className="h-3 w-3 mr-1 inline-block bg-gray-400 rounded-full"></span>
-                Salle {session.roomNumber}
+                Salle {session.room ?? '-'}
               </div>
               <div className="flex items-center text-xs">
                 <span className="h-3 w-3 mr-1 inline-block bg-gray-600 rounded-full"></span>
-                {session.instructor.firstName} {session.instructor.lastName}
+                {getInstructorName(session.instructorId)}
               </div>
             </div>
           ))

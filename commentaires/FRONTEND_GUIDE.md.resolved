@@ -3,7 +3,7 @@
 Guide complet pour développer des applications frontend avec l'architecture microservices SMS.
 
 **Date**: 25 janvier 2026  
-**API Gateway**: `http://localhost:8080`  
+**API Gateway**: `http://localhost:9000`  
 **Version**: 1.0.0
 
 ---
@@ -25,17 +25,17 @@ Guide complet pour développer des applications frontend avec l'architecture mic
 
 ### API Gateway - Point d'entrée unique
 
-**Toutes les requêtes passent par l'API Gateway** sur le port `8080`.
+**Toutes les requêtes passent par l'API Gateway** sur le port `9000`.
 
 ```
 Frontend (React/Vue/Angular)
     ↓
-http://localhost:8080 (API Gateway)
+http://localhost:9000 (API Gateway)
     ↓
 Routes vers microservices
-    ├── /api/auth → Identity Service (8084)
+    ├── /api/auth → Identity Service (9000)
     ├── /api/students → Student Service (8086)
-    ├── /api/attendance → Attendance Service (8090)
+    ├── /api/attendance → Attendance Service (9000)
     ├── /api/messages → Messaging Service (8091)
     └── ...
 ```
@@ -45,7 +45,7 @@ Routes vers microservices
 ```typescript
 // config/api.config.ts
 export const API_CONFIG = {
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:9000',
   timeout: 30000,
   withCredentials: false,
   headers: {
@@ -1029,7 +1029,7 @@ await attendanceService.validateAttendance(attendanceId, {
 
 ```.env
 # .env (Development)
-REACT_APP_API_URL=http://localhost:8080
+REACT_APP_API_URL=http://localhost:9000
 REACT_APP_ENV=development
 
 # .env.production
@@ -1080,5 +1080,5 @@ const data = await retryRequest(() => studentService.getAllStudents());
 ---
 
 **Date**: 25 janvier 2026  
-**API Gateway**: http://localhost:8080  
+**API Gateway**: http://localhost:9000  
 **Services**: 11 microservices

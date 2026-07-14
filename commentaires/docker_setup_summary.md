@@ -231,7 +231,7 @@ docker-compose up -d --build --force-recreate
 
 | Service | Port | URL | Description |
 |---------|------|-----|-------------|
-| API Gateway | 8080 | http://localhost:8080 | Point d'entrée principal |
+| API Gateway | 9000 | http://localhost:9000 | Point d'entrée principal |
 | Eureka Server | 8761 | http://localhost:8761 | Dashboard registry |
 | RabbitMQ UI | 15672 | http://localhost:15672 | Management UI (guest/guest) |
 | PostgreSQL | 5432 | localhost:5432 | Database (postgres/postgres) |
@@ -241,12 +241,12 @@ docker-compose up -d --build --force-recreate
 
 | Service | Port | URL |
 |---------|------|-----|
-| Identity | 8084 | http://localhost:8084 |
-| Academic Year | 8085 | http://localhost:8085 |
+| Identity | 9000 | http://localhost:9000 |
+| Academic Year | 9000 | http://localhost:9000 |
 | Student | 8086 | http://localhost:8086 |
-| Academic Structure | 8087 | http://localhost:8087 |
-| Instructor | 8088 | http://localhost:8088 |
-| Attendance | 8090 | http://localhost:8090 |
+| Academic Structure | 9000 | http://localhost:9000 |
+| Instructor | 9000 | http://localhost:9000 |
+| Attendance | 9000 | http://localhost:9000 |
 | Messaging | 8091 | http://localhost:8091 |
 | Notification | 8092 | http://localhost:8092 |
 | Report | 8093 | http://localhost:8093 |
@@ -419,10 +419,10 @@ docker-compose up -d
 sleep 240
 
 # Tester l'API Gateway
-curl http://localhost:8080/actuator/health
+curl http://localhost:9000/actuator/health
 
 # Tester un service
-curl http://localhost:8084/api/auth/validate?token=test
+curl http://localhost:9000/api/auth/validate?token=test
 ```
 
 ---
@@ -434,13 +434,13 @@ curl http://localhost:8084/api/auth/validate?token=test
 Tous les services exposent :
 ```bash
 # Health
-curl http://localhost:8084/actuator/health
+curl http://localhost:9000/actuator/health
 
 # Metrics
-curl http://localhost:8084/actuator/metrics
+curl http://localhost:9000/actuator/metrics
 
 # Info
-curl http://localhost:8084/actuator/info
+curl http://localhost:9000/actuator/info
 ```
 
 ### Logs centralisés
@@ -481,11 +481,11 @@ docker-compose logs > logs.txt
 
 ```bash
 # Windows: Trouver le processus
-netstat -ano | findstr :8080
+netstat -ano | findstr :9000
 taskkill /PID <PID> /F
 
 # Linux: Trouver et tuer
-lsof -ti:8080 | xargs kill -9
+lsof -ti:9000 | xargs kill -9
 ```
 
 ### Out of Memory
@@ -515,7 +515,7 @@ docker system prune -a --volumes
 - [ ] Docker et Docker Compose installés
 - [ ] Au moins 8GB RAM disponibles
 - [ ] Au moins 20GB d'espace disque
-- [ ] Ports 5432, 8080-8095, 9092, 15672 disponibles
+- [ ] Ports 5432, 9000-8095, 9092, 15672 disponibles
 - [ ] Fichier `.env` créé (copie de `.env.example`)
 
 ### Démarrage normal
@@ -524,7 +524,7 @@ docker system prune -a --volumes
 - [ ] Attendre 4 minutes
 - [ ] Vérifier : `docker-compose ps`
 - [ ] Tester Eureka : http://localhost:8761
-- [ ] Tester API Gateway : http://localhost:8080/actuator/health
+- [ ] Tester API Gateway : http://localhost:9000/actuator/health
 
 ### En cas de problème
 

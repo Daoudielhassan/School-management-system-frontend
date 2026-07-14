@@ -21,14 +21,21 @@ function LoginForm() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
+    const hasCredentialParams = searchParams.has("email") || searchParams.has("password")
+    if (hasCredentialParams) {
+      router.replace("/login")
+    }
+  }, [searchParams, router])
+
+  useEffect(() => {
     if (isAuthenticated && role) {
       const rolePathMap: Record<UserRole, string> = {
-        [UserRole.ETUDIANT]: "/student",
-        [UserRole.PROFESSEUR]: "/professor",
+        [UserRole.STUDENT]: "/student",
+        [UserRole.INSTRUCTOR]: "/professor",
         [UserRole.MANAGER]: "/manager",
-        [UserRole.ADMINISTRATEUR]: "/admin",
+        [UserRole.ADMIN]: "/admin",
       }
-      const redirectPath = searchParams.get("redirect") || `${rolePathMap[role]}/`
+      const redirectPath = searchParams.get("redirect") || `${rolePathMap[role] || "/"}/`
       router.replace(redirectPath)
     }
   }, [isAuthenticated, role, router, searchParams])
@@ -87,7 +94,7 @@ function LoginForm() {
             <p className="text-white/90 drop-shadow">Sign in to access your account</p>
           </div>
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" method="post" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-white/90 mb-2">

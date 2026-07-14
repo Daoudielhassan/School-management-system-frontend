@@ -1,33 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
+import { API_ENDPOINTS, apiGet, apiPost } from '@/config/api';
 
 interface Subject {
-  id: number;
+  id: string;
   name: string;
 }
 
 interface Department {
-  id: number;
+  id: string;
   name: string;
 }
 
 interface Classe {
-  id: number;
+  id: string;
   name: string;
 }
 
 interface Instructor {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
 }
 
 interface SessionFormData {
-  subjectId: number;
-  departmentId: number;
-  classId: number;
-  instructorId: number;
+  subjectId: string;
+  departmentId: string;
+  classId: string;
+  instructorId: string;
   sessionDate: string;
   startTime: string;
   roomNumber: string;
@@ -35,7 +35,7 @@ interface SessionFormData {
 }
 
 export default function SessionManagement() {
-  const { userId } = useAuth();
+  const { userId, token } = useAuth();
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [classes, setClasses] = useState<Classe[]>([]);
@@ -46,10 +46,10 @@ export default function SessionManagement() {
   const [success, setSuccess] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<SessionFormData>({
-    subjectId: 0,
-    departmentId: 0,
-    classId: 0,
-    instructorId: 0,
+    subjectId: '',
+    departmentId: '',
+    classId: '',
+    instructorId: '',
     sessionDate: '',
     startTime: '',
     roomNumber: '',
@@ -59,7 +59,7 @@ export default function SessionManagement() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!userId) {
+      if (!userId || !token) {
         setError('User ID not available');
         setLoading(false);
         return;
@@ -67,14 +67,14 @@ export default function SessionManagement() {
 
       try {
         const [subjectsRes, departmentsRes, instructorsRes] = await Promise.all([
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/subjects?userId=${userId}`),
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/departments?userId=${userId}`),
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/instructors?userId=${userId}`)
+          apiGet(`${API_ENDPOINTS.SUBJECTS.BASE}?userId=${userId}`, token),
+          apiGet(`${API_ENDPOINTS.DEPARTMENTS.BASE}?userId=${userId}`, token),
+          apiGet(`${API_ENDPOINTS.INSTRUCTORS.BASE}?userId=${userId}`, token)
         ]);
 
-        setSubjects(subjectsRes.data);
-        setDepartments(departmentsRes.data);
-        setInstructors(instructorsRes.data);
+        setSubjects(subjectsRes as Subject[]);
+        setDepartments(departmentsRes as Department[]);
+        setInstructors(instructorsRes as Instructor[]);
         setLoading(false);
       } catch (err) {
         setError('Failed to fetch data');
@@ -83,29 +83,32 @@ export default function SessionManagement() {
     };
 
     fetchData();
-  }, [userId]);
+  }, [userId, token]);
 
   // Reset dependent field (classId) when departmentId changes
   useEffect(() => {
     if (!formData.departmentId) {
       setClasses([]);
-      setFormData(prev => ({ ...prev, classId: 0 }));
+      setFormData(prev => ({ ...prev, classId: '' }));
     }
   }, [formData.departmentId]);
 
   useEffect(() => {
-    if (formData.departmentId && userId) {
+    if (formData.departmentId && userId && token) {
       const fetchClasses = async () => {
         try {
-          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/classes/department/${formData.departmentId}?userId=${userId}`);
-          setClasses(response.data);
+          const data = await apiGet(
+            `${API_ENDPOINTS.CLASSES.BY_DEPARTMENT(formData.departmentId)}?userId=${userId}`,
+            token
+          );
+          setClasses(data as Classe[]);
         } catch (err) {
           setError('Failed to fetch classes');
         }
       };
       fetchClasses();
     }
-  }, [formData.departmentId, userId]);
+  }, [formData.departmentId, userId, token]);
 
   // Auto-dismiss error/success messages after 5 seconds
   useEffect(() => {
@@ -121,13 +124,9 @@ export default function SessionManagement() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
-    // Convert string to number for numeric fields
-    const numericFields = ['subjectId', 'departmentId', 'classId', 'instructorId'];
-    const parsedValue = numericFields.includes(name) ? parseInt(value) || 0 : value;
-    
     setFormData(prev => ({
       ...prev,
-      [name]: parsedValue
+      [name]: value
     }));
   };
 
@@ -148,25 +147,38 @@ export default function SessionManagement() {
       return;
     }
 
-    if (!userId) {
+    if (!userId || !token) {
       setError('User ID not available');
       setIsSubmitting(false);
       return;
     }
 
     try {
-      const sessionDataWithUserId = {
-        ...formData,
-        userId: userId
+      // Map frontend form fields to backend SessionRequest fields
+      const startsAt = `${formData.sessionDate}T${formData.startTime}:00`;
+      // Default duration: 1h30
+      const startsDate = new Date(startsAt);
+      startsDate.setMinutes(startsDate.getMinutes() + 90);
+      const endsAt = startsDate.toISOString().slice(0, 19);
+
+      const sessionPayload = {
+        managerId: userId,
+        departmentId: formData.departmentId,
+        classGroupId: formData.classId,
+        subjectId: formData.subjectId,
+        instructorId: formData.instructorId,
+        startsAt,
+        endsAt,
+        room: formData.roomNumber,
       };
-      
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions`, sessionDataWithUserId);
+
+      await apiPost(API_ENDPOINTS.SESSIONS.BASE, sessionPayload, token);
       setSuccess('Session created successfully');
       setFormData({
-        subjectId: 0,
-        departmentId: 0,
-        classId: 0,
-        instructorId: 0,
+      subjectId: '',
+      departmentId: '',
+      classId: '',
+      instructorId: '',
         sessionDate: '',
         startTime: '',
         roomNumber: '',

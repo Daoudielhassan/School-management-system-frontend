@@ -1,77 +1,21 @@
-// context/StudentContext.tsx
-"use client"
-import React, { createContext, useContext, useState, useEffect } from "react"
-import { useAuth } from "@/context/AuthContext"
-import { StudentServiceClient } from "@/lib/api-clients"
+"use client";
 
-// Define the student data type
-type StudentData = {
-  id: number
-  firstName: string
-  lastName: string
-  email: string
-  departmentId: number
-  classeId: number
-  // Add any other student properties you need
-}
+import React, { createContext, useContext } from "react";
 
 interface StudentContextType {
-  studentData: StudentData | null
-  isLoading: boolean
-  error: string | null
-  fetchStudentData: () => Promise<void>
+  // Reserved for future student-scoped state
 }
 
-// Create the context with default values
-const StudentContext = createContext<StudentContextType | undefined>(undefined)
+const StudentContext = createContext<StudentContextType | undefined>(undefined);
 
-// Context provider component
 export function StudentProvider({ children }: { children: React.ReactNode }) {
-  const [studentData, setStudentData] = useState<StudentData | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const { token, role, isAuthenticated, userId } = useAuth()
-
-  // Fetch student data from the API using StudentServiceClient
-  const fetchStudentData = async () => {
-    if (!isAuthenticated || role !== "ETUDIANT" || !userId) {
-      setError("Not authorized to access student data")
-      return
-    }
-
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      // Use StudentServiceClient for microservices
-      const data = await StudentServiceClient.getStudentByUserId(userId, token!)
-      setStudentData(data)
-    } catch (err: any) {
-      console.error('Error fetching student data:', err)
-      setError(err.message || "Failed to fetch student data")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    if (isAuthenticated && role === "ETUDIANT" && userId) {
-      fetchStudentData()
-    }
-  }, [isAuthenticated, role, userId])
-
-  return (
-    <StudentContext.Provider value={{ studentData, isLoading, error, fetchStudentData }}>
-      {children}
-    </StudentContext.Provider>
-  )
+  return <StudentContext.Provider value={{}}>{children}</StudentContext.Provider>;
 }
 
-// Custom hook to use the student context
 export function useStudent() {
-  const context = useContext(StudentContext)
+  const context = useContext(StudentContext);
   if (context === undefined) {
-    throw new Error("useStudent must be used within a StudentProvider")
+    throw new Error("useStudent must be used within a StudentProvider");
   }
-  return context
+  return context;
 }

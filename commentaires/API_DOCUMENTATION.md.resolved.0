@@ -12,12 +12,12 @@ Documentation complète de toutes les APIs REST des 11 microservices du système
 
 ## Table des matières
 
-1. [Identity Service](#1-identity-service-port-8084)
-2. [Academic Year Service](#2-academic-year-service-port-8085)
-3. [Academic Structure Service](#3-academic-structure-service-port-8087)
-4. [Student Service](#4-student-service-port-8087)
-5. [Instructor Service](#5-instructor-service-port-8088)
-6. [Attendance Service](#6-attendance-service-port-8090)
+1. [Identity Service](#1-identity-service-port-9000)
+2. [Academic Year Service](#2-academic-year-service-port-9000)
+3. [Academic Structure Service](#3-academic-structure-service-port-9000)
+4. [Student Service](#4-student-service-port-9000)
+5. [Instructor Service](#5-instructor-service-port-9000)
+6. [Attendance Service](#6-attendance-service-port-9000)
 7. [Messaging Service](#7-messaging-service-port-8091)
 8. [Notification Service](#8-notification-service-port-8092)
 9. [Report Service](#9-report-service-port-8093)
@@ -26,7 +26,7 @@ Documentation complète de toutes les APIs REST des 11 microservices du système
 
 ---
 
-## 1. Identity Service (Port: 8084)
+## 1. Identity Service (Port: 9000)
 
 Service d'authentification et gestion des identités avec JWT.
 
@@ -111,7 +111,7 @@ Service d'authentification et gestion des identités avec JWT.
 
 ---
 
-## 2. Academic Year Service (Port: 8085)
+## 2. Academic Year Service (Port: 9000)
 
 Service de gestion des années académiques et semestres.
 
@@ -182,7 +182,7 @@ Service de gestion des années académiques et semestres.
 
 ---
 
-## 3. Academic Structure Service (Port: 8087)
+## 3. Academic Structure Service (Port: 9000)
 
 Service de gestion de la structure académique (départements, classes, modules, matières, offres, sessions).
 
@@ -348,7 +348,7 @@ Service de gestion de la structure académique (départements, classes, modules,
 
 ---
 
-## 4. Student Service (Port: 8087)
+## 4. Student Service (Port: 9000)
 
 Service de gestion des étudiants et inscriptions.
 
@@ -435,7 +435,7 @@ Service de gestion des étudiants et inscriptions.
 
 ---
 
-## 5. Instructor Service (Port: 8088)
+## 5. Instructor Service (Port: 9000)
 
 Service de gestion des instructeurs/professeurs.
 
@@ -469,7 +469,7 @@ Service de gestion des instructeurs/professeurs.
 
 ---
 
-## 6. Attendance Service (Port: 8090)
+## 6. Attendance Service (Port: 9000)
 
 Service de gestion des présences avec workflow de validation et système d'appel.
 
@@ -882,12 +882,12 @@ Service de gestion des managers académiques.
 
 | Service | Controllers | Total Endpoints | Port |
 |---------|-------------|-----------------|------|
-| Identity Service | 2 | ~15 | 8084 |
-| Academic Year Service | 2 | ~16 | 8085 |
-| Academic Structure Service | 6 | ~42 | 8087 |
-| Student Service | 2 | ~28 | 8087 |
-| Instructor Service | 1 | ~8 | 8088 |
-| Attendance Service | 1 | ~18 | 8090 |
+| Identity Service | 2 | ~15 | 9000 |
+| Academic Year Service | 2 | ~16 | 9000 |
+| Academic Structure Service | 6 | ~42 | 9000 |
+| Student Service | 2 | ~28 | 9000 |
+| Instructor Service | 1 | ~8 | 9000 |
+| Attendance Service | 1 | ~18 | 9000 |
 | Messaging Service | 1 | ~8 | 8091 |
 | Notification Service | 1 | ~10 | 8092 |
 | Report Service | 3 | ~10 | 8093 |

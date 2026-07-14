@@ -578,7 +578,7 @@ sequenceDiagram
 
 ## Permissions par service
 
-### Identity Service (8084)
+### Identity Service (9000)
 
 | Endpoint | STUDENT | INSTRUCTOR | MANAGER | ADMIN |
 |----------|---------|------------|---------|-------|
@@ -601,7 +601,7 @@ sequenceDiagram
 | GET /api/enrollments/student/{id} | 🎯 (soi) | 📖 | ✅ | ✅ |
 | POST /api/enrollments | 🔒 | 🔒 | ✅ | ✅ |
 
-### Attendance Service (8090)
+### Attendance Service (9000)
 
 | Endpoint | STUDENT | INSTRUCTOR | MANAGER | ADMIN |
 |----------|---------|------------|---------|-------|
@@ -616,7 +616,7 @@ sequenceDiagram
 | PUT /api/attendance/{id}/appeal/review | 🔒 | 🔒 | ✅ | ✅ |
 | GET /api/attendance/student/{id}/statistics | 🎯 (soi) | 📖 | ✅ | ✅ |
 
-### Academic Structure Service (8087)
+### Academic Structure Service (9000)
 
 | Endpoint | STUDENT | INSTRUCTOR | MANAGER | ADMIN |
 |----------|---------|------------|---------|-------|

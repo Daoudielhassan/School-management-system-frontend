@@ -1,8 +1,8 @@
 export enum UserRole {
-  ETUDIANT = 'ETUDIANT',
-  PROFESSEUR = 'PROFESSEUR', // Make sure this matches "PROFESSEUR" exactly
+  ADMIN = 'ADMIN',
   MANAGER = 'MANAGER',
-  ADMINISTRATEUR = 'ADMINISTRATEUR'
+  INSTRUCTOR = 'INSTRUCTOR',
+  STUDENT = 'STUDENT'
 }
 
 export interface LoginCredentials {
@@ -12,19 +12,23 @@ export interface LoginCredentials {
 
 export interface AuthResponse {
   token: string;
-  role: UserRole;
-  id: number;
+  role: UserRole | string;
+  userId?: string;
+  id?: number | string;
+  mustChangePassword?: boolean;
 }
 
 export interface AuthState {
   token: string | null;
   role: UserRole | null;
-  userId: number | null;
+  userId: string | null;
   isAuthenticated: boolean;
+  mustChangePassword: boolean;
 }
 
 export interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
   checkAuth: () => boolean;
+  clearMustChangePassword: () => void;
 } 

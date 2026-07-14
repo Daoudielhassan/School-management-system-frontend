@@ -1,11 +1,10 @@
 "use client"
 
-import React from "react"
+import React, { useEffect, useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Sidebar } from "@/components/ui/sidebar" // Ajuste le chemin selon ton projet
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,193 +28,227 @@ import {
   ClipboardList,
   GraduationCap,
   AlertTriangle,
-  FileText,
   PieChart,
   BookOpen,
+  ScrollText,
+  Award,
+  SlidersHorizontal,
+  Database,
+  Search,
 } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
+import { AdminProvider, useAdmin } from "@/context/AdminContext"
 
-const navigation = [
-  { name: "Dashboard", href: "/admin", icon: BarChart3, color: "text-blue-600", bgColor: "bg-blue-50 hover:bg-blue-100" },
-  { name: "Utilisateurs", href: "/admin/users", icon: Users, color: "text-emerald-600", bgColor: "bg-emerald-50 hover:bg-emerald-100" },
-  { name: "Étudiants", href: "/admin/students", icon: GraduationCap, color: "text-purple-600", bgColor: "bg-purple-50 hover:bg-purple-100" },
-  { name: "Classes", href: "/admin/classes", icon: BookOpen, color: "text-indigo-600", bgColor: "bg-indigo-50 hover:bg-indigo-100" },
-  { name: "Départements", href: "/admin/departments", icon: Building, color: "text-amber-600", bgColor: "bg-amber-50 hover:bg-amber-100" },
-  { name: "Sessions", href: "/admin/sessions", icon: Calendar, color: "text-cyan-600", bgColor: "bg-cyan-50 hover:bg-cyan-100" },
-  { name: "Présences", href: "/admin/attendance", icon: ClipboardList, color: "text-violet-600", bgColor: "bg-violet-50 hover:bg-violet-100" },
-  { name: "Notes", href: "/admin/grades", icon: BookCopy, color: "text-green-600", bgColor: "bg-green-50 hover:bg-green-100" },
-  { name: "Discipline", href: "/admin/discipline", icon: AlertTriangle, color: "text-red-600", bgColor: "bg-red-50 hover:bg-red-100" },
-  { name: "Messages", href: "/admin/messages", icon: MessageSquare, color: "text-pink-600", bgColor: "bg-pink-50 hover:bg-pink-100" },
-  { name: "Rapports", href: "/admin/reports", icon: PieChart, color: "text-orange-600", bgColor: "bg-orange-50 hover:bg-orange-100" },
-  { name: "Paramètres", href: "/admin/settings", icon: Settings, color: "text-slate-600", bgColor: "bg-slate-50 hover:bg-slate-100" },
-  { name: "Aide", href: "/admin/help", icon: HelpCircle, color: "text-blue-500", bgColor: "bg-blue-50 hover:bg-blue-100" },
+// 1. Transformation de la navigation simple en sections catégorisées
+const sidebarSections = [
+  {
+    title: "GENERAL",
+    items: [
+      { id: "dashboard", label: "Dashboard", href: "/admin", icon: BarChart3 },
+    ]
+  },
+  {
+    title: "ACADEMIC",
+    items: [
+      { id: "students", label: "Étudiants", href: "/admin/students", icon: GraduationCap },
+      { id: "classes", label: "Classes", href: "/admin/classes", icon: BookOpen },
+      { id: "departments", label: "Départements", href: "/admin/departments", icon: Building },
+      { id: "academic", label: "Années", href: "/admin/academic", icon: BookCopy },
+      { id: "sessions", label: "Sessions", href: "/admin/sessions", icon: Calendar },
+      { id: "attendance", label: "Présences", href: "/admin/attendance", icon: ClipboardList },
+      { id: "grades", label: "Notes", href: "/admin/grades", icon: Award },
+      { id: "discipline", label: "Discipline", href: "/admin/discipline", icon: AlertTriangle },
+    ]
+  },
+  {
+    title: "COMMUNICATION",
+    items: [
+      { id: "messages", label: "Messages", href: "/admin/messages", icon: MessageSquare },
+      { id: "notifications", label: "Notifications", href: "/admin/notifications", icon: Bell },
+    ]
+  },
+  {
+    title: "ADMINISTRATION",
+    items: [
+      { id: "users", label: "Utilisateurs", href: "/admin/users", icon: Users },
+      { id: "permissions", label: "Permissions", href: "/admin/permissions", icon: Shield },
+      { id: "reports", label: "Rapports", href: "/admin/reports", icon: PieChart },
+      { id: "audit-logs", label: "Audit Logs", href: "/admin/audit-logs", icon: ScrollText },
+    ]
+  },
+  {
+    title: "SYSTEM",
+    items: [
+      { id: "config", label: "Configuration", href: "/admin/config", icon: SlidersHorizontal },
+      { id: "backups", label: "Sauvegardes", href: "/admin/backups", icon: Database },
+      { id: "settings", label: "Paramètres", href: "/admin/settings", icon: Settings },
+      { id: "help", label: "Aide", href: "/admin/help", icon: HelpCircle },
+    ]
+  }
 ]
+
+function AdminLayoutContent({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const { logout } = useAuth()
+  const { adminData } = useAdmin()
+  const [mounted, setMounted] = useState(false)
+
+  // Évite les erreurs d'hydratation côté client pour le raccourci clavier
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const handleLogout = () => {
+    logout()
+  }
+
+  // Préparation des données utilisateur pour le Layout et la Sidebar
+  const firstName = adminData?.firstname || "Hassan"
+  const lastName = adminData?.lastname || ""
+  const initials = `${firstName.charAt(0)}${lastName ? lastName.charAt(0) : ""}`
+  
+  const currentUser = {
+    name: `${firstName} ${lastName}`.trim(),
+    role: "Administrator",
+  }
+
+  return (
+    // Application du fond premium en dégradé
+    <div className="min-h-screen flex bg-gradient-to-br from-[#f8fafc] to-[#f2f5fa]">
+      
+      {/* Intégration de la nouvelle Sidebar */}
+      <Sidebar 
+        sections={sidebarSections} 
+        user={currentUser}
+        onLogout={handleLogout} 
+        defaultCollapsed 
+      />
+
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Header Premium - Sans logo, avec recherche centrale */}
+        <header className="z-40 px-[40px] pt-[32px] pb-4">
+          <div className="flex items-center justify-between gap-8">
+            
+            {/* Gauche : Message de bienvenue */}
+            <div className="flex flex-col flex-shrink-0">
+              <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
+                Bonjour {firstName} 👋
+              </h2>
+              <p className="text-sm font-medium text-slate-500 mt-1">
+                Bienvenue dans votre espace d'administration
+              </p>
+            </div>
+
+            {/* Centre : Barre de recherche globale */}
+            <div className="flex-1 max-w-2xl hidden md:flex items-center">
+              <button 
+                className="flex items-center justify-between w-full h-12 px-4 bg-white/60 hover:bg-white border border-slate-200/60 hover:border-blue-300 shadow-sm hover:shadow-md hover:shadow-blue-500/5 rounded-2xl text-slate-400 transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-blue-100"
+              >
+                <div className="flex items-center gap-3">
+                  <Search className="w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                  <span className="text-[15px] text-slate-400 group-hover:text-slate-600 transition-colors">
+                    Search students, users, classes...
+                  </span>
+                </div>
+                {mounted && (
+                  <kbd className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-slate-500 bg-slate-100/80 border border-slate-200/60 rounded-lg">
+                    <span className="text-sm">⌘</span>K
+                  </kbd>
+                )}
+              </button>
+            </div>
+
+            {/* Droite : Actions & Profil */}
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl bg-white/60 border border-slate-200/60 shadow-sm hover:bg-white text-slate-500 hover:text-blue-600 transition-all duration-200">
+                <MessageSquare className="h-5 w-5" />
+              </Button>
+              
+              <Button variant="ghost" size="icon" className="relative h-11 w-11 rounded-2xl bg-white/60 border border-slate-200/60 shadow-sm hover:bg-white text-slate-500 hover:text-blue-600 transition-all duration-200">
+                <Bell className="h-5 w-5" />
+                <span className="absolute top-2.5 right-3 h-2 w-2 bg-red-500 rounded-full border-2 border-white"></span>
+              </Button>
+              
+              <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl bg-white/60 border border-slate-200/60 shadow-sm hover:bg-white text-slate-500 hover:text-blue-600 transition-all duration-200">
+                <HelpCircle className="h-5 w-5" />
+              </Button>
+
+              <div className="w-px h-8 bg-slate-200/80 mx-1"></div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-11 w-11 rounded-2xl p-0 hover:scale-105 transition-transform duration-200">
+                    <Avatar className="h-11 w-11 border border-white shadow-md">
+                      <AvatarImage src="/user.png" alt="Admin User" />
+                      <AvatarFallback className="bg-blue-600 text-white font-semibold text-sm">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64 rounded-2xl bg-white/95 backdrop-blur-xl border-slate-100 shadow-xl shadow-slate-900/10 p-2" align="end" sideOffset={10}>
+                  <DropdownMenuLabel className="font-normal px-3 py-2">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-semibold text-slate-900">
+                        {currentUser.name}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {adminData?.email || "admin@university.edu"}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-slate-100" />
+                  <DropdownMenuItem asChild className="rounded-xl hover:bg-slate-50 focus:bg-slate-50 cursor-pointer mb-1">
+                    <Link href="/admin/profile" className="flex items-center px-3 py-2.5">
+                      <Settings className="mr-3 h-4 w-4 text-slate-500" />
+                      <span className="text-slate-700 font-medium">Profil</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="rounded-xl hover:bg-slate-50 focus:bg-slate-50 cursor-pointer">
+                    <Link href="/admin/settings" className="flex items-center px-3 py-2.5">
+                      <Settings className="mr-3 h-4 w-4 text-slate-500" />
+                      <span className="text-slate-700 font-medium">Paramètres</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-slate-100 my-1" />
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="rounded-xl hover:bg-red-50 focus:bg-red-50 cursor-pointer text-red-600 focus:text-red-700 mt-1"
+                  >
+                    <LogOut className="mr-3 h-4 w-4" />
+                    <span className="font-medium">Déconnexion</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content - Pleine largeur avec le bon espacement */}
+        <main className="flex-1 px-[40px] pt-4 pb-12 overflow-x-hidden overflow-y-auto w-full">
+          {/* L'espace est maintenu généreux et non limité par max-w-7xl */}
+          <div className="w-full h-full flex flex-col space-y-8">
+            {children}
+          </div>
+        </main>
+      </div>
+    </div>
+  )
+}
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const pathname = usePathname()
-  const { logout, userId, token } = useAuth()
-  const [user, setUser] = React.useState<{ firstname: string; lastname: string } | null>(null)
-
-  React.useEffect(() => {
-    if (userId && token) {
-      fetch(`http://localhost:8080/api/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((res) => {
-          if (!res.ok) {
-            return Promise.reject(new Error("Response not OK"));
-          }
-          return res.json();
-        })
-        .then((data) => setUser(data))
-        .catch((err) => console.error("Failed to fetch user:", err));
-    }
-  }, [userId, token])
-
-  const handleLogout = () => {
-    logout()
-  }
-
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header with improved contrast and spacing */}
-      <header className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-50">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <Link href="/admin" className="flex items-center gap-3 group">
-                <div className="relative">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200">
-                    <Shield className="h-6 w-6 text-white" />
-                  </div>
-                  <div className="absolute inset-0 bg-blue-600 rounded-xl opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
-                </div>
-                <div className="flex flex-col">
-                  <h1 className="text-2xl font-bold text-slate-900 group-hover:text-blue-700 transition-colors duration-200">
-                    GESTION INTRANET
-                  </h1>
-                  <span className="text-sm font-medium text-blue-600 tracking-wide">Admin Control</span>
-                </div>
-              </Link>
-              <Badge 
-                variant="secondary" 
-                className="bg-blue-100 text-blue-800 border-blue-200 font-medium px-3 py-1 text-sm"
-              >
-                Administrator
-              </Badge>
-            </div>
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="relative hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors duration-200"
-                aria-label="Notifications"
-              >
-                <Bell className="h-5 w-5" />
-                <div className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full animate-pulse shadow-sm"></div>
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-slate-100 transition-colors duration-200">
-                    <Avatar className="h-10 w-10 border-2 border-slate-200 shadow-sm">
-                      <AvatarImage src="/user.png" alt="Admin User" />
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-semibold">
-                        {user ? `${user.firstname.charAt(0)}${user.lastname.charAt(0)}` : "A"}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64 bg-white border-slate-200 shadow-xl" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal p-4">
-                    <div className="flex flex-col space-y-2">
-                      <p className="text-sm font-semibold leading-none text-slate-900">
-                        {user ? `${user.firstname} ${user.lastname}` : "Administrateur"}
-                      </p>
-                      <p className="text-xs leading-none text-slate-500">
-                        admin@university.edu
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-slate-200" />
-                  <DropdownMenuItem asChild className="hover:bg-slate-50 focus:bg-slate-50 cursor-pointer">
-                    <Link href="/admin/profile" className="flex items-center px-4 py-2">
-                      <Settings className="mr-3 h-4 w-4 text-slate-600" />
-                      <span className="text-slate-700">Profil</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="hover:bg-slate-50 focus:bg-slate-50 cursor-pointer">
-                    <Link href="/admin/settings" className="flex items-center px-4 py-2">
-                      <Settings className="mr-3 h-4 w-4 text-slate-600" />
-                      <span className="text-slate-700">Paramètres</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-slate-200" />
-                  <DropdownMenuItem 
-                    onClick={handleLogout} 
-                    className="hover:bg-red-50 focus:bg-red-50 cursor-pointer text-red-600 hover:text-red-700"
-                  >
-                    <LogOut className="mr-3 h-4 w-4" />
-                    <span>Déconnexion</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="flex">
-        {/* Sidebar with improved spacing and contrast */}
-        <aside className="w-72 bg-white border-r border-slate-200 min-h-screen sticky top-[80px] overflow-y-auto shadow-sm">
-          <nav className="p-6 space-y-2">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href
-              return (
-                <Link key={item.name} href={item.href}>
-                  <Button 
-                    variant="ghost" 
-                    className={`w-full justify-start h-12 px-4 transition-all duration-200 group ${
-                      isActive 
-                        ? `${item.bgColor} border-l-4 border-l-current ${item.color} font-semibold shadow-sm` 
-                        : "hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-l-4 border-l-transparent"
-                    }`}
-                  >
-                    <div className={`relative mr-4 p-2 rounded-lg transition-all duration-200 ${
-                      isActive 
-                        ? `${item.bgColor.split(' ')[0]} ${item.color}` 
-                        : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200 group-hover:text-slate-700'
-                    }`}>
-                      <item.icon className="h-5 w-5" />
-                      {isActive && (
-                        <div className="absolute inset-0 bg-current opacity-10 rounded-lg"></div>
-                      )}
-                    </div>
-                    <span className="font-medium tracking-wide">
-                      {item.name}
-                    </span>
-                    {isActive && (
-                      <div className="ml-auto w-2 h-2 bg-current rounded-full animate-pulse"></div>
-                    )}
-                  </Button>
-                </Link>
-              )
-            })}
-          </nav>
-        </aside>
-
-        {/* Main Content with improved spacing */}
-        <main className="flex-1 p-8 overflow-x-hidden bg-slate-50">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
-        </main>
-      </div>
-    </div>
+    <AdminProvider>
+      <AdminLayoutContent>
+        {children}
+      </AdminLayoutContent>
+    </AdminProvider>
   )
 }

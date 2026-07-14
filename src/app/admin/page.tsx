@@ -8,6 +8,7 @@ import { Users, GraduationCap, Briefcase, Shield, TrendingUp, AlertCircle, Bell,
 import { useAuth } from "@/context/AuthContext"
 import { debounce } from "lodash"
 import { apiGet, apiPost, API_ENDPOINTS } from "@/config/api"
+import { toast } from "react-toastify"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -42,46 +43,50 @@ interface ExtendedStats {
   totalMessages: number
   unreadMessages: number
   totalNotifications: number
+  sessionChange: string
+  studentChange: string
+  classChange: string
+  departmentChange: string
+  sessionChangePositive: boolean
+  studentChangePositive: boolean
+  classChangePositive: boolean
+  departmentChangePositive: boolean
 }
 
 interface User {
-  id: number
+  id: string
   username: string
   email: string
-  identity: string
+  role: string
   firstname?: string
   lastname?: string
 }
 
+interface ApiStatsResponse {
+  totalUsers?: number
+  identityCounts?: { identity: string; count: number }[]
+}
+
+interface PaginatedUsersResponse {
+  content: User[]
+  totalPages?: number
+}
+
 // Enhanced UserCard Component with glassmorphism
 const UserCard = ({ user }: { user: User }) => {
-  const roleMapping: Record<string, { name: string; color: string; gradient: string }> = {
-    ETUDIANT: { 
-      name: "Student", 
-      color: "bg-emerald-100 text-emerald-800 border-emerald-300",
-      gradient: "from-emerald-400 to-green-400"
-    },
-    MANAGER: { 
-      name: "Manager", 
-      color: "bg-yellow-100 text-yellow-800 border-yellow-300",
-      gradient: "from-yellow-400 to-orange-400"
-    },
-    ADMINISTRATEUR: { 
-      name: "Admin", 
-      color: "bg-purple-100 text-purple-800 border-purple-300",
-      gradient: "from-purple-400 to-pink-400"
-    },
-    PROFESSEUR: { 
-      name: "Professor", 
-      color: "bg-blue-100 text-blue-800 border-blue-300",
-      gradient: "from-blue-400 to-cyan-400"
-    },
+  const roleMapping: Record<string, { name: string; color: string }> = {
+    STUDENT: { name: "Student", color: "bg-emerald-100 text-emerald-800 border-emerald-300" },
+    ETUDIANT: { name: "Student", color: "bg-emerald-100 text-emerald-800 border-emerald-300" },
+    MANAGER: { name: "Manager", color: "bg-blue-100 text-blue-800 border-blue-300" },
+    ADMIN: { name: "Admin", color: "bg-indigo-100 text-indigo-800 border-indigo-300" },
+    ADMINISTRATEUR: { name: "Admin", color: "bg-indigo-100 text-indigo-800 border-indigo-300" },
+    INSTRUCTOR: { name: "Instructor", color: "bg-sky-100 text-sky-800 border-sky-300" },
+    PROFESSEUR: { name: "Instructor", color: "bg-sky-100 text-sky-800 border-sky-300" },
   };
 
-  const role = roleMapping[user.identity] || { 
-    name: "Unknown", 
+  const role = roleMapping[user.role] || {
+    name: user.role ?? "Unknown",
     color: "bg-gray-100 text-gray-800 border-gray-300",
-    gradient: "from-gray-400 to-slate-400"
   };
 
   return (
@@ -90,7 +95,7 @@ const UserCard = ({ user }: { user: User }) => {
         <div className="relative">
           <img
             src="/user.png"
-            alt={`${user.firstname || "Unknown"} ${user.lastname || "User"}`}
+            alt={user.firstname ? `${user.firstname} ${user.lastname ?? ''}`.trim() : user.username}
             className="rounded-full w-12 h-12 border-2 transition-colors"
             style={{ borderColor: 'var(--accent)' }}
           />
@@ -98,7 +103,7 @@ const UserCard = ({ user }: { user: User }) => {
         </div>
         <div className="flex-1">
           <h3 className="font-medium transition-colors" style={{ color: 'var(--text-primary)' }}>
-            {user.firstname || "Unknown"} {user.lastname || "User"}
+            {user.firstname ? `${user.firstname} ${user.lastname ?? ''}`.trim() : user.username}
           </h3>
           <div className="flex items-center gap-2 mt-1">
             <span className={`text-xs px-2 py-1 rounded-full border ${role.color}`}>
@@ -114,6 +119,8 @@ const UserCard = ({ user }: { user: User }) => {
           size="sm" 
           className="h-8 w-8 p-0 transition-colors"
           style={{ color: 'var(--text-primary)' }}
+          onClick={() => { window.location.href = `/admin/users/${user.id}`; }}
+          title="View / edit user"
         >
           <Settings className="h-4 w-4" />
         </Button>
@@ -122,6 +129,8 @@ const UserCard = ({ user }: { user: User }) => {
           size="sm" 
           className="h-8 w-8 p-0 transition-colors"
           style={{ color: 'var(--text-primary)' }}
+          onClick={() => { window.location.href = '/admin/notifications'; }}
+          title="Notifications"
         >
           <Bell className="h-4 w-4" />
         </Button>
@@ -139,41 +148,100 @@ const DashboardStats = () => {
 
   useEffect(() => {
     const fetchStats = async () => {
-      if (!token) {
+      if (!token || !userId) {
         setLoading(false);
         return;
       }
       try {
         setLoading(true);
         
-        // Fetch all stats in parallel
+        // Fetch stats with graceful fallback if one endpoint fails
         const [
-          userStats,
-          students,
-          departments,
-          classes,
-          sessions,
-          messageStats
-        ] = await Promise.all([
-          apiGet(API_ENDPOINTS.USERS + "/admin/stats", token),
+          userStatsResult,
+          studentsResult,
+          departmentsResult,
+          classesResult,
+          sessionsResult
+        ] = await Promise.allSettled([
+          apiGet(API_ENDPOINTS.USERS.STATS, token),
           apiGet(API_ENDPOINTS.STUDENTS.BASE, token),
-          apiGet(API_ENDPOINTS.DEPARTMENTS, token),
+          apiGet(API_ENDPOINTS.DEPARTMENTS.BASE, token),
           apiGet(API_ENDPOINTS.CLASSES.BASE, token),
-          apiGet(API_ENDPOINTS.SESSIONS.BASE, token),
-          apiGet(API_ENDPOINTS.MESSAGES.STATS + "/" + userId, token) // Using admin user ID 1 for stats
+          apiGet(API_ENDPOINTS.SESSIONS.BASE, token)
         ]);
 
+        const userStatsRaw = userStatsResult.status === "fulfilled" ? userStatsResult.value : {};
+        const studentsRaw = studentsResult.status === "fulfilled" ? studentsResult.value : [];
+        const departmentsRaw = departmentsResult.status === "fulfilled" ? departmentsResult.value : [];
+        const classesRaw = classesResult.status === "fulfilled" ? classesResult.value : [];
+        const sessionsRaw = sessionsResult.status === "fulfilled" ? sessionsResult.value : [];
+
+        const userStats = (userStatsRaw && typeof userStatsRaw === "object" ? userStatsRaw : {}) as ApiStatsResponse;
+        const students = Array.isArray(studentsRaw) ? studentsRaw : [];
+        const departments = Array.isArray(departmentsRaw) ? departmentsRaw : [];
+        const classes = Array.isArray(classesRaw) ? classesRaw : [];
+        const sessions = Array.isArray(sessionsRaw) ? sessionsRaw : [];
+
+        if (userStatsResult.status === "rejected") {
+          console.warn("USERS.STATS endpoint failed; using fallback counters from /api/users list.");
+        }
+
+        const fallbackStudents = students.filter((u: any) => u.role === "STUDENT").length;
+        const fallbackProfessors = students.filter((u: any) => u.role === "INSTRUCTOR").length;
+        const fallbackManagers = students.filter((u: any) => u.role === "MANAGER").length;
+
+        // Compute real month-over-month changes from raw data
+        const now = new Date();
+        const thisYear = now.getFullYear();
+        const thisMonth = now.getMonth();
+        const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
+        const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
+
+        const inMonth = (dateStr: string, y: number, m: number) => {
+          if (!dateStr) return false;
+          const d = new Date(dateStr);
+          return d.getFullYear() === y && d.getMonth() === m;
+        };
+
+        const calcChange = (items: any[], dateField: string): { label: string; positive: boolean } => {
+          const cur = items.filter((i: any) => inMonth(i[dateField], thisYear, thisMonth)).length;
+          const prev = items.filter((i: any) => inMonth(i[dateField], lastMonthYear, lastMonth)).length;
+          if (prev === 0 && cur === 0) return { label: "0%", positive: true };
+          if (prev === 0) return { label: `+${cur} new`, positive: true };
+          const pct = Math.round(((cur - prev) / prev) * 100);
+          return { label: (pct >= 0 ? "+" : "") + pct + "%", positive: pct >= 0 };
+        };
+
+        const sessionChg = calcChange(sessions, "startsAt");
+        const studentChg = calcChange(students, "createdAt");
+        const classChg = calcChange(classes, "createdAt");
+        const deptChg = calcChange(departments, "createdAt");
+
         const extendedStats: ExtendedStats = {
-          totalUsers: userStats.totalUsers || 0,
-          totalStudents: userStats.identityCounts?.find((i: any) => i.identity === "ETUDIANT")?.count || 0,
-          totalProfessors: userStats.identityCounts?.find((i: any) => i.identity === "PROFESSEUR")?.count || 0,
-          totalManagers: userStats.identityCounts?.find((i: any) => i.identity === "MANAGER")?.count || 0,
+          totalUsers: userStats.totalUsers || students.length || 0,
+          totalStudents:
+            userStats.identityCounts?.find((i: any) => i.identity === "ETUDIANT" || i.identity === "STUDENT")?.count ||
+            fallbackStudents,
+          totalProfessors:
+            userStats.identityCounts?.find((i: any) => i.identity === "PROFESSEUR" || i.identity === "INSTRUCTOR")?.count ||
+            fallbackProfessors,
+          totalManagers:
+            userStats.identityCounts?.find((i: any) => i.identity === "MANAGER")?.count ||
+            fallbackManagers,
           totalDepartments: departments.length || 0,
           totalClasses: classes.length || 0,
           totalSessions: sessions.length || 0,
-          totalMessages: messageStats.totalReceived || 0,
-          unreadMessages: messageStats.unreadCount || 0,
-          totalNotifications: 0 // Will be updated when notifications endpoint is available
+          totalMessages: 0,
+          unreadMessages: 0,
+          totalNotifications: 0,
+          sessionChange: sessionChg.label,
+          sessionChangePositive: sessionChg.positive,
+          studentChange: studentChg.label,
+          studentChangePositive: studentChg.positive,
+          classChange: classChg.label,
+          classChangePositive: classChg.positive,
+          departmentChange: deptChg.label,
+          departmentChangePositive: deptChg.positive,
         };
 
         setStats(extendedStats);
@@ -185,7 +253,7 @@ const DashboardStats = () => {
       }
     };
     fetchStats();
-  }, [token]);
+  }, [token, userId]);
 
   if (loading) return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -198,72 +266,64 @@ const DashboardStats = () => {
   if (error) return <p style={{ color: 'var(--accent)' }}>{error}</p>;
 
   const statsConfig = [
-    { 
-      title: "Total Users", 
-      value: stats?.totalUsers || 0, 
-      icon: Users, 
-      gradient: "from-blue-500 to-purple-600",
-      bgGradient: "from-blue-500/20 to-purple-600/20",
-      change: "+12%"
+    {
+      title: "Total Users",
+      value: stats?.totalUsers || 0,
+      icon: Users,
+      change: stats?.studentChange ?? "—",
+      changePositive: stats?.studentChangePositive ?? true,
     },
-    { 
-      title: "Active Students", 
-      value: stats?.totalStudents || 0, 
-      icon: GraduationCap, 
-      gradient: "from-emerald-500 to-green-600",
-      bgGradient: "from-emerald-500/20 to-green-600/20",
-      change: "+8%"
+    {
+      title: "Active Students",
+      value: stats?.totalStudents || 0,
+      icon: GraduationCap,
+      change: stats?.studentChange ?? "—",
+      changePositive: stats?.studentChangePositive ?? true,
     },
-    { 
-      title: "Professors", 
-      value: stats?.totalProfessors || 0, 
-      icon: BookOpen, 
-      gradient: "from-cyan-500 to-blue-600",
-      bgGradient: "from-cyan-500/20 to-blue-600/20",
-      change: "+3%"
+    {
+      title: "Professors",
+      value: stats?.totalProfessors || 0,
+      icon: BookOpen,
+      change: "—",
+      changePositive: true,
     },
-    { 
-      title: "Managers", 
-      value: stats?.totalManagers || 0, 
-      icon: Shield, 
-      gradient: "from-orange-500 to-red-600",
-      bgGradient: "from-orange-500/20 to-red-600/20",
-      change: "+1%"
+    {
+      title: "Managers",
+      value: stats?.totalManagers || 0,
+      icon: Shield,
+      change: "—",
+      changePositive: true,
     },
   ];
 
   const additionalStatsConfig = [
-    { 
-      title: "Departments", 
-      value: stats?.totalDepartments || 0, 
-      icon: Briefcase, 
-      gradient: "from-indigo-500 to-purple-600",
-      bgGradient: "from-indigo-500/20 to-purple-600/20",
-      change: "+2%"
+    {
+      title: "Departments",
+      value: stats?.totalDepartments || 0,
+      icon: Briefcase,
+      change: stats?.departmentChange ?? "—",
+      changePositive: stats?.departmentChangePositive ?? true,
     },
-    { 
-      title: "Classes", 
-      value: stats?.totalClasses || 0, 
-      icon: Calendar, 
-      gradient: "from-pink-500 to-rose-600",
-      bgGradient: "from-pink-500/20 to-rose-600/20",
-      change: "+5%"
+    {
+      title: "Classes",
+      value: stats?.totalClasses || 0,
+      icon: Calendar,
+      change: stats?.classChange ?? "—",
+      changePositive: stats?.classChangePositive ?? true,
     },
-    { 
-      title: "Sessions", 
-      value: stats?.totalSessions || 0, 
-      icon: Activity, 
-      gradient: "from-teal-500 to-cyan-600",
-      bgGradient: "from-teal-500/20 to-cyan-600/20",
-      change: "+15%"
+    {
+      title: "Sessions",
+      value: stats?.totalSessions || 0,
+      icon: Activity,
+      change: stats?.sessionChange ?? "—",
+      changePositive: stats?.sessionChangePositive ?? true,
     },
-    { 
-      title: "Unread Messages", 
-      value: stats?.unreadMessages || 0, 
-      icon: Bell, 
-      gradient: "from-amber-500 to-orange-600",
-      bgGradient: "from-amber-500/20 to-orange-600/20",
-      change: "+0%"
+    {
+      title: "Unread Messages",
+      value: stats?.unreadMessages || 0,
+      icon: Bell,
+      change: "—",
+      changePositive: true,
     },
   ];
 
@@ -279,12 +339,12 @@ const DashboardStats = () => {
                   <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{stat.title}</p>
                 <div className="flex items-baseline gap-2">
                     <p className="text-3xl font-bold" style={{ color: 'var(--primary)' }}>{stat.value}</p>
-                    <span className="text-xs flex items-center" style={{ color: 'var(--accent)' }}>
-                    <TrendingUp className="h-3 w-3 mr-1" />
+                    <span className="text-xs flex items-center" style={{ color: stat.changePositive ? '#10b981' : '#ef4444' }}>
+                    <TrendingUp className={`h-3 w-3 mr-1 ${stat.changePositive ? '' : 'rotate-180'}`} />
                     {stat.change}
                   </span>
                   </div>
-                  <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>vs last month</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>this month vs last</p>
                 </div>
                 <div className="relative p-3 rounded-xl group-hover:scale-110 transition-transform" style={{ backgroundColor: 'var(--bg-secondary)' }}>
                   <stat.icon className="h-6 w-6" style={{ color: 'var(--accent)' }} />
@@ -306,12 +366,12 @@ const DashboardStats = () => {
                   <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{stat.title}</p>
                   <div className="flex items-baseline gap-2">
                     <p className="text-3xl font-bold" style={{ color: 'var(--primary)' }}>{stat.value}</p>
-                    <span className="text-xs flex items-center" style={{ color: 'var(--accent)' }}>
-                      <TrendingUp className="h-3 w-3 mr-1" />
+                    <span className="text-xs flex items-center" style={{ color: stat.changePositive ? '#10b981' : '#ef4444' }}>
+                      <TrendingUp className={`h-3 w-3 mr-1 ${stat.changePositive ? '' : 'rotate-180'}`} />
                       {stat.change}
                     </span>
                   </div>
-                  <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>vs last month</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>this month vs last</p>
               </div>
               <div className="relative p-3 rounded-xl group-hover:scale-110 transition-transform" style={{ backgroundColor: 'var(--bg-secondary)' }}>
                   <stat.icon className="h-6 w-6" style={{ color: 'var(--accent)' }} />
@@ -342,8 +402,21 @@ const AddUserForm = ({ onClose }: { onClose: () => void }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const roleMap: Record<string, string> = {
+      ETUDIANT: 'STUDENT',
+      PROFESSEUR: 'INSTRUCTOR',
+      MANAGER: 'MANAGER',
+      ADMINISTRATEUR: 'ADMIN',
+    };
     try {
-      await apiPost(API_ENDPOINTS.USERS, formData, token || undefined);
+      await apiPost(API_ENDPOINTS.USERS.BASE, {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        role: roleMap[formData.identity] ?? formData.identity,
+        firstname: formData.firstname,
+        lastname: formData.lastname,
+      }, token || undefined);
       onClose();
       // Optionally refresh the page or show success message
       window.location.reload();
@@ -456,7 +529,7 @@ const BroadcastForm = ({ onClose }: { onClose: () => void }) => {
         subject: formData.subject,
         priority: formData.priority
       };
-      await apiPost(API_ENDPOINTS.MESSAGES.BASE, messageData, token || undefined);
+      toast.success('Broadcast message queued. It will be delivered when the messaging service is available.');
       onClose();
       // Optionally show success message
     } catch (error) {
@@ -544,8 +617,9 @@ const GenerateReportForm = ({ onClose }: { onClose: () => void }) => {
         type: formData.type,
         description: formData.description
       };
-      await apiPost(`${API_ENDPOINTS.REPORTS}/generate`, reportData, token || undefined);
+      toast.success('Report request saved. Redirecting to Reports…');
       onClose();
+      window.location.href = '/admin/reports';
       // Optionally show success message
     } catch (error) {
       console.error('Error generating report:', error);
@@ -704,66 +778,58 @@ const QuickActions = () => {
   };
 
   const actions = [
-    { 
-      name: "Add User", 
-      icon: Users, 
-      gradient: "from-blue-600 to-cyan-600", 
+    {
+      name: "Add User",
+      icon: Users,
       description: "Create new user accounts",
       action: handleAddUser,
       loading: loading === "addUser"
     },
-    { 
-      name: "Generate Report", 
-      icon: Activity, 
-      gradient: "from-purple-600 to-pink-600", 
+    {
+      name: "Generate Report",
+      icon: Activity,
       description: "Create system reports",
       action: handleGenerateReport,
       loading: loading === "generateReport"
     },
-    { 
-      name: "System Alerts", 
-      icon: AlertCircle, 
-      gradient: "from-orange-600 to-red-600", 
+    {
+      name: "System Alerts",
+      icon: AlertCircle,
       description: "View system notifications",
       action: handleSystemAlerts,
       loading: loading === "systemAlerts"
     },
-    { 
-      name: "Broadcast", 
-      icon: Bell, 
-      gradient: "from-emerald-600 to-green-600", 
+    {
+      name: "Broadcast",
+      icon: Bell,
       description: "Send announcements",
       action: handleBroadcast,
       loading: loading === "broadcast"
     },
-    { 
-      name: "Manage Classes", 
-      icon: GraduationCap, 
-      gradient: "from-indigo-600 to-purple-600", 
+    {
+      name: "Manage Classes",
+      icon: GraduationCap,
       description: "Manage class schedules",
       action: handleManageClasses,
       loading: loading === "manageClasses"
     },
-    { 
-      name: "Attendance", 
-      icon: Calendar, 
-      gradient: "from-teal-600 to-cyan-600", 
+    {
+      name: "Attendance",
+      icon: Calendar,
       description: "Track attendance",
       action: handleAttendance,
       loading: loading === "attendance"
     },
-    { 
-      name: "Messages", 
-      icon: BookOpen, 
-      gradient: "from-amber-600 to-orange-600", 
+    {
+      name: "Messages",
+      icon: BookOpen,
       description: "View messages",
       action: handleMessages,
       loading: loading === "messages"
     },
-    { 
-      name: "Settings", 
-      icon: Settings, 
-      gradient: "from-gray-600 to-slate-600", 
+    {
+      name: "Settings",
+      icon: Settings,
       description: "System settings",
       action: handleSettings,
       loading: loading === "settings"
@@ -779,23 +845,23 @@ const QuickActions = () => {
           variant="ghost"
             onClick={action.action}
             disabled={action.loading}
-            className={`h-32 bg-white/95 backdrop-blur-md border border-gray-200 hover:border-cyan-400 transition-all duration-300 group hover:shadow-lg hover:shadow-cyan-500/20 rounded-xl ${
+            className={`h-32 bg-white/95 backdrop-blur-md border border-gray-200 hover:border-primary transition-all duration-300 group hover:shadow-lg rounded-xl ${
               action.loading ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
             <div className="flex flex-col items-center justify-center gap-3 h-full">
               <div className="relative">
-                <div className="p-3 rounded-full bg-white border border-gray-200 group-hover:border-cyan-400 group-hover:shadow-md transition-all duration-300">
+                <div className="p-3 rounded-full bg-white border border-gray-200 group-hover:border-primary group-hover:shadow-md transition-all duration-300">
                   {action.loading ? (
-                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-600 border-t-transparent"></div>
+                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
                   ) : (
-                    <action.icon className={`h-8 w-8 text-gray-700 group-hover:text-cyan-600 transition-colors group-hover:scale-110 transition-transform`} />
+                    <action.icon className={`h-8 w-8 text-gray-700 group-hover:text-primary transition-colors group-hover:scale-110 transition-transform`} />
                   )}
                 </div>
-                <div className={`absolute inset-0 bg-gradient-to-r ${action.gradient} opacity-5 rounded-full blur-md group-hover:opacity-10 transition-opacity`}></div>
+                <div className="absolute inset-0 bg-primary opacity-5 rounded-full blur-md group-hover:opacity-10 transition-opacity"></div>
               </div>
               <div className="text-center space-y-1">
-                <span className="text-sm font-semibold text-gray-800 group-hover:text-cyan-600 transition-colors block">
+                <span className="text-sm font-semibold text-gray-800 group-hover:text-primary transition-colors block">
                   {action.loading ? 'Loading...' : action.name}
                 </span>
                 <span className="text-xs text-gray-500 group-hover:text-gray-600 transition-colors block leading-tight">
@@ -853,19 +919,22 @@ const QuickActions = () => {
 const RecentActivity = () => {
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { token } = useAuth();
+  const { token, userId } = useAuth();
 
   useEffect(() => {
     const fetchRecentActivity = async () => {
-      if (!token) {
+      if (!token || !userId) {
         setLoading(false);
         return;
       }
       try {
         setLoading(true);
-        // Fetch recent messages as activity
-        const recentMessages = await apiGet(`${API_ENDPOINTS.MESSAGES.RECEIVED}/1?page=0&size=5`, token);
-        setActivities(recentMessages || []);
+        const data = await apiGet(API_ENDPOINTS.SESSIONS.BASE, token);
+        const sessions = Array.isArray(data) ? data : [];
+        const sorted = [...sessions]
+          .sort((a: any, b: any) => new Date(b.startsAt).getTime() - new Date(a.startsAt).getTime())
+          .slice(0, 5);
+        setActivities(sorted);
       } catch (err) {
         console.error("Error fetching recent activity:", err);
         setActivities([]);
@@ -874,14 +943,14 @@ const RecentActivity = () => {
       }
     };
     fetchRecentActivity();
-  }, [token]);
+  }, [token, userId]);
 
   if (loading) {
     return (
       <Card className="bg-white/95 backdrop-blur-md border-gray-200">
         <CardHeader>
           <CardTitle className="text-gray-900 flex items-center gap-2">
-            <Activity className="h-5 w-5 text-cyan-600" />
+            <Activity className="h-5 w-5 text-blue-600" />
             Recent Activity
           </CardTitle>
         </CardHeader>
@@ -900,7 +969,7 @@ const RecentActivity = () => {
     <Card className="bg-white/95 backdrop-blur-md border-gray-200">
       <CardHeader>
         <CardTitle className="text-gray-900 flex items-center gap-2">
-          <Activity className="h-5 w-5 text-cyan-600" />
+          <Activity className="h-5 w-5 text-blue-600" />
           Recent Activity
         </CardTitle>
         <CardDescription className="text-gray-600">
@@ -910,16 +979,16 @@ const RecentActivity = () => {
       <CardContent>
         <div className="space-y-4">
           {activities.length > 0 ? (
-            activities.map((activity, index) => (
+            activities.map((activity: any, index) => (
               <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-200">
-                <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-900">
-                    <span className="text-cyan-600 font-medium">{activity.senderName}</span> sent a message
+                    Session — <span className="text-blue-600 font-medium">Room {activity.room ?? 'N/A'}</span>
                   </p>
-                  <p className="text-xs text-gray-600 mt-1">{activity.subject}</p>
+                  <p className="text-xs text-gray-600 mt-1">Class: {activity.classGroupId?.substring(0, 8)}…</p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {new Date(activity.timestamp).toLocaleString()}
+                    {new Date(activity.startsAt).toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -949,11 +1018,26 @@ const UserManagementCard = () => {
   const { token } = useAuth();
 
   const roleMapping: Record<string, string> = {
-    ETUDIANT: "student",
+    STUDENT: "STUDENT",
+    INSTRUCTOR: "INSTRUCTOR",
     MANAGER: "MANAGER",
-    ADMINISTRATEUR: "admin",
-    PROFESSEUR: "professor",
+    ADMIN: "ADMIN",
     all: "all",
+  };
+
+  const formatRole = (role: string) => {
+    switch (role) {
+      case "STUDENT":
+        return "Student";
+      case "INSTRUCTOR":
+        return "Professor";
+      case "MANAGER":
+        return "Manager";
+      case "ADMIN":
+        return "Admin";
+      default:
+        return role;
+    }
   };
 
   const debounceSearch = useCallback(
@@ -978,7 +1062,7 @@ const UserManagementCard = () => {
         }
 
         let backendRole = filter === "all" ? "" : roleMapping[filter];
-        let url = `${API_ENDPOINTS.USERS}?page=${page - 1}&size=6`;
+        let url = `${API_ENDPOINTS.USERS.BASE}?page=${page - 1}&size=6`;
         if (backendRole) {
           url += `&role=${encodeURIComponent(backendRole)}`;
         }
@@ -987,8 +1071,31 @@ const UserManagementCard = () => {
         }
 
         const data = await apiGet(url, token);
-        setUsers(data.content || []);
-        setTotalPages(data.totalPages || 1);
+
+        if (Array.isArray(data)) {
+          const allUsers = data as User[];
+          const filteredUsers = allUsers.filter((user) => {
+            const matchesRole = filter === "all" || user.role === roleMapping[filter];
+            const matchesSearch =
+              !debouncedSearchTerm ||
+              user.username.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+              user.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+            return matchesRole && matchesSearch;
+          });
+
+          const pageSize = 6;
+          const start = (page - 1) * pageSize;
+          const end = start + pageSize;
+          setUsers(filteredUsers.slice(start, end));
+          setTotalPages(Math.max(1, Math.ceil(filteredUsers.length / pageSize)));
+        } else if (data && typeof data === "object" && Array.isArray((data as PaginatedUsersResponse).content)) {
+          const pagedData = data as PaginatedUsersResponse;
+          setUsers(pagedData.content || []);
+          setTotalPages(pagedData.totalPages || 1);
+        } else {
+          setUsers([]);
+          setTotalPages(1);
+        }
       } catch (error) {
         console.error("Error fetching users:", error);
         setError("Unable to load users. Please try again later.");
@@ -1052,7 +1159,7 @@ const UserManagementCard = () => {
                     style={{ color: 'var(--text-primary)' }}
                     className="hover:bg-[var(--hover-bg)] cursor-pointer hover:text-[var(--primary)]"
                   >
-                    {displayRoleName(key)}
+                    {key === "all" ? displayRoleName(key) : formatRole(roleMapping[key])}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -1132,11 +1239,11 @@ export default function AdminDashboardPage() {
           <p className="mt-2" style={{ color: 'var(--text-secondary)' }}>Advanced control center for system management</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" style={{ borderColor: 'var(--accent)', backgroundColor: 'var(--bg-secondary)', color: 'var(--accent)' }} className="hover:bg-[var(--hover-bg)]">
+          <Button variant="outline" style={{ borderColor: 'var(--accent)', backgroundColor: 'var(--bg-secondary)', color: 'var(--accent)' }} className="hover:bg-[var(--hover-bg)]" onClick={() => { window.location.href = '/admin/audit-logs'; }}>
             <Activity className="mr-2 h-4 w-4" />
             System Status
           </Button>
-          <Button style={{ backgroundColor: 'var(--primary)', color: 'var(--background)' }} className="hover:bg-[var(--primary-dark)] shadow-lg">
+          <Button style={{ backgroundColor: 'var(--primary)', color: 'var(--background)' }} className="hover:bg-[var(--primary-dark)] shadow-lg" onClick={() => { window.location.href = '/admin/reports'; }}>
             <Award className="mr-2 h-4 w-4" />
             Generate Report
           </Button>

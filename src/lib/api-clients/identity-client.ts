@@ -30,7 +30,7 @@ export class IdentityServiceClient {
     /**
      * Get user by ID
      */
-    static async getUserById(id: number, token: string) {
+    static async getUserById(id: string, token: string) {
         return apiGet(API_ENDPOINTS.USERS.BY_ID(id), token);
     }
 
@@ -58,14 +58,26 @@ export class IdentityServiceClient {
     /**
      * Update user
      */
-    static async updateUser(id: number, userData: any, token: string) {
+    static async updateUser(id: string, userData: any, token: string) {
         return apiPut(API_ENDPOINTS.USERS.BY_ID(id), userData, token);
     }
 
     /**
      * Delete user
      */
-    static async deleteUser(id: number, token: string) {
+    static async deleteUser(id: string, token: string) {
         return apiDelete(API_ENDPOINTS.USERS.BY_ID(id), token);
+    }
+
+    static async enableUser(id: string, token: string) {
+        return apiPut(API_ENDPOINTS.USERS.ENABLE(id), {}, token);
+    }
+
+    static async disableUser(id: string, token: string) {
+        return apiPut(API_ENDPOINTS.USERS.DISABLE(id), {}, token);
+    }
+
+    static async changePassword(id: string, newPassword: string, token: string) {
+        return apiPut(`${API_ENDPOINTS.USERS.CHANGE_PASSWORD(id)}?newPassword=${encodeURIComponent(newPassword)}`, {}, token);
     }
 }

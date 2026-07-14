@@ -45,7 +45,7 @@ Ce projet est une **architecture microservices complète** pour un système de g
 
 ## 🎯 Microservices
 
-### 1. **Identity Service** (Port: 8084)
+### 1. **Identity Service** (Port: 9000)
 **Responsabilité**: Authentification et gestion des identités
 
 #### Technologies
@@ -210,7 +210,7 @@ Table: attendance
 
 ---
 
-### 4. **Academic Year Service** (Port: 8085)
+### 4. **Academic Year Service** (Port: 9000)
 **Responsabilité**: Gestion des années académiques et semestres
 
 #### Base de données: `academic_year_db`
@@ -227,7 +227,7 @@ Table: semester
 
 ---
 
-### 5. **Student Service** (Port: 8087)
+### 5. **Student Service** (Port: 9000)
 **Responsabilité**: Gestion des étudiants
 
 #### Base de données: `student_db`
@@ -252,7 +252,7 @@ Table: student_enrollment
 
 ---
 
-### 6. **Instructor Service** (Port: 8088)
+### 6. **Instructor Service** (Port: 9000)
 **Responsabilité**: Gestion des enseignants
 
 #### Base de données: `instructor_db`
@@ -524,11 +524,11 @@ Table: class_report_projection
 
 2. **Core Services**
    ```bash
-   # Identity Service (8084)
+   # Identity Service (9000)
    cd services/identity-service
    mvn spring-boot:run
    
-   # Academic Year Service (8085)
+   # Academic Year Service (9000)
    # Academic Structure Service (8086)
    # ...
    ```
@@ -544,14 +544,14 @@ Table: class_report_projection
 | Service | Port |
 |---------|------|
 | Eureka Server | 8761 |
-| API Gateway | 8080 |
+| API Gateway | 9000 |
 | Config Server | 8888 |
-| Identity | 8084 |
-| Academic Year | 8085 |
+| Identity | 9000 |
+| Academic Year | 9000 |
 | Academic Structure | 8086 |
-| Student | 8087 |
-| Instructor | 8088 |
-| Attendance | 8090 |
+| Student | 9000 |
+| Instructor | 9000 |
+| Attendance | 9000 |
 | Messaging | 8091 |
 | Notification | 8092 |
 | Report | 8093 |
@@ -714,7 +714,7 @@ Le projet est **production-ready** avec quelques améliorations (containerisatio
 ### Services
 - **Eureka**: http://localhost:8761
 - **RabbitMQ Management**: http://localhost:15672
-- **API Gateway**: http://localhost:8080
+- **API Gateway**: http://localhost:9000
 
 ---
 

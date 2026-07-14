@@ -85,25 +85,25 @@
 
 | Service | Controllers | Endpoints | Port |
 |---------|-------------|-----------|------|
-| **Identity Service** | 2 | ~15 | 8084 |
+| **Identity Service** | 2 | ~15 | 9000 |
 | - AuthController | 1 | 3 | - |
 | - UserController | 1 | 12 | - |
-| **Academic Year Service** | 2 | ~16 | 8085 |
+| **Academic Year Service** | 2 | ~16 | 9000 |
 | - AcademicYearController | 1 | 8 | - |
 | - SemesterController | 1 | 8 | - |
-| **Academic Structure Service** | 6 | ~42 | 8087 |
+| **Academic Structure Service** | 6 | ~42 | 9000 |
 | - DepartmentController | 1 | 6 | - |
 | - ClassGroupController | 1 | 5 | - |
 | - ModuleController | 1 | 5 | - |
 | - SubjectController | 1 | 5 | - |
 | - SubjectOfferingController | 1 | 5 | - |
 | - SessionController ⭐ | 1 | 7 | - |
-| **Student Service** | 2 | ~28 | 8087 |
+| **Student Service** | 2 | ~28 | 9000 |
 | - StudentController | 1 | 13 | - |
 | - StudentEnrollmentController | 1 | 15 | - |
-| **Instructor Service** | 1 | ~8 | 8088 |
+| **Instructor Service** | 1 | ~8 | 9000 |
 | - InstructorController | 1 | 8 | - |
-| **Attendance Service** | 1 | ~18 | 8090 |
+| **Attendance Service** | 1 | ~18 | 9000 |
 | - AttendanceController | 1 | 18 | - |
 | **Messaging Service** | 1 | ~8 | 8091 |
 | - MessageController | 1 | 8 | - |

@@ -1,0 +1,140 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "search": "Rechercher",
+    "refresh": "Actualiser",
+    "loading": "Chargement…",
+    "noResults": "Aucun résultat",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "export": "Exporter",
+    "filters": "Filtres",
+    "actions": "Actions",
+    "status": "Statut",
+    "createdAt": "Créé le",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page",
+    "of": "sur",
+    "rowsPerPage": "Lignes par page",
+    "totalResults": "{from}–{to} sur {total} résultats"
+  },
+  "auth": {
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "username": "Nom d'utilisateur",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "changePassword": "Changer le mot de passe",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "mustChangePassword": "Vous devez changer votre mot de passe avant de continuer.",
+    "passwordStrength": {
+      "weak": "Faible",
+      "fair": "Moyen",
+      "good": "Bon",
+      "strong": "Fort"
+    }
+  },
+  "students": {
+    "title": "Gestion des étudiants",
+    "description": "Ajout et gestion des étudiants du système",
+    "add": "Ajouter un étudiant",
+    "studentNumber": "Numéro étudiant",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "dateOfBirth": "Date de naissance",
+    "class": "Classe",
+    "department": "Département",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet étudiant ?",
+    "createSuccess": "Étudiant ajouté avec succès !",
+    "updateSuccess": "Étudiant mis à jour avec succès !",
+    "deleteSuccess": "Étudiant supprimé avec succès !",
+    "temporaryPassword": {
+      "title": "Mot de passe temporaire",
+      "description": "Veuillez transmettre ce mot de passe à l'étudiant. Il devra le changer à sa première connexion.",
+      "copied": "Copié !",
+      "copy": "Copier",
+      "acknowledge": "J'ai noté le mot de passe, fermer"
+    }
+  },
+  "sessions": {
+    "title": "Gestion des séances",
+    "add": "Ajouter une séance",
+    "subject": "Matière",
+    "room": "Salle",
+    "startTime": "Début",
+    "endTime": "Fin",
+    "instructor": "Enseignant",
+    "classGroup": "Groupe",
+    "status": {
+      "SCHEDULED": "Planifiée",
+      "IN_PROGRESS": "En cours",
+      "COMPLETED": "Terminée",
+      "CANCELLED": "Annulée"
+    }
+  },
+  "attendance": {
+    "title": "Présences",
+    "status": {
+      "PRESENT": "Présent",
+      "ABSENT": "Absent",
+      "LATE": "En retard",
+      "EXCUSED": "Excusé"
+    },
+    "initialize": "Initialiser les présences",
+    "update": "Mettre à jour"
+  },
+  "auditLogs": {
+    "title": "Journaux d'audit",
+    "description": "Surveillance de toutes les activités système et événements de sécurité",
+    "actions": {
+      "ALL": "Toutes les actions",
+      "CREATE": "Création",
+      "UPDATE": "Modification",
+      "DELETE": "Suppression",
+      "READ": "Lecture",
+      "ERROR": "Erreur"
+    },
+    "export": "Exporter CSV",
+    "clearAll": "Tout effacer",
+    "clearConfirm": "Supprimer TOUS les journaux d'audit ? Cette action est irréversible.",
+    "clearSuccess": "Journaux d'audit effacés",
+    "stats": {
+      "totalEvents": "Total événements",
+      "creates": "Créations",
+      "updates": "Modifications",
+      "deletes": "Suppressions",
+      "errors": "Erreurs"
+    }
+  },
+  "reports": {
+    "title": "Rapports",
+    "description": "Analyses et rapports du système",
+    "totalUsers": "Total utilisateurs",
+    "activeUsers": "Utilisateurs actifs",
+    "auditEvents": "Événements d'audit",
+    "systemErrors": "Erreurs système"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "students": "Étudiants",
+    "instructors": "Enseignants",
+    "sessions": "Séances",
+    "attendance": "Présences",
+    "grades": "Notes",
+    "reports": "Rapports",
+    "auditLogs": "Journaux d'audit",
+    "users": "Utilisateurs",
+    "departments": "Départements",
+    "settings": "Paramètres",
+    "help": "Aide"
+  }
+}
