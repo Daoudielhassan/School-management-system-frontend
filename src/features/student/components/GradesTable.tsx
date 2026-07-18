@@ -13,9 +13,11 @@ export interface GradesTableProps {
   isLoading?: boolean;
   isError?: boolean;
   onRetry?: () => void;
+  /** Resolves a subjectId to its display name — falls back to "Matière inconnue" if omitted. */
+  subjectName?: (subjectId: string) => string;
 }
 
-export function GradesTable({ grades, isLoading, isError, onRetry }: GradesTableProps) {
+export function GradesTable({ grades, isLoading, isError, onRetry, subjectName }: GradesTableProps) {
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -55,7 +57,9 @@ export function GradesTable({ grades, isLoading, isError, onRetry }: GradesTable
           return (
             <TableRow key={grade.id}>
               <TableCell className="text-slate-600">{format(new Date(grade.gradedAt), 'dd/MM/yyyy')}</TableCell>
-              <TableCell className="text-slate-600">{grade.subjectId.slice(0, 8)}…</TableCell>
+              <TableCell className="text-slate-600">
+                {subjectName?.(grade.subjectId) ?? 'Matière inconnue'}
+              </TableCell>
               <TableCell>
                 <Badge variant="outline">{grade.evaluationType}</Badge>
               </TableCell>

@@ -2,7 +2,7 @@
 
 import { Briefcase } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { AddManagerPanel, ManagerDirectory } from '@/features/managers/components';
 
 export default function AdminManagersPage() {
@@ -24,7 +24,7 @@ export default function AdminManagersPage() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
+      <PageHeader
         icon={Briefcase}
         title="Managers"
         description="Provisionnement et gestion des comptes manager"

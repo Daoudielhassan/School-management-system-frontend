@@ -9,7 +9,7 @@ import { useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Plus, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { extractErrorMessage } from '@/lib/api-error';
 import { ClassStatsCards } from './ClassStatsCards';
@@ -97,7 +97,7 @@ export function ClassesManager() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
+      <PageHeader
         icon={BookOpen}
         title="Classes"
         description="Gérez les classes, groupes et emplois du temps"

@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Shield, Download, RefreshCw, Trash2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { TableSkeleton, StatsGridSkeleton } from '@/components/shared/Skeletons';
 import { Pagination } from '@/components/shared/Pagination';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
@@ -105,7 +105,7 @@ export function AuditLogsManager() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
+      <PageHeader
         icon={Shield}
         title="Journaux d'audit"
         description="Surveillez l'activité système et les événements de sécurité"

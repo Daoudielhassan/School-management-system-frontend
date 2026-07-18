@@ -10,7 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus } from 'lucide-react';
+import { BookOpen, Plus } from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { useDepartmentClassGroups } from '../hooks/useDepartment';
 import { useTeachingAssignments } from '../hooks/useTeachingAssignments';
 import { TeachingAssignmentsList } from './TeachingAssignmentsList';
@@ -25,16 +26,17 @@ export function TeachingAssignmentsManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800">Affectations</h1>
-          <p className="text-slate-500 mt-1">Qui enseigne quoi, à quelle classe</p>
-        </div>
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nouvelle affectation
-        </Button>
-      </div>
+      <PageHeader
+        icon={BookOpen}
+        title="Affectations"
+        description="Qui enseigne quoi, à quelle classe"
+        actions={
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nouvelle affectation
+          </Button>
+        }
+      />
 
       <Card>
         <CardContent className="p-6 space-y-4">

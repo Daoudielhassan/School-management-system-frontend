@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 import { ClipboardList, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { extractErrorMessage } from '@/lib/api-error';
 import { AttendanceStatsCards } from './AttendanceStatsCards';
 import { AttendanceFilters } from './AttendanceFilters';
@@ -45,7 +45,7 @@ export function AttendanceManager() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
+      <PageHeader
         icon={ClipboardList}
         title="Présences"
         description="Suivez et validez les présences des étudiants"

@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DataTable } from '@/components/shared/DataTable';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { extractErrorMessage } from '@/lib/api-error';
 import { useUsers } from '@/features/users';
 import { SendNotificationForm } from './SendNotificationForm';
@@ -65,7 +65,7 @@ export function NotificationsManager() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
+      <PageHeader
         icon={Bell}
         title="Notifications"
         description="Envoyez une notification à un utilisateur et consultez sa boîte de réception"

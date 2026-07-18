@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { CalendarRange } from 'lucide-react';
 import { DataTable } from '@/components/shared/DataTable';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { extractErrorMessage } from '@/lib/api-error';
 import { AcademicYearFormDialog } from './AcademicYearFormDialog';
 import { RolloverConfirmDialog } from './RolloverConfirmDialog';
@@ -57,7 +57,7 @@ export function AcademicYearsManager() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
+      <PageHeader
         icon={CalendarRange}
         title="Années académiques"
         description="Gérez le calendrier académique et les semestres"

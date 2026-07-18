@@ -1,15 +1,18 @@
 'use client';
 
+import { UserCircle } from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { ProfileForm } from './ProfileForm';
 import { ChangePasswordForm } from './ChangePasswordForm';
 
 export function StudentProfileManager() {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-800">Mon profil</h1>
-        <p className="text-slate-500 mt-1">Gérez vos informations personnelles et votre sécurité</p>
-      </div>
+      <PageHeader
+        icon={UserCircle}
+        title="Mon profil"
+        description="Gérez vos informations personnelles et votre sécurité"
+      />
 
       <div className="grid grid-cols-1 gap-6 max-w-2xl">
         <ProfileForm />

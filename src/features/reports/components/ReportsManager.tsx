@@ -8,7 +8,7 @@
  */
 import { useState } from 'react';
 import { PieChart } from 'lucide-react';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { useUserStats } from '@/features/users';
 import { useAuditLogStats } from '@/features/audit-logs';
 import { useStudents } from '@/features/students';
@@ -37,7 +37,7 @@ export function ReportsManager() {
 
   return (
     <div className="space-y-6">
-        <AdminPageHeader
+        <PageHeader
           icon={PieChart}
           title="Rapports &amp; analytiques"
           description="Vue d'ensemble du système et rapports de présence / notes à la demande"
@@ -77,7 +77,10 @@ export function ReportsManager() {
         ) : gradeReport.isLoading ? (
           <div className="animate-pulse bg-slate-100 rounded-xl h-48" />
         ) : gradeReport.data ? (
-          <GradeReportView report={gradeReport.data} />
+          <GradeReportView
+            report={gradeReport.data}
+            subjectName={(id) => subjects.find((s) => s.id === id)?.name ?? 'Matière inconnue'}
+          />
         ) : null}
     </div>
   );

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { HelpCircle, BookOpen, MessageSquare, LifeBuoy } from 'lucide-react';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 const RESOURCES = [
   {
@@ -29,7 +29,7 @@ const RESOURCES = [
 export default function AdminHelpPage() {
   return (
     <div className="space-y-6">
-      <AdminPageHeader icon={HelpCircle} title="Aide" description="Support et documentation" />
+      <PageHeader icon={HelpCircle} title="Aide" description="Support et documentation" />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {RESOURCES.map(({ icon: Icon, title, description, href }) => (

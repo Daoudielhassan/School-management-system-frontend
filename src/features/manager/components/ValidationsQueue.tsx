@@ -10,7 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Check, X } from 'lucide-react';
+import { ClipboardCheck, Check, X } from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { usePendingValidations, useValidationStats } from '../hooks/useValidations';
 import { useDepartmentClassGroups } from '../hooks/useDepartment';
 import { useManagerSubjects } from '../hooks/useTeachingAssignments';
@@ -50,10 +51,11 @@ export function ValidationsQueue() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-800">Validations</h1>
-        <p className="text-slate-500 mt-1">Approuvez ou rejetez les justificatifs d&apos;absence</p>
-      </div>
+      <PageHeader
+        icon={ClipboardCheck}
+        title="Validations"
+        description="Approuvez ou rejetez les justificatifs d'absence"
+      />
 
       {stats && <ValidationStatsCards stats={stats} />}
 

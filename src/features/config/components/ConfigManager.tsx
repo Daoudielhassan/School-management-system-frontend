@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { SlidersHorizontal } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { extractErrorMessage } from '@/lib/api-error';
 import { ConfigCard } from './ConfigCard';
 import { useGroupedConfigs, useUpdateConfig } from '../hooks/useConfig';
@@ -31,7 +31,7 @@ export function ConfigManager() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
+      <PageHeader
         icon={SlidersHorizontal}
         title="Configuration"
         description="Gérez les paramètres globaux du système"

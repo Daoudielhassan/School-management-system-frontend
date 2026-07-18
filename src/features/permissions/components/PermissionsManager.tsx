@@ -14,7 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Shield } from 'lucide-react';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { usePermissionsByRole } from '../hooks/usePermissions';
 import { ROLES } from '../constants';
 
@@ -23,7 +23,7 @@ export function PermissionsManager() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
+      <PageHeader
         icon={Shield}
         title="Permissions"
         description="Aperçu du contrôle d'accès par rôle (RBAC)"

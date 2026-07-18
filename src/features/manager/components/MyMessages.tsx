@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus } from 'lucide-react';
+import { MessageSquare, Plus } from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { useMyInbox, useMySentMessages } from '../hooks/useMyMessages';
 import { MessageList } from './MessageList';
 import { ComposeMessageDialog } from './ComposeMessageDialog';
@@ -24,16 +25,17 @@ export function MyMessages() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800">Messages</h1>
-          <p className="text-slate-500 mt-1">Échangez avec les étudiants, professeurs et l&apos;administration</p>
-        </div>
-        <Button onClick={() => setComposeOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nouveau message
-        </Button>
-      </div>
+      <PageHeader
+        icon={MessageSquare}
+        title="Messages"
+        description="Échangez avec les étudiants, professeurs et l'administration"
+        actions={
+          <Button onClick={() => setComposeOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nouveau message
+          </Button>
+        }
+      />
 
       <Card>
         <CardContent className="p-6">

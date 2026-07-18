@@ -11,7 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { extractErrorMessage } from '@/lib/api-error';
 import { useUsers } from '@/features/users';
@@ -121,7 +121,7 @@ export function MessagesManager() {
 
   return (
     <div className="space-y-6">
-        <AdminPageHeader
+        <PageHeader
           icon={MessageSquare}
           title="Centre de communication"
           description="Messagerie privée entre utilisateurs"

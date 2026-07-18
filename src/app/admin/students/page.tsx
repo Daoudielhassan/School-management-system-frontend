@@ -2,7 +2,7 @@
 
 import { GraduationCap } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { AddStudentPanel, StudentDirectory } from '@/features/students/components';
 
 export default function AdminStudentsPage() {
@@ -24,7 +24,7 @@ export default function AdminStudentsPage() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
+      <PageHeader
         icon={GraduationCap}
         title="Étudiants"
         description="Ajout et gestion des étudiants du système"

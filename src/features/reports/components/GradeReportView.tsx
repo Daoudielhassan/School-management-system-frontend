@@ -4,7 +4,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Hash, TrendingUp, ArrowDown, ArrowUp } from 'lucide-react';
 import type { GradeReport } from '../types';
 
-export function GradeReportView({ report }: { report: GradeReport }) {
+export function GradeReportView({
+  report,
+  subjectName,
+}: {
+  report: GradeReport;
+  /** Resolves a subjectId to its display name — falls back to "Matière inconnue" if omitted. */
+  subjectName?: (subjectId: string) => string;
+}) {
   const cards = [
     { icon: Hash, value: report.count, label: 'Notes' },
     { icon: TrendingUp, value: `${report.averagePercent}%`, label: 'Moyenne' },
@@ -33,7 +40,7 @@ export function GradeReportView({ report }: { report: GradeReport }) {
             <div className="space-y-2">
               {report.bySubject.map((s) => (
                 <div key={s.subjectId} className="flex items-center justify-between text-sm border-b border-slate-100 last:border-0 pb-2 last:pb-0">
-                  <span className="text-slate-500">{s.subjectId}</span>
+                  <span className="text-slate-500">{subjectName?.(s.subjectId) ?? 'Matière inconnue'}</span>
                   <span className="text-slate-800 font-medium">
                     {s.averagePercent}% ({s.count} notes)
                   </span>

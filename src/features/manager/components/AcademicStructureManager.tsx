@@ -6,17 +6,20 @@
  * and subjects belong to a module. The department is always resolved
  * server-side from the manager's own profile — never passed by the client.
  */
+import { Layers } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { ModulesManager } from '@/features/modules/components';
 import { SubjectsManager } from '@/features/subjects/components';
 
 export function AcademicStructureManager() {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-800">Structure académique</h1>
-        <p className="text-slate-500 mt-1">Modules et matières de votre département</p>
-      </div>
+      <PageHeader
+        icon={Layers}
+        title="Structure académique"
+        description="Modules et matières de votre département"
+      />
 
       <Tabs defaultValue="modules">
         <TabsList>

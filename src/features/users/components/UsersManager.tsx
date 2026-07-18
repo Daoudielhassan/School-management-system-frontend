@@ -9,7 +9,7 @@ import { useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Plus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { Pagination } from '@/components/shared/Pagination';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { extractErrorMessage } from '@/lib/api-error';
@@ -103,7 +103,7 @@ export function UsersManager() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
+      <PageHeader
         icon={Users}
         title="Utilisateurs"
         description="Gérez les comptes utilisateurs du système"

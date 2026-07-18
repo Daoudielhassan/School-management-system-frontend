@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 import { Plus, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { extractErrorMessage } from '@/lib/api-error';
 import { GradeStatsCards } from './GradeStatsCards';
@@ -67,7 +67,7 @@ export function GradesManager() {
 
   return (
     <div className="space-y-6">
-        <AdminPageHeader
+        <PageHeader
           icon={Award}
           title="Notes"
           description="Suivi des performances académiques des étudiants"

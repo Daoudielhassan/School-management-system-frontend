@@ -2,22 +2,23 @@
 
 import type { ComponentType, ReactNode } from 'react';
 
-export interface AdminPageHeaderProps {
+export interface PageHeaderProps {
   /** Lucide (or any) icon component rendered in the accent chip. */
   icon?: ComponentType<{ className?: string }>;
   title: string;
-  description?: string;
+  description?: ReactNode;
   /** Right-aligned actions (buttons, etc.). */
   actions?: ReactNode;
 }
 
 /**
- * Consistent premium header for every admin screen: an accent icon chip, a
- * title set in the admin display font (`--font-admin-display`, scoped to the
- * admin layout), a muted description, and a right-aligned actions slot. Keeps
- * typography, spacing and color identical across the whole admin section.
+ * Consistent premium header for every dashboard screen (admin, manager,
+ * student): an accent icon chip, a title set in the admin display font where
+ * available (`--font-admin-display`, falls back to inherit outside the admin
+ * layout), a muted description, and a right-aligned actions slot. Keeps
+ * typography, spacing and color identical across every role.
  */
-export function AdminPageHeader({ icon: Icon, title, description, actions }: AdminPageHeaderProps) {
+export function PageHeader({ icon: Icon, title, description, actions }: PageHeaderProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div className="flex items-center gap-3.5 min-w-0">

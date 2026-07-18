@@ -8,7 +8,7 @@ import { useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Plus, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { extractErrorMessage } from '@/lib/api-error';
 import { DepartmentStatsCards } from './DepartmentStatsCards';
@@ -98,7 +98,7 @@ export function DepartmentsManager() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
+      <PageHeader
         icon={Building2}
         title="Départements"
         description="Organisez les départements et leurs classes"

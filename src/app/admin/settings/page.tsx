@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Settings, SlidersHorizontal, Shield, Database, ArrowRight } from 'lucide-react';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 const AREAS = [
   {
@@ -30,7 +30,7 @@ const AREAS = [
 export default function AdminSettingsPage() {
   return (
     <div className="space-y-6">
-      <AdminPageHeader icon={Settings} title="Paramètres" description="Configuration du système" />
+      <PageHeader icon={Settings} title="Paramètres" description="Configuration du système" />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {AREAS.map(({ icon: Icon, title, description, href }) => (

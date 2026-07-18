@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
+  FileBarChart2,
   FileCheck,
   CalendarCheck,
   CalendarX,
@@ -24,8 +25,10 @@ import {
   ArrowDown,
   ArrowUp,
 } from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { useDepartmentClassGroups, useDepartmentDiplomas } from '../hooks/useDepartment';
 import { useDepartmentStudents } from '../hooks/useDepartmentStudents';
+import { useManagerAcademicYears, useManagerSubjects } from '../hooks/useTeachingAssignments';
 import { useAttendanceReport, useGradeReport } from '@/features/reports';
 import type { AttendanceReport, GradeReport } from '@/features/reports';
 import { QueryErrorState } from './QueryErrorState';
@@ -58,7 +61,7 @@ function AttendanceStats({ report }: { report: AttendanceReport }) {
   );
 }
 
-function GradeStats({ report }: { report: GradeReport }) {
+function GradeStats({ report, subjectName }: { report: GradeReport; subjectName: (id: string) => string }) {
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -74,7 +77,7 @@ function GradeStats({ report }: { report: GradeReport }) {
             <div className="space-y-1.5">
               {report.bySubject.map((s) => (
                 <div key={s.subjectId} className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500">{s.subjectId}</span>
+                  <span className="text-slate-500">{subjectName(s.subjectId)}</span>
                   <span className="text-slate-800 font-medium">
                     {s.averagePercent}% ({s.count} notes)
                   </span>
@@ -99,19 +102,28 @@ export function DepartmentReports() {
   const studentGrades = useGradeReport('student', studentId || undefined);
 
   const diplomasQuery = useDepartmentDiplomas();
+  const { data: academicYears = [] } = useManagerAcademicYears();
+  const { data: subjects = [] } = useManagerSubjects();
   const studentName = useMemo(() => {
     const byId = new Map(students.map((s) => [s.id, `${s.firstName} ${s.lastName}`]));
-    return (id: string) => byId.get(id) ?? id.slice(0, 8);
+    return (id: string) => byId.get(id) ?? 'Étudiant inconnu';
   }, [students]);
+  const academicYearLabel = useMemo(() => {
+    const byId = new Map(academicYears.map((y) => [y.id, y.code]));
+    return (id: string) => byId.get(id) ?? '—';
+  }, [academicYears]);
+  const subjectName = useMemo(() => {
+    const byId = new Map(subjects.map((s) => [s.id, s.name]));
+    return (id: string) => byId.get(id) ?? 'Matière inconnue';
+  }, [subjects]);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-800">Rapports</h1>
-        <p className="text-slate-500 mt-1">
-          Statistiques de présence et de notes, limitées à votre département
-        </p>
-      </div>
+      <PageHeader
+        icon={FileBarChart2}
+        title="Rapports"
+        description="Statistiques de présence et de notes, limitées à votre département"
+      />
 
       <Card>
         <CardContent className="p-6">
@@ -195,7 +207,7 @@ export function DepartmentReports() {
                         onRetry={studentGrades.refetch}
                       />
                     ) : studentGrades.data ? (
-                      <GradeStats report={studentGrades.data} />
+                      <GradeStats report={studentGrades.data} subjectName={subjectName} />
                     ) : null}
                   </div>
                 </div>
@@ -232,7 +244,7 @@ export function DepartmentReports() {
                     {(diplomasQuery.data ?? []).map((d) => (
                       <TableRow key={d.id}>
                         <TableCell className="font-medium text-slate-700">{studentName(d.studentId)}</TableCell>
-                        <TableCell className="text-slate-600">{d.academicYearId.slice(0, 8)}…</TableCell>
+                        <TableCell className="text-slate-600">{academicYearLabel(d.academicYearId)}</TableCell>
                         <TableCell className="text-slate-600">
                           {format(new Date(d.issuedAt), 'dd/MM/yyyy')}
                         </TableCell>

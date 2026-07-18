@@ -10,7 +10,7 @@ import { Database } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/shared/DataTable';
-import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { extractErrorMessage } from '@/lib/api-error';
 import { BackupStatsCards } from './BackupStatsCards';
@@ -48,7 +48,7 @@ export function BackupsManager() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
+      <PageHeader
         icon={Database}
         title="Sauvegarde &amp; restauration"
         description="Gérez les sauvegardes de la base de données et la restauration système"

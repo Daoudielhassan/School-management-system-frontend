@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Building2, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { useDepartmentClassGroups, useDepartmentSessions, useDepartmentAttendance } from '../hooks/useDepartment';
 import { DepartmentClassGroupsTable } from './DepartmentClassGroupsTable';
 import { DepartmentSessionsTable } from './DepartmentSessionsTable';
@@ -20,10 +21,11 @@ export function DepartmentOverview() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-800">Département</h1>
-        <p className="text-slate-500 mt-1">Classes, sessions et présences de votre département</p>
-      </div>
+      <PageHeader
+        icon={Building2}
+        title="Département"
+        description="Classes, sessions et présences de votre département"
+      />
 
       <Card>
         <CardContent className="p-6">
