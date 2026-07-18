@@ -18,6 +18,7 @@ export function resolveRecords(bundle: AttendanceBundle): ResolvedAttendanceReco
   const sessions = new Map(bundle.sessions.map((s) => [s.id, s]));
   const subjects = new Map(bundle.subjects.map((s) => [s.id, s]));
   const instructors = new Map(bundle.instructors.map((i) => [i.id, i]));
+  const teachingAssignments = new Map(bundle.teachingAssignments.map((a) => [a.id, a]));
 
   const sessionTime = (session?: Session) =>
     session ? session.startsAt.split('T')[1]?.substring(0, 5) ?? '-' : '-';
@@ -25,6 +26,11 @@ export function resolveRecords(bundle: AttendanceBundle): ResolvedAttendanceReco
   return bundle.records.map((r) => {
     const student = students.get(r.studentId);
     const session = sessions.get(r.sessionId);
+    // Session no longer carries subjectId/instructorId directly — resolve
+    // through its teachingAssignmentId (§2.15/§2.19).
+    const assignment = session?.teachingAssignmentId
+      ? teachingAssignments.get(session.teachingAssignmentId)
+      : undefined;
     return {
       id: r.id,
       studentId: r.studentId,
@@ -32,11 +38,11 @@ export function resolveRecords(bundle: AttendanceBundle): ResolvedAttendanceReco
       studentName: student
         ? `${student.firstName} ${student.lastName}`
         : r.studentId.substring(0, 8),
-      subjectName: session
-        ? subjects.get(session.subjectId)?.name ?? session.subjectId.substring(0, 8)
+      subjectName: assignment
+        ? subjects.get(assignment.subjectId)?.name ?? assignment.subjectId.substring(0, 8)
         : '-',
-      instructorName: session
-        ? instructors.get(session.instructorId)?.name ?? session.instructorId.substring(0, 8)
+      instructorName: assignment
+        ? instructors.get(assignment.instructorId)?.name ?? assignment.instructorId.substring(0, 8)
         : '-',
       attendanceDate: r.attendanceDate,
       time: sessionTime(session),

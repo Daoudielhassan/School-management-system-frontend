@@ -23,3 +23,9 @@ export const STUDENT_UPLOAD_ACCEPT = '.csv,.xlsx';
 
 /** Allowed extensions, validated client-side before upload. */
 export const STUDENT_UPLOAD_EXTENSIONS = ['csv', 'xlsx'] as const;
+
+/** Matches the server-side limit (`StudentController.MAX_UPLOAD_SIZE_BYTES`). */
+export const STUDENT_UPLOAD_MAX_SIZE_BYTES = 5 * 1024 * 1024;
+
+/** Header names the bulk-upload file must contain (case/whitespace-insensitive). */
+export const STUDENT_UPLOAD_REQUIRED_HEADERS = ['firstname', 'lastname', 'email'] as const;

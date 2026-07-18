@@ -39,6 +39,27 @@ export interface Instructor {
   temporaryPassword?: string;
 }
 
+// ─── Teaching Assignment Types ─────────────────────────────────────────────────
+
+export type TeachingAssignmentStatus = 'ACTIVE' | 'CANCELLED';
+
+/**
+ * The contract ("who teaches what, to which class, for which year") a
+ * `Session.teachingAssignmentId` points to. Introduced when `Session` lost its
+ * direct `classGroupId`/`subjectId`/`instructorId`/`teachingModuleId` fields —
+ * see API_REFERENCE.md §2.15/§2.19.
+ */
+export interface TeachingAssignment {
+  id: string;
+  departmentId: string;
+  classGroupId: string;
+  instructorId: string;
+  subjectId: string;
+  academicYearId: string;
+  status: TeachingAssignmentStatus;
+  createdAt: string;
+}
+
 // ─── Attendance Types ─────────────────────────────────────────────────────────
 
 export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';

@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import { useAuth } from '@/context/AuthContext';
+import { extractErrorMessage } from '@/lib/api-error';
 import {
   fetchMyInbox,
   fetchMyUnreadMessageCount,
@@ -88,6 +90,7 @@ export function useMarkMyMessageRead() {
       return markMyMessageRead(messageId, userId, token ?? undefined);
     },
     onSuccess: invalidate,
+    onError: (error) => toast.error(extractErrorMessage(error, 'Échec du marquage comme lu')),
   });
 }
 
@@ -102,6 +105,7 @@ export function useStarMyMessage() {
       return starMyMessage(messageId, userId, token ?? undefined);
     },
     onSuccess: invalidate,
+    onError: (error) => toast.error(extractErrorMessage(error, "Échec de l'ajout aux favoris")),
   });
 }
 
@@ -116,5 +120,6 @@ export function useArchiveMyMessage() {
       return archiveMyMessage(messageId, userId, token ?? undefined);
     },
     onSuccess: invalidate,
+    onError: (error) => toast.error(extractErrorMessage(error, "Échec de l'archivage")),
   });
 }

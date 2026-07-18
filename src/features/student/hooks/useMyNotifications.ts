@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import { useAuth } from '@/context/AuthContext';
+import { extractErrorMessage } from '@/lib/api-error';
 import {
   fetchMyNotifications,
   fetchMyUnreadNotificationCount,
@@ -47,6 +49,7 @@ export function useMarkMyNotificationRead() {
   return useMutation<NotificationResponse, Error, string>({
     mutationFn: (id) => markMyNotificationRead(id, token ?? undefined),
     onSuccess: invalidate,
+    onError: (error) => toast.error(extractErrorMessage(error, 'Échec du marquage comme lu')),
   });
 }
 
@@ -58,6 +61,7 @@ export function useDismissMyNotification() {
   return useMutation<NotificationResponse, Error, string>({
     mutationFn: (id) => dismissMyNotification(id, token ?? undefined),
     onSuccess: invalidate,
+    onError: (error) => toast.error(extractErrorMessage(error, 'Échec de la mise à jour')),
   });
 }
 

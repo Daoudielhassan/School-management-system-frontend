@@ -6,27 +6,30 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiDelete, API_ENDPOINTS } from '@/config/api';
 import { useAuth } from '@/context/AuthContext';
 
+/**
+ * Matches `SessionResponse` (API_REFERENCE.md §2.15). `Session` no longer
+ * carries `classGroupId`/`subjectId`/`instructorId`/`teachingModuleId`
+ * directly — those live on the `TeachingAssignment` (`@/types/education`)
+ * referenced by `teachingAssignmentId`; resolve it to get the class/subject/
+ * instructor for a session.
+ */
 export interface SessionData {
   id: string;
   managerId?: string;
   departmentId?: string;
-  classGroupId?: string;
-  teachingModuleId?: string;
-  subjectId?: string;
-  instructorId?: string;
+  teachingAssignmentId?: string;
   startsAt: string;
   endsAt: string;
   room?: string;
+  status?: 'SCHEDULED' | 'CANCELLED' | 'COMPLETED';
   createdAt: string;
 }
 
+/** Matches `SessionRequest` — `teachingAssignmentId` replaces the old class/subject/instructor fields. */
 export interface CreateSessionPayload {
   managerId?: string;
   departmentId: string;
-  classGroupId: string;
-  teachingModuleId?: string;
-  subjectId: string;
-  instructorId: string;
+  teachingAssignmentId: string;
   startsAt: string;
   endsAt: string;
   room?: string;

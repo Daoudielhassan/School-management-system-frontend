@@ -15,3 +15,16 @@ export interface CreateAcademicYearPayload {
   startDate: string;
   endDate: string;
 }
+
+/** Payload for `POST /api/academic-years/rollover` — Admin-only, irreversible. */
+export interface RolloverPayload {
+  endingYearId: string;
+  startingYearId: string;
+}
+
+/** Matches `RolloverResponse` — lets the confirmation dialog show the actual blast radius. */
+export interface RolloverResult {
+  promotedCohortsCount: number;
+  graduatedCohortsCount: number;
+  diplomasIssuedCount: number;
+}

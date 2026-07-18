@@ -38,6 +38,8 @@ export const API_ENDPOINTS = {
     BASE: `${EDUCATION_CORE_BASE}/api/academic-years`,
     BY_ID: (id: string) => `${EDUCATION_CORE_BASE}/api/academic-years/${id}`,
     ADD_SEMESTER: (id: string) => `${EDUCATION_CORE_BASE}/api/academic-years/${id}/semesters`,
+    // Closure phase (Admin-only): promotes/graduates every ACTIVE cohort and diplomas level-3 students.
+    ROLLOVER: `${EDUCATION_CORE_BASE}/api/academic-years/rollover`,
   },
 
   DEPARTMENTS: {
@@ -163,10 +165,11 @@ export const API_ENDPOINTS = {
     // JWT-scoped self-service (student portal) — resolved server-side, no id needed.
     ME: `${EDUCATION_CORE_BASE}/api/grades/me`,
     BY_SUBJECT: (subjectId: string) => `${EDUCATION_CORE_BASE}/api/grades/subject/${subjectId}`,
-    FILTER: (params?: { studentId?: string; subjectId?: string; page?: number; size?: number }) => {
+    FILTER: (params?: { studentId?: string; subjectId?: string; instructorId?: string; page?: number; size?: number }) => {
       const query = new URLSearchParams();
       if (params?.studentId) query.set('studentId', params.studentId);
       if (params?.subjectId) query.set('subjectId', params.subjectId);
+      if (params?.instructorId) query.set('instructorId', params.instructorId);
       if (params?.page !== undefined) query.set('page', String(params.page));
       if (params?.size !== undefined) query.set('size', String(params.size));
       const qs = query.toString();
@@ -213,11 +216,29 @@ export const API_ENDPOINTS = {
       `${EDUCATION_CORE_BASE}/api/manager/validations/stats${managerId ? `?managerId=${managerId}` : ""}`,
   },
 
+  // The contract ("who teaches what, to which class") a Session's `teachingAssignmentId` points to (§2.19).
+  TEACHING_ASSIGNMENTS: {
+    BASE: `${EDUCATION_CORE_BASE}/api/teaching-assignments`,
+    BY_ID: (id: string) => `${EDUCATION_CORE_BASE}/api/teaching-assignments/${id}`,
+    CANCEL: (id: string) => `${EDUCATION_CORE_BASE}/api/teaching-assignments/${id}/cancel`,
+    // Only one of departmentId/classGroupId/instructorId at a time per the backend contract.
+    FILTER: (params?: { departmentId?: string; classGroupId?: string; instructorId?: string }) => {
+      const query = new URLSearchParams();
+      if (params?.departmentId) query.set("departmentId", params.departmentId);
+      if (params?.classGroupId) query.set("classGroupId", params.classGroupId);
+      if (params?.instructorId) query.set("instructorId", params.instructorId);
+      const qs = query.toString();
+      return `${EDUCATION_CORE_BASE}/api/teaching-assignments${qs ? `?${qs}` : ""}`;
+    },
+  },
+
   MANAGERS: {
     BASE: `${EDUCATION_CORE_BASE}/api/managers`,
     BY_ID: (id: string) => `${EDUCATION_CORE_BASE}/api/managers/${id}`,
     BY_USER_ID: (userId: string) => `${EDUCATION_CORE_BASE}/api/managers/user/${userId}`,
     BY_EMPLOYEE_NUMBER: (employeeNumber: string) => `${EDUCATION_CORE_BASE}/api/managers/employee/${employeeNumber}`,
+    // JWT-scoped self-service (manager portal) — resolved server-side, no id needed.
+    ME: `${EDUCATION_CORE_BASE}/api/managers/me`,
     ACTIVE: `${EDUCATION_CORE_BASE}/api/managers/active`,
     BY_LEVEL: (level: string, page?: number, size?: number) => {
       const query = new URLSearchParams();
@@ -234,6 +255,13 @@ export const API_ENDPOINTS = {
     ATTENDANCE: (managerId: string) => `${EDUCATION_CORE_BASE}/api/managers/${managerId}/department/attendance`,
     UPDATE_ATTENDANCE: (managerId: string, attendanceId: string) =>
       `${EDUCATION_CORE_BASE}/api/managers/${managerId}/attendance/${attendanceId}/status`,
+    // Creates a TeachingAssignment scoped to the manager's own department (§2.19).
+    TEACHING_ASSIGNMENTS: (managerId: string) =>
+      `${EDUCATION_CORE_BASE}/api/managers/${managerId}/teaching-assignments`,
+    // Jury phase: moves a repeating student into a different cohort of the same level.
+    REPETITIONS: (managerId: string) => `${EDUCATION_CORE_BASE}/api/managers/${managerId}/department/repetitions`,
+    // Read-only: diplomas issued to students of this manager's department.
+    DIPLOMAS: (managerId: string) => `${EDUCATION_CORE_BASE}/api/managers/${managerId}/department/diplomas`,
   },
 
   MANAGER_ACTIONS: {
@@ -264,8 +292,8 @@ export const API_ENDPOINTS = {
     BY_CLASS: (classGroupId: string) => `${EDUCATION_CORE_BASE}/api/manager-assignments/class/${classGroupId}`,
     BY_MANAGER_AND_TYPE: (managerId: string, type: string) =>
       `${EDUCATION_CORE_BASE}/api/manager-assignments/manager/${managerId}/type/${type}`,
-    DELETE: (assignmentId: string, revokedBy: string) =>
-      `${EDUCATION_CORE_BASE}/api/manager-assignments/${assignmentId}?revokedBy=${encodeURIComponent(revokedBy)}`,
+    // v0: `revokedBy` is resolved server-side from the caller's JWT, no longer a client-supplied query param.
+    DELETE: (assignmentId: string) => `${EDUCATION_CORE_BASE}/api/manager-assignments/${assignmentId}`,
   },
 
   MANAGER_RESPONSIBILITIES: {

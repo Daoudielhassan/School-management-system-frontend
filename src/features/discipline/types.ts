@@ -2,6 +2,14 @@
  * Domain + view types for the discipline feature.
  */
 
+/** Minimal student shape needed for a name-based picker — satisfied by both
+ * the admin `StudentData` and the manager `StudentLite` types. */
+export interface StudentOption {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
 export type CaseSeverity = 'minor' | 'moderate' | 'severe' | 'critical';
 export type CaseStatus = 'pending' | 'under_review' | 'resolved' | 'appealed';
 

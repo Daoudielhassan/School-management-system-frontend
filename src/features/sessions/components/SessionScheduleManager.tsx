@@ -6,6 +6,7 @@
  */
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -13,13 +14,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Plus } from 'lucide-react';
 import Schedule from '@/components/shared/schedule';
 import { useDepartments, useDepartmentClasses } from '@/features/departments';
+import { CreateSessionDialog } from './CreateSessionDialog';
 
 export function SessionScheduleManager() {
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
+  const [createSessionOpen, setCreateSessionOpen] = useState(false);
+  const [scheduleRefreshKey, setScheduleRefreshKey] = useState(0);
 
   const { data: departments = [], isLoading: deptLoading } = useDepartments();
   const { data: classes = [], isLoading: classLoading } = useDepartmentClasses(
@@ -93,7 +97,22 @@ export function SessionScheduleManager() {
       </Card>
 
       {selectedDepartment && selectedClass ? (
-        <Schedule departmentId={selectedDepartment} classeId={selectedClass} />
+        <>
+          <div className="flex justify-end">
+            <Button size="sm" onClick={() => setCreateSessionOpen(true)}>
+              <Plus className="h-4 w-4 mr-1.5" />
+              Nouvelle séance
+            </Button>
+          </div>
+          <Schedule key={scheduleRefreshKey} departmentId={selectedDepartment} classeId={selectedClass} />
+          <CreateSessionDialog
+            open={createSessionOpen}
+            onOpenChange={setCreateSessionOpen}
+            departmentId={selectedDepartment}
+            classGroupId={selectedClass}
+            onCreated={() => setScheduleRefreshKey((k) => k + 1)}
+          />
+        </>
       ) : (
         <Card className="text-center p-8">
           <p className="text-gray-600">

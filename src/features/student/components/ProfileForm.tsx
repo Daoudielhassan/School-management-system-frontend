@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { UserCircle } from 'lucide-react';
 import { extractErrorMessage } from '@/lib/api-error';
 import { useMyProfile, useUpdateMyProfile } from '../hooks/useMyProfile';
+import { QueryErrorState } from './QueryErrorState';
 import type { StudentProfileUpdatePayload } from '../types';
 
 const EMPTY_FORM: StudentProfileUpdatePayload = {
@@ -22,7 +23,7 @@ const EMPTY_FORM: StudentProfileUpdatePayload = {
 };
 
 export function ProfileForm() {
-  const { data: profile, isLoading } = useMyProfile();
+  const { data: profile, isLoading, isError, refetch } = useMyProfile();
   const updateProfile = useUpdateMyProfile();
   const [form, setForm] = useState<StudentProfileUpdatePayload>(EMPTY_FORM);
 
@@ -55,6 +56,16 @@ export function ProfileForm() {
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-10 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <QueryErrorState message="Impossible de charger votre profil." onRetry={refetch} />
         </CardContent>
       </Card>
     );
@@ -124,7 +135,7 @@ export function ProfileForm() {
           </div>
 
           <div className="flex justify-end">
-            <Button type="submit" disabled={updateProfile.isPending}>
+            <Button type="submit" disabled={updateProfile.isPending || !profile}>
               {updateProfile.isPending ? 'Enregistrement…' : 'Enregistrer'}
             </Button>
           </div>

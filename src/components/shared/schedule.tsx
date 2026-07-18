@@ -7,18 +7,22 @@ import { ChevronLeft, ChevronRight, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
 import { API_ENDPOINTS, apiGet } from "@/config/api"
+import type { TeachingAssignment } from "@/types/education"
 
+/**
+ * Matches `SessionResponse` (API_REFERENCE.md §2.15). `subjectId`/`instructorId`
+ * no longer live on the session directly — resolve `teachingAssignmentId`
+ * through `TeachingAssignment` (§2.19) instead.
+ */
 interface Session {
   id: string;
   managerId: string;
   departmentId: string;
-  classGroupId: string;
-  teachingModuleId: string | null;
-  subjectId: string;
-  instructorId: string;
+  teachingAssignmentId: string | null;
   startsAt: string;
   endsAt: string;
   room: string | null;
+  status?: string;
   createdAt: string;
 }
 
@@ -129,15 +133,27 @@ export default function Schedule({ departmentId, classeId }: ScheduleProps) {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [teachingAssignments, setTeachingAssignments] = useState<TeachingAssignment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [weekOffset, setWeekOffset] = useState(0);
 
-  const getSubjectName = (subjectId: string) =>
-    subjects.find((s) => s.id === subjectId)?.name ?? subjectId.substring(0, 8);
+  const getAssignment = (teachingAssignmentId: string | null) =>
+    teachingAssignmentId
+      ? teachingAssignments.find((a) => a.id === teachingAssignmentId)
+      : undefined;
 
-  const getInstructorName = (instructorId: string) =>
-    instructors.find((i) => i.id === instructorId)?.name ?? instructorId.substring(0, 8);
+  const getSubjectName = (teachingAssignmentId: string | null) => {
+    const assignment = getAssignment(teachingAssignmentId);
+    if (!assignment) return "-";
+    return subjects.find((s) => s.id === assignment.subjectId)?.name ?? assignment.subjectId.substring(0, 8);
+  };
+
+  const getInstructorName = (teachingAssignmentId: string | null) => {
+    const assignment = getAssignment(teachingAssignmentId);
+    if (!assignment) return "-";
+    return instructors.find((i) => i.id === assignment.instructorId)?.name ?? assignment.instructorId.substring(0, 8);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -148,14 +164,16 @@ export default function Schedule({ departmentId, classeId }: ScheduleProps) {
       setIsLoading(true);
       setError(null);
       try {
-        const [sessionsData, subjectsData, instructorsData] = await Promise.all([
+        const [sessionsData, subjectsData, instructorsData, assignmentsData] = await Promise.all([
           apiGet(API_ENDPOINTS.SESSIONS.BY_DEPARTMENT_AND_CLASS(departmentId, classeId), token),
           apiGet(API_ENDPOINTS.SUBJECTS.BASE, token),
           apiGet(API_ENDPOINTS.INSTRUCTORS.BASE, token),
+          apiGet(API_ENDPOINTS.TEACHING_ASSIGNMENTS.FILTER({ classGroupId: classeId }), token),
         ]);
         setSessions(Array.isArray(sessionsData) ? sessionsData : []);
         setSubjects(Array.isArray(subjectsData) ? subjectsData : []);
         setInstructors(Array.isArray(instructorsData) ? instructorsData : []);
+        setTeachingAssignments(Array.isArray(assignmentsData) ? assignmentsData : []);
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -263,11 +281,11 @@ export default function Schedule({ departmentId, classeId }: ScheduleProps) {
                       <div
                         className={cn("absolute inset-0 p-1 text-xs border rounded overflow-hidden", getSessionStyle(""))}
                       >
-                        <div className="font-bold">{getSubjectName(session.subjectId)}</div>
+                        <div className="font-bold">{getSubjectName(session.teachingAssignmentId)}</div>
                         <div>{session.startsAt.split('T')[1]?.substring(0, 5)} - {session.endsAt.split('T')[1]?.substring(0, 5)}</div>
                         <div className="text-xs text-gray-600">{formatDate(session.startsAt.split('T')[0])}</div>
                         <div>Salle: {session.room ?? '-'}</div>
-                        <div>Prof: {getInstructorName(session.instructorId)}</div>
+                        <div>Prof: {getInstructorName(session.teachingAssignmentId)}</div>
                       </div>
                     )}
                   </div>
@@ -300,7 +318,7 @@ export default function Schedule({ departmentId, classeId }: ScheduleProps) {
               key={session.id}
               className={cn("mb-3 p-3 text-xs border rounded-lg", getSessionStyle(""))}
             >
-              <div className="font-bold text-sm mb-1">{getSubjectName(session.subjectId)}</div>
+              <div className="font-bold text-sm mb-1">{getSubjectName(session.teachingAssignmentId)}</div>
               <div className="flex items-center text-xs mb-1">
                 <Calendar className="h-3 w-3 mr-1" />
                 {session.startsAt.split('T')[1]?.substring(0, 5)} - {session.endsAt.split('T')[1]?.substring(0, 5)}
@@ -311,7 +329,7 @@ export default function Schedule({ departmentId, classeId }: ScheduleProps) {
               </div>
               <div className="flex items-center text-xs">
                 <span className="h-3 w-3 mr-1 inline-block bg-gray-600 rounded-full"></span>
-                {getInstructorName(session.instructorId)}
+                {getInstructorName(session.teachingAssignmentId)}
               </div>
             </div>
           ))

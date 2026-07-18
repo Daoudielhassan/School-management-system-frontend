@@ -5,12 +5,13 @@
  */
 import { useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
-import { Plus } from 'lucide-react';
+import { Plus, RotateCw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/shared/DataTable';
 import { extractErrorMessage } from '@/lib/api-error';
 import { AcademicYearFormDialog } from './AcademicYearFormDialog';
+import { RolloverConfirmDialog } from './RolloverConfirmDialog';
 import { buildAcademicYearColumns } from './academic-year-columns';
 import {
   useAcademicYears,
@@ -21,6 +22,7 @@ import { toAcademicYearPayload, type AcademicYearFormValues } from '../validatio
 
 export function AcademicYearsManager() {
   const [createOpen, setCreateOpen] = useState(false);
+  const [rolloverOpen, setRolloverOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   const { data: years = [], isLoading } = useAcademicYears();
@@ -58,15 +60,21 @@ export function AcademicYearsManager() {
           <h1 className="text-3xl font-bold tracking-tight">Academic Years</h1>
           <p className="text-muted-foreground">Manage academic calendar and semesters.</p>
         </div>
-        <Button
-          onClick={() => {
-            setFormError(null);
-            setCreateOpen(true);
-          }}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          New Academic Year
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="destructive" onClick={() => setRolloverOpen(true)}>
+            <RotateCw className="mr-2 h-4 w-4" />
+            Academic Year Rollover
+          </Button>
+          <Button
+            onClick={() => {
+              setFormError(null);
+              setCreateOpen(true);
+            }}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            New Academic Year
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -89,6 +97,8 @@ export function AcademicYearsManager() {
         isSubmitting={createYear.isPending}
         onSubmit={handleCreate}
       />
+
+      <RolloverConfirmDialog open={rolloverOpen} onOpenChange={setRolloverOpen} years={years} />
     </div>
   );
 }

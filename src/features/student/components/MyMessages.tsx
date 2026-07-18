@@ -12,8 +12,13 @@ import { MessageThreadDialog } from './MessageThreadDialog';
 import type { MessageResponse } from '../types';
 
 export function MyMessages() {
-  const { data: inbox = [], isLoading: inboxLoading } = useMyInbox();
-  const { data: sent = [], isLoading: sentLoading } = useMySentMessages();
+  const { data: inbox = [], isLoading: inboxLoading, isError: inboxError, refetch: refetchInbox } = useMyInbox();
+  const {
+    data: sent = [],
+    isLoading: sentLoading,
+    isError: sentError,
+    refetch: refetchSent,
+  } = useMySentMessages();
   const [composeOpen, setComposeOpen] = useState(false);
   const [openMessage, setOpenMessage] = useState<MessageResponse | null>(null);
 
@@ -39,11 +44,23 @@ export function MyMessages() {
             </TabsList>
 
             <TabsContent value="inbox">
-              <MessageList messages={inbox} isLoading={inboxLoading} onOpen={setOpenMessage} />
+              <MessageList
+                messages={inbox}
+                isLoading={inboxLoading}
+                isError={inboxError}
+                onRetry={refetchInbox}
+                onOpen={setOpenMessage}
+              />
             </TabsContent>
 
             <TabsContent value="sent">
-              <MessageList messages={sent} isLoading={sentLoading} onOpen={setOpenMessage} />
+              <MessageList
+                messages={sent}
+                isLoading={sentLoading}
+                isError={sentError}
+                onRetry={refetchSent}
+                onOpen={setOpenMessage}
+              />
             </TabsContent>
           </Tabs>
         </CardContent>

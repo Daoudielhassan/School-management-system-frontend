@@ -35,6 +35,9 @@ import {
   SlidersHorizontal,
   Database,
   Search,
+  Briefcase,
+  Layers,
+  BookMarked,
 } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import { AdminProvider, useAdmin } from "@/context/AdminContext"
@@ -55,6 +58,8 @@ const sidebarSections = [
       { id: "departments", label: "Départements", href: "/admin/departments", icon: Building },
       { id: "academic", label: "Années", href: "/admin/academic", icon: BookCopy },
       { id: "sessions", label: "Sessions", href: "/admin/sessions", icon: Calendar },
+      { id: "modules", label: "Modules", href: "/admin/modules", icon: Layers },
+      { id: "subjects", label: "Matières", href: "/admin/subjects", icon: BookMarked },
       { id: "attendance", label: "Présences", href: "/admin/attendance", icon: ClipboardList },
       { id: "grades", label: "Notes", href: "/admin/grades", icon: Award },
       { id: "discipline", label: "Discipline", href: "/admin/discipline", icon: AlertTriangle },
@@ -71,6 +76,7 @@ const sidebarSections = [
     title: "ADMINISTRATION",
     items: [
       { id: "users", label: "Utilisateurs", href: "/admin/users", icon: Users },
+      { id: "managers", label: "Managers", href: "/admin/managers", icon: Briefcase },
       { id: "permissions", label: "Permissions", href: "/admin/permissions", icon: Shield },
       { id: "reports", label: "Rapports", href: "/admin/reports", icon: PieChart },
       { id: "audit-logs", label: "Audit Logs", href: "/admin/audit-logs", icon: ScrollText },

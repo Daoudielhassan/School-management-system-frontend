@@ -12,6 +12,7 @@ import type {
   Instructor,
   AttendanceQuery,
 } from '../types';
+import type { TeachingAssignment } from '@/types/education';
 
 function toArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
@@ -45,11 +46,12 @@ export async function fetchAttendanceBundle(
   query: AttendanceQuery,
   token?: string
 ): Promise<AttendanceBundle> {
-  const [students, sessionsRaw, subjects, instructors] = await Promise.all([
+  const [students, sessionsRaw, subjects, instructors, teachingAssignmentsRaw] = await Promise.all([
     apiGet(API_ENDPOINTS.STUDENTS.BASE, token).catch(() => []),
     apiGet(API_ENDPOINTS.SESSIONS.BASE, token).catch(() => []),
     apiGet(API_ENDPOINTS.SUBJECTS.BASE, token).catch(() => []),
     apiGet(API_ENDPOINTS.INSTRUCTORS.BASE, token).catch(() => []),
+    apiGet(API_ENDPOINTS.TEACHING_ASSIGNMENTS.BASE, token).catch(() => []),
   ]);
   const sessions = toArray<Session>(sessionsRaw);
 
@@ -73,6 +75,7 @@ export async function fetchAttendanceBundle(
     sessions,
     subjects: toArray<Subject>(subjects),
     instructors: toArray<Instructor>(instructors),
+    teachingAssignments: toArray<TeachingAssignment>(teachingAssignmentsRaw),
   };
 }
 

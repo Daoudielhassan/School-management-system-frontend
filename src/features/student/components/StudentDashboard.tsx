@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useStudentDashboard } from '../hooks/useStudentDashboard';
 import { DashboardStatCards } from './DashboardStatCards';
 import { TodaySessionsCard } from './TodaySessionsCard';
+import { QueryErrorState } from './QueryErrorState';
 
 const QUICK_LINKS = [
   { href: '/student/grades', label: 'Mes notes', icon: Award },
@@ -16,7 +17,7 @@ const QUICK_LINKS = [
 ];
 
 export function StudentDashboard() {
-  const { data, isLoading, isError } = useStudentDashboard();
+  const { data, isLoading, isError, refetch } = useStudentDashboard();
 
   return (
     <div className="space-y-6">
@@ -35,8 +36,8 @@ export function StudentDashboard() {
 
       {isError && (
         <Card>
-          <CardContent className="p-6 text-center text-red-600">
-            Impossible de charger le tableau de bord.
+          <CardContent className="p-6">
+            <QueryErrorState message="Impossible de charger le tableau de bord." onRetry={refetch} />
           </CardContent>
         </Card>
       )}

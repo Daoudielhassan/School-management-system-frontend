@@ -1,0 +1,9 @@
+export { ManagerDashboard } from './ManagerDashboard';
+export { ValidationsQueue } from './ValidationsQueue';
+export { DepartmentOverview } from './DepartmentOverview';
+export { DepartmentReports } from './DepartmentReports';
+export { AcademicStructureManager } from './AcademicStructureManager';
+export { TeachingAssignmentsManager } from './TeachingAssignmentsManager';
+export { ManagerProfileManager } from './ManagerProfileManager';
+export { MyMessages } from './MyMessages';
+export { MyNotifications } from './MyNotifications';

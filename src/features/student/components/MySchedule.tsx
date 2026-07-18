@@ -8,10 +8,11 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useMySchedule } from '../hooks/useMySchedule';
 import { getWeekStartIso } from '../lib/week';
 import { WeekScheduleGrid } from './WeekScheduleGrid';
+import { QueryErrorState } from './QueryErrorState';
 
 export function MySchedule() {
   const [weekStart, setWeekStart] = useState(() => getWeekStartIso());
-  const { schedule, instructorNames, isLoading, isError } = useMySchedule(weekStart);
+  const { schedule, instructorNames, isLoading, isError, refetch } = useMySchedule(weekStart);
 
   const weekEnd = addDays(parseISO(weekStart), 6);
   const label = `${format(parseISO(weekStart), 'dd MMM', { locale: fr })} – ${format(weekEnd, 'dd MMM yyyy', { locale: fr })}`;
@@ -45,7 +46,7 @@ export function MySchedule() {
       </div>
 
       {isError ? (
-        <p className="text-center text-red-600 py-12">Impossible de charger l&apos;emploi du temps.</p>
+        <QueryErrorState message="Impossible de charger l'emploi du temps." onRetry={refetch} />
       ) : (
         <WeekScheduleGrid
           weekStart={weekStart}

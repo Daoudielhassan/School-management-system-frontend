@@ -31,11 +31,16 @@ export function StudentFormDialog({
     const base: FieldConfig<CreateStudentFormValues>[] = [
       { name: 'firstName', label: 'First Name', placeholder: 'John', colSpan: 1 },
       { name: 'lastName', label: 'Last Name', placeholder: 'Doe', colSpan: 1 },
-      { name: 'studentNumber', label: 'Student Number', placeholder: 'e.g., STU-2026-001' },
+    ];
+    if (!classGroups) {
+      // Edit mode only — the student number is generated server-side on create.
+      base.push({ name: 'studentNumber', label: 'Student Number' });
+    }
+    base.push(
       { name: 'email', label: 'Email', type: 'email', placeholder: 'john.doe@example.com' },
       { name: 'phoneNumber', label: 'Phone Number', placeholder: '+1 (555) 123-4567', colSpan: 1 },
-      { name: 'dateOfBirth', label: 'Date of Birth', type: 'date', colSpan: 1 },
-    ];
+      { name: 'dateOfBirth', label: 'Date of Birth', type: 'date', colSpan: 1 }
+    );
     if (classGroups) {
       base.push({
         name: 'classGroupId',

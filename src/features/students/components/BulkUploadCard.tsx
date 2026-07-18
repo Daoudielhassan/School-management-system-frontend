@@ -1,78 +1,189 @@
 'use client';
 
 /**
- * Bulk CSV/XLSX upload panel. Owns only local file-selection UI state and
+ * Bulk CSV/XLSX upload panel. Owns local file-selection/preview state and
  * delegates the actual upload to `onUpload` (wired to a mutation by the parent).
  */
 import { useRef, useState } from 'react';
-import { FileSpreadsheet } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { FileSpreadsheet, Download, UploadCloud } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { STUDENT_UPLOAD_ACCEPT, STUDENT_UPLOAD_EXTENSIONS } from '../constants';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { cn } from '@/lib/utils';
+import {
+  STUDENT_UPLOAD_ACCEPT,
+  STUDENT_UPLOAD_EXTENSIONS,
+  STUDENT_UPLOAD_MAX_SIZE_BYTES,
+} from '../constants';
+import { parseBulkUploadFile, type BulkUploadPreview } from '../lib/parse-bulk-upload-file';
 
 export interface BulkUploadCardProps {
   isUploading?: boolean;
   onUpload: (file: File) => void | Promise<void>;
 }
 
+const TEMPLATE_CSV = 'firstName,lastName,email,phoneNumber,dateOfBirth\nJohn,Doe,john.doe@example.com,+1 (555) 123-4567,2005-03-14\n';
+
+function downloadTemplate() {
+  const blob = new Blob([TEMPLATE_CSV], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'student-bulk-upload-template.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 export function BulkUploadCard({ isUploading = false, onUpload }: BulkUploadCardProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState('');
+  const [preview, setPreview] = useState<BulkUploadPreview | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const reset = () => {
+    setFile(null);
+    setPreview(null);
+    setError('');
+    if (inputRef.current) inputRef.current.value = '';
+  };
+
+  const handleFile = async (selected: File | null) => {
+    setError('');
+    setPreview(null);
+    if (!selected) {
+      setFile(null);
+      return;
+    }
+    const ext = selected.name.split('.').pop()?.toLowerCase();
+    if (!ext || !STUDENT_UPLOAD_EXTENSIONS.includes(ext as never)) {
+      setError('Only CSV or Excel files are supported');
+      setFile(null);
+      return;
+    }
+    if (selected.size > STUDENT_UPLOAD_MAX_SIZE_BYTES) {
+      setError('File exceeds the 5 MB limit');
+      setFile(null);
+      return;
+    }
+    setFile(selected);
+    try {
+      const parsed = await parseBulkUploadFile(selected);
+      setPreview(parsed);
+      if (parsed.missingHeaders.length > 0) {
+        setError(`Missing required column(s): ${parsed.missingHeaders.join(', ')}`);
+      }
+    } catch {
+      setError('Unable to read this file — please check its format');
+    }
+  };
 
   const handleSubmit = async () => {
     if (!file) {
       setError('Please select a file to upload');
       return;
     }
-    const ext = file.name.split('.').pop()?.toLowerCase();
-    if (!ext || !STUDENT_UPLOAD_EXTENSIONS.includes(ext as never)) {
-      setError('Only CSV or Excel files are supported');
+    if (preview && preview.missingHeaders.length > 0) {
       return;
     }
-    setError('');
     await onUpload(file);
-    setFile(null);
-    if (inputRef.current) inputRef.current.value = '';
+    reset();
   };
+
+  const canSubmit = !!file && !isUploading && (!preview || preview.missingHeaders.length === 0);
 
   return (
     <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
       <div className="flex items-start gap-4">
         <FileSpreadsheet className="text-blue-600 h-10 w-10 flex-shrink-0" />
-        <div className="w-full">
-          <h3 className="font-medium text-blue-800 mb-1">Bulk Upload Students</h3>
-          <p className="text-sm text-gray-600 mb-4">
-            Upload a CSV or Excel file containing student information.
-          </p>
+        <div className="w-full space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h3 className="font-medium text-blue-800 mb-1">Bulk Upload Students</h3>
+              <p className="text-sm text-gray-600">
+                Upload a CSV or Excel file containing student information.
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={downloadTemplate} type="button">
+              <Download className="mr-2 h-4 w-4" />
+              Download template
+            </Button>
+          </div>
 
-          <div className="space-y-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="file-upload">Upload File</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="file-upload"
-                  type="file"
-                  ref={inputRef}
-                  accept={STUDENT_UPLOAD_ACCEPT}
-                  onChange={(e) => {
-                    setFile(e.target.files?.[0] ?? null);
-                    setError('');
-                  }}
-                />
-                <Button onClick={handleSubmit} disabled={isUploading}>
-                  {isUploading ? 'Uploading…' : 'Upload'}
-                </Button>
+          <div
+            className={cn(
+              'border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer',
+              isDragging ? 'border-blue-500 bg-blue-100/50' : 'border-blue-200 bg-white/50'
+            )}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setIsDragging(false);
+              handleFile(e.dataTransfer.files?.[0] ?? null);
+            }}
+            onClick={() => inputRef.current?.click()}
+          >
+            <UploadCloud className="mx-auto h-8 w-8 text-blue-400 mb-2" />
+            <p className="text-sm text-gray-600">
+              {file ? file.name : 'Drag & drop a file here, or click to browse'}
+            </p>
+            <Label htmlFor="file-upload" className="sr-only">
+              Upload File
+            </Label>
+            <input
+              id="file-upload"
+              type="file"
+              ref={inputRef}
+              accept={STUDENT_UPLOAD_ACCEPT}
+              className="hidden"
+              onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+            />
+          </div>
+
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {preview && preview.missingHeaders.length === 0 && (
+            <div className="space-y-2">
+              <p className="text-sm text-blue-800 font-medium">
+                {preview.totalRows} student{preview.totalRows === 1 ? '' : 's'} detected — preview of the first rows:
+              </p>
+              <div className="bg-white rounded-md border border-blue-100 overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {preview.headers.map((h, i) => (
+                        <TableHead key={i}>{h}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {preview.rows.map((row, i) => (
+                      <TableRow key={i}>
+                        {row.map((cell, j) => (
+                          <TableCell key={j} className="text-xs">
+                            {cell}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             </div>
+          )}
 
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+          <div className="flex justify-end">
+            <Button onClick={handleSubmit} disabled={!canSubmit}>
+              {isUploading ? 'Uploading…' : 'Upload'}
+            </Button>
           </div>
         </div>
       </div>

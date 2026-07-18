@@ -41,7 +41,9 @@ export function TodaySessionsCard({ sessions }: { sessions: SessionData[] }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-slate-800 truncate">
-                    {session.instructorId ? instructorNames[session.instructorId] ?? 'Cours' : 'Cours'}
+                    {session.teachingAssignmentId
+                      ? instructorNames[session.teachingAssignmentId] ?? 'Cours'
+                      : 'Cours'}
                   </p>
                   <div className="flex items-center gap-3 text-xs text-slate-500 mt-0.5">
                     <span>

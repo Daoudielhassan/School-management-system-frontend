@@ -9,8 +9,9 @@ const severityValues = SEVERITY_OPTIONS.map((o) => o.value) as [string, ...strin
 const statusValues = STATUS_OPTIONS.map((o) => o.value) as [string, ...string[]];
 
 export const caseFormSchema = z.object({
-  studentName: z.string().trim().min(1, 'Le nom de l’étudiant est obligatoire'),
-  studentId: z.string().trim(),
+  // Derived from the selected student (see CaseFormDialog) — never typed by hand.
+  studentName: z.string().trim(),
+  studentId: z.string().trim().min(1, 'Sélectionnez un étudiant'),
   violation: z.string().trim().min(1, 'La violation est obligatoire'),
   description: z.string().trim(),
   severity: z.enum(severityValues),

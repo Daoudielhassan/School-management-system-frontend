@@ -1,10 +1,12 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
+import { useStudents } from '@/features/students';
 import { DisciplineManager } from '@/features/discipline/components';
 
 export default function AdminDisciplinePage() {
   const { token, isAuthenticated } = useAuth();
+  const { data: students = [] } = useStudents();
 
   if (!isAuthenticated || !token) {
     return (
@@ -20,5 +22,5 @@ export default function AdminDisciplinePage() {
     );
   }
 
-  return <DisciplineManager />;
+  return <DisciplineManager students={students} />;
 }

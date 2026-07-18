@@ -2,7 +2,7 @@
  * Academic-years API layer.
  */
 import { apiGet, apiPost, apiPut, API_ENDPOINTS } from '@/config/api';
-import type { AcademicYear, CreateAcademicYearPayload } from '../types';
+import type { AcademicYear, CreateAcademicYearPayload, RolloverPayload, RolloverResult } from '../types';
 
 export async function fetchAcademicYears(token?: string): Promise<AcademicYear[]> {
   const data = await apiGet<AcademicYear[] | { content?: AcademicYear[] }>(
@@ -22,4 +22,9 @@ export function createAcademicYear(
 
 export function setActiveAcademicYear(id: string, token?: string): Promise<unknown> {
   return apiPut(`${API_ENDPOINTS.ACADEMIC_YEARS.BY_ID(id)}/activate`, {}, token);
+}
+
+/** `POST /api/academic-years/rollover` — Admin-only. */
+export function rolloverAcademicYear(payload: RolloverPayload, token?: string): Promise<RolloverResult> {
+  return apiPost<RolloverResult>(API_ENDPOINTS.ACADEMIC_YEARS.ROLLOVER, payload, token);
 }

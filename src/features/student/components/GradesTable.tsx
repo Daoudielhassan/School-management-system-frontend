@@ -4,15 +4,18 @@ import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { QueryErrorState } from './QueryErrorState';
 import { gradePercent, performanceColorClass } from '../lib/format';
 import type { GradeResponse } from '../types';
 
 export interface GradesTableProps {
   grades: GradeResponse[];
   isLoading?: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
 }
 
-export function GradesTable({ grades, isLoading }: GradesTableProps) {
+export function GradesTable({ grades, isLoading, isError, onRetry }: GradesTableProps) {
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -21,6 +24,10 @@ export function GradesTable({ grades, isLoading }: GradesTableProps) {
         ))}
       </div>
     );
+  }
+
+  if (isError) {
+    return <QueryErrorState message="Impossible de charger vos notes." onRetry={onRetry} />;
   }
 
   if (grades.length === 0) {

@@ -7,9 +7,10 @@ import {
   fetchAcademicYears,
   createAcademicYear,
   setActiveAcademicYear,
+  rolloverAcademicYear,
 } from '../api/academic.api';
 import { ACADEMIC_YEARS_QUERY_KEY } from '../constants';
-import type { AcademicYear, CreateAcademicYearPayload } from '../types';
+import type { AcademicYear, CreateAcademicYearPayload, RolloverPayload, RolloverResult } from '../types';
 
 export function useAcademicYears() {
   const { token } = useAuth();
@@ -38,6 +39,23 @@ export function useSetActiveAcademicYear() {
 
   return useMutation<unknown, Error, string>({
     mutationFn: (id) => setActiveAcademicYear(id, token ?? undefined),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ACADEMIC_YEARS_QUERY_KEY }),
+  });
+}
+
+/**
+ * Closure phase (Admin-only, irreversible): promotes/graduates every ACTIVE
+ * cohort institution-wide. Only the academic-years cache is invalidated here
+ * — manager-side class/enrollment caches are a different feature's concern
+ * and this action is rare enough (once a year) that a manual refresh there
+ * is an acceptable trade-off.
+ */
+export function useRolloverAcademicYear() {
+  const { token } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<RolloverResult, Error, RolloverPayload>({
+    mutationFn: (payload) => rolloverAcademicYear(payload, token ?? undefined),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ACADEMIC_YEARS_QUERY_KEY }),
   });
 }

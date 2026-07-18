@@ -21,6 +21,7 @@ const EMPTY_BUNDLE: AttendanceBundle = {
   sessions: [],
   subjects: [],
   instructors: [],
+  teachingAssignments: [],
 };
 
 /** Fetch the raw attendance bundle (records + lookups). */

@@ -99,9 +99,10 @@ export async function uploadStudentsFile(
     body: formData,
   });
 
-  const data: BulkUploadResult = await res.json().catch(() => ({}));
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data?.message || 'Failed to upload students');
+    const message = (data as { message?: string })?.message;
+    throw new Error(message || 'Failed to upload students');
   }
-  return data;
+  return data as BulkUploadResult;
 }

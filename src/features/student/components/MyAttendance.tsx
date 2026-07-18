@@ -9,7 +9,7 @@ import { JustifyAttendanceDialog } from './JustifyAttendanceDialog';
 import type { AttendanceResponse } from '../types';
 
 export function MyAttendance() {
-  const { data: records = [], isLoading } = useMyAttendance();
+  const { data: records = [], isLoading, isError, refetch } = useMyAttendance();
   const { data: summary } = useMyAttendanceSummary();
   const [pendingJustify, setPendingJustify] = useState<AttendanceResponse | null>(null);
 
@@ -24,7 +24,13 @@ export function MyAttendance() {
 
       <Card>
         <CardContent className="p-6">
-          <AttendanceTable records={records} isLoading={isLoading} onJustify={setPendingJustify} />
+          <AttendanceTable
+            records={records}
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={refetch}
+            onJustify={setPendingJustify}
+          />
         </CardContent>
       </Card>
 

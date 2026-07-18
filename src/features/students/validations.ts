@@ -10,9 +10,11 @@
 import { z } from 'zod';
 import type { StudentMutationPayload } from './types';
 
-/** Fields common to creating and editing a student. */
+/** Fields common to creating and editing a student. `studentNumber` is
+ * generated server-side on create (never shown in the create form) and only
+ * editable afterwards — kept unvalidated here like the other optional fields. */
 export const studentFormSchema = z.object({
-  studentNumber: z.string().trim().min(1, 'Student number is required'),
+  studentNumber: z.string().trim(),
   firstName: z.string().trim().min(1, 'First name is required'),
   lastName: z.string().trim().min(1, 'Last name is required'),
   email: z

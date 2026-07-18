@@ -5,16 +5,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { QueryErrorState } from './QueryErrorState';
 import { attendanceStatusStyle, justificationStatusStyle } from '../lib/format';
 import type { AttendanceResponse } from '../types';
 
 export interface AttendanceTableProps {
   records: AttendanceResponse[];
   isLoading?: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
   onJustify: (record: AttendanceResponse) => void;
 }
 
-export function AttendanceTable({ records, isLoading, onJustify }: AttendanceTableProps) {
+export function AttendanceTable({ records, isLoading, isError, onRetry, onJustify }: AttendanceTableProps) {
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -23,6 +26,10 @@ export function AttendanceTable({ records, isLoading, onJustify }: AttendanceTab
         ))}
       </div>
     );
+  }
+
+  if (isError) {
+    return <QueryErrorState message="Impossible de charger vos présences." onRetry={onRetry} />;
   }
 
   if (records.length === 0) {

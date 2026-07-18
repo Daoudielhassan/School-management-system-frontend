@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { API_ENDPOINTS, apiGet, apiPost } from '@/config/api';
+import type { TeachingAssignment } from '@/types/education';
 
 interface Subject {
   id: string;
@@ -23,11 +24,19 @@ interface Instructor {
   lastName: string;
 }
 
+/** Matches `AcademicYearResponse` (API_REFERENCE.md §2.1) — not `@/types/education`'s `AcademicYear`, which is stale (`code`/`status`, not `name`/`isActive`). */
+interface AcademicYear {
+  id: string;
+  code: string;
+  status: string;
+}
+
 interface SessionFormData {
   subjectId: string;
   departmentId: string;
   classId: string;
   instructorId: string;
+  academicYearId: string;
   sessionDate: string;
   startTime: string;
   roomNumber: string;
@@ -40,6 +49,7 @@ export default function SessionManagement() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [classes, setClasses] = useState<Classe[]>([]);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,12 +60,13 @@ export default function SessionManagement() {
     departmentId: '',
     classId: '',
     instructorId: '',
+    academicYearId: '',
     sessionDate: '',
     startTime: '',
     roomNumber: '',
     sessionType: 'Cours' // Default value
   });
-  
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,15 +77,22 @@ export default function SessionManagement() {
       }
 
       try {
-        const [subjectsRes, departmentsRes, instructorsRes] = await Promise.all([
+        const [subjectsRes, departmentsRes, instructorsRes, academicYearsRes] = await Promise.all([
           apiGet(`${API_ENDPOINTS.SUBJECTS.BASE}?userId=${userId}`, token),
           apiGet(`${API_ENDPOINTS.DEPARTMENTS.BASE}?userId=${userId}`, token),
-          apiGet(`${API_ENDPOINTS.INSTRUCTORS.BASE}?userId=${userId}`, token)
+          apiGet(`${API_ENDPOINTS.INSTRUCTORS.BASE}?userId=${userId}`, token),
+          apiGet(API_ENDPOINTS.ACADEMIC_YEARS.BASE, token),
         ]);
 
         setSubjects(subjectsRes as Subject[]);
         setDepartments(departmentsRes as Department[]);
         setInstructors(instructorsRes as Instructor[]);
+        const years = academicYearsRes as AcademicYear[];
+        setAcademicYears(years);
+        const active = years.find((y) => y.status === 'ACTIVE');
+        if (active) {
+          setFormData((prev) => ({ ...prev, academicYearId: active.id }));
+        }
         setLoading(false);
       } catch (err) {
         setError('Failed to fetch data');
@@ -139,8 +157,8 @@ export default function SessionManagement() {
     // Form validation
     if (
       !formData.subjectId || !formData.departmentId || !formData.classId ||
-      !formData.instructorId || !formData.sessionDate || !formData.startTime ||
-      !formData.roomNumber || !formData.sessionType
+      !formData.instructorId || !formData.academicYearId || !formData.sessionDate ||
+      !formData.startTime || !formData.roomNumber || !formData.sessionType
     ) {
       setError('Please fill in all fields.');
       setIsSubmitting(false);
@@ -154,6 +172,45 @@ export default function SessionManagement() {
     }
 
     try {
+      // A Session no longer carries class/subject/instructor directly — it
+      // references a TeachingAssignment (API_REFERENCE.md §2.15/§2.19).
+      // Reuse an existing ACTIVE assignment for this class/subject/instructor
+      // combination if one exists, otherwise create it.
+      //
+      // NOTE: `managerId` is set to the logged-in user's identity `userId`,
+      // matching this component's pre-existing (unverified) assumption —
+      // the backend expects `Manager.id`, which may differ from `User.id`.
+      // This component has no current callers in the app; wire it up with a
+      // real managerId before using it.
+      const existingAssignments = (await apiGet(
+        API_ENDPOINTS.TEACHING_ASSIGNMENTS.FILTER({ classGroupId: formData.classId }),
+        token
+      ).catch(() => [])) as TeachingAssignment[];
+
+      const matching = Array.isArray(existingAssignments)
+        ? existingAssignments.find(
+            (a) =>
+              a.status === 'ACTIVE' &&
+              a.subjectId === formData.subjectId &&
+              a.instructorId === formData.instructorId
+          )
+        : undefined;
+
+      let teachingAssignmentId = matching?.id;
+      if (!teachingAssignmentId) {
+        const created = (await apiPost(
+          API_ENDPOINTS.MANAGERS.TEACHING_ASSIGNMENTS(userId),
+          {
+            classGroupId: formData.classId,
+            instructorId: formData.instructorId,
+            subjectId: formData.subjectId,
+            academicYearId: formData.academicYearId,
+          },
+          token
+        )) as TeachingAssignment;
+        teachingAssignmentId = created.id;
+      }
+
       // Map frontend form fields to backend SessionRequest fields
       const startsAt = `${formData.sessionDate}T${formData.startTime}:00`;
       // Default duration: 1h30
@@ -164,9 +221,7 @@ export default function SessionManagement() {
       const sessionPayload = {
         managerId: userId,
         departmentId: formData.departmentId,
-        classGroupId: formData.classId,
-        subjectId: formData.subjectId,
-        instructorId: formData.instructorId,
+        teachingAssignmentId,
         startsAt,
         endsAt,
         room: formData.roomNumber,
@@ -179,6 +234,7 @@ export default function SessionManagement() {
       departmentId: '',
       classId: '',
       instructorId: '',
+      academicYearId: academicYears.find((y) => y.status === 'ACTIVE')?.id ?? '',
         sessionDate: '',
         startTime: '',
         roomNumber: '',
@@ -279,6 +335,24 @@ export default function SessionManagement() {
               {instructors.map(instructor => (
                 <option key={instructor.id} value={instructor.id}>
                   {instructor.firstName} {instructor.lastName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Academic Year</label>
+            <select
+              name="academicYearId"
+              value={formData.academicYearId}
+              onChange={handleInputChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              required
+            >
+              <option value="">Select Academic Year</option>
+              {academicYears.map(year => (
+                <option key={year.id} value={year.id}>
+                  {year.code}
                 </option>
               ))}
             </select>

@@ -53,7 +53,9 @@ export function WeekScheduleGrid({ weekStart, schedule, instructorNames, isLoadi
                   {sessions.map((session) => (
                     <div key={session.id} className="rounded-xl bg-blue-50/60 border border-blue-100 p-2.5">
                       <p className="text-xs font-semibold text-slate-700 truncate">
-                        {session.instructorId ? instructorNames[session.instructorId] ?? 'Cours' : 'Cours'}
+                        {session.teachingAssignmentId
+                          ? instructorNames[session.teachingAssignmentId] ?? 'Cours'
+                          : 'Cours'}
                       </p>
                       <div className="flex items-center gap-1 text-[11px] text-slate-500 mt-1">
                         <Clock className="h-3 w-3" />

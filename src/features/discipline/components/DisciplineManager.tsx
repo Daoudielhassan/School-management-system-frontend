@@ -28,12 +28,17 @@ import {
   type CaseUpdateValues,
 } from '../validations';
 import { DISCIPLINE_QUERY_KEY, STATUS_FILTER_ALL, SEVERITY_FILTER_ALL } from '../constants';
-import type { DisciplinaryCase, DisciplineFilters as Filters } from '../types';
+import type { DisciplinaryCase, DisciplineFilters as Filters, StudentOption } from '../types';
 
 const EMPTY_FILTERS: Filters = { status: STATUS_FILTER_ALL, severity: SEVERITY_FILTER_ALL };
 const EMPTY_STATS = { total: 0, pending: 0, underReview: 0, resolved: 0, appealed: 0 };
 
-export function DisciplineManager() {
+export interface DisciplineManagerProps {
+  /** Name-based picker options for the create form — all students for admin, own department for a manager. */
+  students: StudentOption[];
+}
+
+export function DisciplineManager({ students }: DisciplineManagerProps) {
   const queryClient = useQueryClient();
 
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
@@ -65,7 +70,9 @@ export function DisciplineManager() {
   const handleCreate = async (values: CaseFormValues) => {
     setFormError(null);
     try {
-      await createCase.mutateAsync(toCreateCasePayload(values));
+      const student = students.find((s) => s.id === values.studentId);
+      const studentName = student ? `${student.firstName} ${student.lastName}` : values.studentName;
+      await createCase.mutateAsync(toCreateCasePayload({ ...values, studentName }));
       toast.success('Dossier créé avec succès');
       setCreateOpen(false);
     } catch (error) {
@@ -197,6 +204,7 @@ export function DisciplineManager() {
           setCreateOpen(open);
           if (!open) setFormError(null);
         }}
+        students={students}
         serverError={formError}
         isSubmitting={createCase.isPending}
         onSubmit={handleCreate}

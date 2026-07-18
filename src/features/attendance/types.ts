@@ -1,6 +1,7 @@
 /**
  * Domain + view types for the attendance feature.
  */
+import type { TeachingAssignment } from '@/types/education';
 
 export interface AttendanceRecord {
   id: string;
@@ -19,10 +20,14 @@ export interface Student {
   studentNumber: string;
 }
 
+/**
+ * Matches `SessionResponse` (API_REFERENCE.md §2.15). `subjectId`/`instructorId`
+ * no longer live on the session directly — resolve `teachingAssignmentId`
+ * through `TeachingAssignment` (`@/types/education`, §2.19) instead.
+ */
 export interface Session {
   id: string;
-  subjectId: string;
-  instructorId: string;
+  teachingAssignmentId?: string;
   startsAt: string;
   room: string | null;
 }
@@ -44,6 +49,8 @@ export interface AttendanceBundle {
   sessions: Session[];
   subjects: Subject[];
   instructors: Instructor[];
+  /** Resolves each session's `teachingAssignmentId` to its subject/instructor (§2.19). */
+  teachingAssignments: TeachingAssignment[];
 }
 
 /** A record with all references resolved to display strings. */

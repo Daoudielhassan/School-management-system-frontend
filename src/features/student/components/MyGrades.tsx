@@ -6,7 +6,7 @@ import { GradesSummaryCards } from './GradesSummaryCards';
 import { GradesTable } from './GradesTable';
 
 export function MyGrades() {
-  const { data: grades = [], isLoading } = useMyGrades();
+  const { data: grades = [], isLoading, isError, refetch } = useMyGrades();
   const { data: summary } = useMyGradeSummary();
 
   return (
@@ -20,7 +20,7 @@ export function MyGrades() {
 
       <Card>
         <CardContent className="p-6">
-          <GradesTable grades={grades} isLoading={isLoading} />
+          <GradesTable grades={grades} isLoading={isLoading} isError={isError} onRetry={refetch} />
         </CardContent>
       </Card>
     </div>

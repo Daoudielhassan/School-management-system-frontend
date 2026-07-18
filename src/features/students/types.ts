@@ -34,10 +34,24 @@ export interface StudentMutationPayload {
   dateOfBirth: string | null;
 }
 
-/** Result of a bulk CSV/XLSX upload. */
+/** One row of a bulk CSV/XLSX upload result — success or failure. */
+export interface BulkUploadRowResult {
+  rowNumber: number;
+  success: boolean;
+  studentNumber?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  temporaryPassword?: string;
+  errorMessage?: string;
+}
+
+/** Result of a bulk CSV/XLSX upload — matches `BulkStudentUploadResponse`. */
 export interface BulkUploadResult {
-  count?: number;
-  message?: string;
+  totalRows: number;
+  successCount: number;
+  failureCount: number;
+  results: BulkUploadRowResult[];
 }
 
 // --- Reference data (used to build the department / class filters) ----------
