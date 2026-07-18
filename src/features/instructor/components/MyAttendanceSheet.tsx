@@ -17,6 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClipboardCheck } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { AttendanceStatusPicker, type AttendanceStatusValue } from '@/components/shared/AttendanceStatusPicker';
 import { extractErrorMessage } from '@/lib/api-error';
 import { QueryErrorState } from './QueryErrorState';
 import { useMySessions, useMySessionDetails } from '../hooks/useMySchedule';
@@ -27,8 +28,6 @@ import {
   useBulkUpdateAttendance,
 } from '../hooks/useSessionAttendance';
 import type { AttendanceStatus } from '../types';
-
-const STATUS_OPTIONS: AttendanceStatus[] = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'];
 
 export function MyAttendanceSheet() {
   const { data: sessions = [] } = useMySessions();
@@ -168,23 +167,14 @@ export function MyAttendanceSheet() {
                       {student ? `${student.firstName} ${student.lastName}` : 'Étudiant…'}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Select
-                        value={pending[r.id] ?? r.status}
-                        onValueChange={(value) =>
-                          setPending((prev) => ({ ...prev, [r.id]: value as AttendanceStatus }))
-                        }
-                      >
-                        <SelectTrigger className="w-32 ml-auto h-8 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {STATUS_OPTIONS.map((status) => (
-                            <SelectItem key={status} value={status}>
-                              {status}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="flex justify-end">
+                        <AttendanceStatusPicker
+                          value={(pending[r.id] ?? r.status) as AttendanceStatusValue}
+                          onChange={(status) =>
+                            setPending((prev) => ({ ...prev, [r.id]: status as AttendanceStatus }))
+                          }
+                        />
+                      </div>
                     </TableCell>
                   </TableRow>
                 );

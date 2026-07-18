@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AttendanceStatusPicker, type AttendanceStatusValue } from '@/components/shared/AttendanceStatusPicker';
 import { extractErrorMessage } from '@/lib/api-error';
 import { QueryErrorState } from './QueryErrorState';
 import { useDepartmentSessions } from '../hooks/useDepartment';
@@ -26,8 +27,6 @@ import {
   useBulkUpdateAttendance,
 } from '../hooks/useSessionAttendance';
 import type { AttendanceStatus } from '../types';
-
-const STATUS_OPTIONS: AttendanceStatus[] = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'];
 
 export function SessionAttendanceSheet() {
   const { data: sessions = [] } = useDepartmentSessions();
@@ -158,26 +157,17 @@ export function SessionAttendanceSheet() {
                 return (
                   <TableRow key={r.id}>
                     <TableCell className="text-slate-700">
-                      {student ? `${student.firstName} ${student.lastName}` : `${r.studentId.slice(0, 8)}…`}
+                      {student ? `${student.firstName} ${student.lastName}` : 'Étudiant inconnu'}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Select
-                        value={pending[r.id] ?? r.status}
-                        onValueChange={(value) =>
-                          setPending((prev) => ({ ...prev, [r.id]: value as AttendanceStatus }))
-                        }
-                      >
-                        <SelectTrigger className="w-32 ml-auto h-8 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {STATUS_OPTIONS.map((status) => (
-                            <SelectItem key={status} value={status}>
-                              {status}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="flex justify-end">
+                        <AttendanceStatusPicker
+                          value={(pending[r.id] ?? r.status) as AttendanceStatusValue}
+                          onChange={(status) =>
+                            setPending((prev) => ({ ...prev, [r.id]: status as AttendanceStatus }))
+                          }
+                        />
+                      </div>
                     </TableCell>
                   </TableRow>
                 );

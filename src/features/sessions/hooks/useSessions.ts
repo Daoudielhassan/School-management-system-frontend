@@ -3,7 +3,7 @@
  * sessions feature — the canonical home for session data access.)
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPost, apiDelete, API_ENDPOINTS } from '@/config/api';
+import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '@/config/api';
 import { useAuth } from '@/context/AuthContext';
 
 /**
@@ -33,6 +33,11 @@ export interface CreateSessionPayload {
   startsAt: string;
   endsAt: string;
   room?: string;
+}
+
+/** `PUT /api/sessions/{id}` takes the same shape as create, full replace — `managerId` is required by the backend. */
+export interface UpdateSessionPayload extends CreateSessionPayload {
+  managerId: string;
 }
 
 export const SESSIONS_QUERY_KEY = ['sessions'] as const;
@@ -100,6 +105,18 @@ export function useCreateSession() {
 
   return useMutation<SessionData, Error, CreateSessionPayload>({
     mutationFn: (payload) => apiPost(API_ENDPOINTS.SESSIONS.BASE, payload, token ?? undefined),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: SESSIONS_QUERY_KEY });
+    },
+  });
+}
+
+export function useUpdateSession() {
+  const { token } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<SessionData, Error, { id: string; payload: UpdateSessionPayload }>({
+    mutationFn: ({ id, payload }) => apiPut(API_ENDPOINTS.SESSIONS.BY_ID(id), payload, token ?? undefined),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: SESSIONS_QUERY_KEY });
     },

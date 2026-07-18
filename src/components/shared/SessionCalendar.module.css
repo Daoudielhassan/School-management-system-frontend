@@ -1,0 +1,91 @@
+.calendarWrap :global(.fc) {
+  font-family: inherit;
+  --fc-border-color: #e2e8f0;
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: #f8fafc;
+  --fc-today-bg-color: #eff6ff;
+  --fc-now-indicator-color: #ef4444;
+}
+
+.calendarWrap :global(.fc-toolbar-title) {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1e293b;
+  text-transform: capitalize;
+}
+
+.calendarWrap :global(.fc-col-header-cell-cushion),
+.calendarWrap :global(.fc-timegrid-axis-cushion) {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.calendarWrap :global(.fc-button) {
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  font-weight: 500;
+  text-transform: capitalize;
+  box-shadow: none;
+  padding: 0.35rem 0.75rem;
+}
+
+.calendarWrap :global(.fc-button:hover) {
+  background: #f8fafc;
+  border-color: #93c5fd;
+}
+
+.calendarWrap :global(.fc-button-active),
+.calendarWrap :global(.fc-button:disabled) {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #1d4ed8 !important;
+  opacity: 1;
+}
+
+.calendarWrap :global(.fc-event) {
+  border-radius: 8px;
+  border-width: 1px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.calendarWrap :global(.fc-timegrid-event) {
+  box-shadow: none;
+}
+
+.eventCard {
+  padding: 3px 6px;
+  overflow: hidden;
+  line-height: 1.25;
+}
+
+.eventTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.eventSubtitle {
+  font-size: 0.7rem;
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.eventRoom {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.7rem;
+  opacity: 0.75;
+}
+
+.eventCancelled {
+  text-decoration: line-through;
+}

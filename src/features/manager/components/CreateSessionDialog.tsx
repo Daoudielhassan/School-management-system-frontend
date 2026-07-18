@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -31,9 +31,12 @@ import { MANAGER_DEPARTMENT_SESSIONS_QUERY_KEY } from '../constants';
 export interface CreateSessionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Prefills the start/end inputs, e.g. when opened from a calendar slot click. ISO strings. */
+  defaultStartsAt?: string;
+  defaultEndsAt?: string;
 }
 
-export function CreateSessionDialog({ open, onOpenChange }: CreateSessionDialogProps) {
+export function CreateSessionDialog({ open, onOpenChange, defaultStartsAt, defaultEndsAt }: CreateSessionDialogProps) {
   const queryClient = useQueryClient();
   const managerId = useMyManagerId();
   const { data: profile } = useMyManagerProfile();
@@ -50,8 +53,15 @@ export function CreateSessionDialog({ open, onOpenChange }: CreateSessionDialogP
   const [room, setRoom] = useState('');
 
   const activeAssignments = assignments.filter((a) => a.status === 'ACTIVE');
-  const subjectName = (id: string) => subjects.find((s) => s.id === id)?.name ?? id.slice(0, 8);
-  const instructorName = (id: string) => instructors.find((i) => i.id === id)?.name ?? id.slice(0, 8);
+  const subjectName = (id: string) => subjects.find((s) => s.id === id)?.name ?? 'Matière inconnue';
+  const instructorName = (id: string) => instructors.find((i) => i.id === id)?.name ?? 'Instructeur inconnu';
+
+  useEffect(() => {
+    if (open && defaultStartsAt && defaultEndsAt) {
+      setStartsAt(defaultStartsAt.slice(0, 16));
+      setEndsAt(defaultEndsAt.slice(0, 16));
+    }
+  }, [open, defaultStartsAt, defaultEndsAt]);
 
   const reset = () => {
     setClassGroupId('');

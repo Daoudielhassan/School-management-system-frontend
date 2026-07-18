@@ -1,23 +1,18 @@
 'use client';
 
-import { useState } from 'react';
-import { Building2, Plus } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { useDepartmentClassGroups, useDepartmentSessions, useDepartmentAttendance } from '../hooks/useDepartment';
+import { useDepartmentClassGroups, useDepartmentAttendance } from '../hooks/useDepartment';
 import { DepartmentClassGroupsTable } from './DepartmentClassGroupsTable';
-import { DepartmentSessionsTable } from './DepartmentSessionsTable';
+import { SessionScheduleBoard } from './SessionScheduleBoard';
 import { DepartmentAttendanceTable } from './DepartmentAttendanceTable';
-import { CreateSessionDialog } from './CreateSessionDialog';
 import { SessionAttendanceSheet } from './SessionAttendanceSheet';
 
 export function DepartmentOverview() {
   const classGroupsQuery = useDepartmentClassGroups();
-  const sessionsQuery = useDepartmentSessions();
   const attendanceQuery = useDepartmentAttendance();
-  const [createSessionOpen, setCreateSessionOpen] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -46,19 +41,8 @@ export function DepartmentOverview() {
               />
             </TabsContent>
 
-            <TabsContent value="sessions" className="space-y-4">
-              <div className="flex justify-end">
-                <Button size="sm" onClick={() => setCreateSessionOpen(true)}>
-                  <Plus className="h-4 w-4 mr-1.5" />
-                  Nouvelle séance
-                </Button>
-              </div>
-              <DepartmentSessionsTable
-                sessions={sessionsQuery.data ?? []}
-                isLoading={sessionsQuery.isLoading}
-                isError={sessionsQuery.isError}
-                onRetry={sessionsQuery.refetch}
-              />
+            <TabsContent value="sessions">
+              <SessionScheduleBoard />
             </TabsContent>
 
             <TabsContent value="attendance">
@@ -76,8 +60,6 @@ export function DepartmentOverview() {
           </Tabs>
         </CardContent>
       </Card>
-
-      <CreateSessionDialog open={createSessionOpen} onOpenChange={setCreateSessionOpen} />
     </div>
   );
 }
