@@ -16,38 +16,27 @@ export function DepartmentStatsCards({
   filteredCount,
   hasSelection,
 }: DepartmentStatsCardsProps) {
+  const tiles = [
+    { icon: Building, value: total, label: 'Départements' },
+    { icon: Users, value: selectedClassesCount > 0 ? selectedClassesCount : '—', label: 'Classes (dép. sélectionné)' },
+    { icon: BookOpen, value: filteredCount, label: 'Résultats filtrés' },
+    { icon: Calendar, value: hasSelection ? '1' : '0', label: 'Sélectionné' },
+  ];
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-      <Card className="bg-blue-600/20 backdrop-blur-md border-blue-400/30">
-        <CardContent className="p-6 text-center">
-          <Building className="h-8 w-8 text-blue-400 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-slate-900">{total}</div>
-          <div className="text-sm text-blue-600">Total Departments</div>
-        </CardContent>
-      </Card>
-      <Card className="bg-blue-600/20 backdrop-blur-md border-blue-400/30">
-        <CardContent className="p-6 text-center">
-          <Users className="h-8 w-8 text-blue-400 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-slate-900">
-            {selectedClassesCount > 0 ? selectedClassesCount : '-'}
-          </div>
-          <div className="text-sm text-blue-600">Classes (selected dept)</div>
-        </CardContent>
-      </Card>
-      <Card className="bg-blue-600/20 backdrop-blur-md border-blue-400/30">
-        <CardContent className="p-6 text-center">
-          <BookOpen className="h-8 w-8 text-blue-400 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-slate-900">{filteredCount}</div>
-          <div className="text-sm text-blue-600">Filtered Results</div>
-        </CardContent>
-      </Card>
-      <Card className="bg-blue-600/20 backdrop-blur-md border-blue-400/30">
-        <CardContent className="p-6 text-center">
-          <Calendar className="h-8 w-8 text-blue-400 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-slate-900">{hasSelection ? '1' : '0'}</div>
-          <div className="text-sm text-blue-600">Selected</div>
-        </CardContent>
-      </Card>
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+      {tiles.map(({ icon: Icon, value, label }) => (
+        <Card key={label} className="border-slate-200 hover:shadow-lg transition-all duration-300 group">
+          <CardContent className="p-5 flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-blue-50 group-hover:scale-110 transition-transform">
+              <Icon className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-slate-800 tabular-nums">{value}</div>
+              <div className="text-xs text-slate-500">{label}</div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }

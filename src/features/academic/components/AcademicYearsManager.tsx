@@ -8,7 +8,9 @@ import { toast } from 'react-toastify';
 import { Plus, RotateCw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { CalendarRange } from 'lucide-react';
 import { DataTable } from '@/components/shared/DataTable';
+import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { extractErrorMessage } from '@/lib/api-error';
 import { AcademicYearFormDialog } from './AcademicYearFormDialog';
 import { RolloverConfirmDialog } from './RolloverConfirmDialog';
@@ -44,7 +46,7 @@ export function AcademicYearsManager() {
     setFormError(null);
     try {
       await createYear.mutateAsync(toAcademicYearPayload(values));
-      toast.success('Academic year created successfully');
+      toast.success('Année académique créée');
       setCreateOpen(false);
     } catch (error) {
       const message = extractErrorMessage(error, 'Failed to create academic year');
@@ -55,32 +57,33 @@ export function AcademicYearsManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Academic Years</h1>
-          <p className="text-muted-foreground">Manage academic calendar and semesters.</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="destructive" onClick={() => setRolloverOpen(true)}>
-            <RotateCw className="mr-2 h-4 w-4" />
-            Academic Year Rollover
-          </Button>
-          <Button
-            onClick={() => {
-              setFormError(null);
-              setCreateOpen(true);
-            }}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            New Academic Year
-          </Button>
-        </div>
-      </div>
+      <AdminPageHeader
+        icon={CalendarRange}
+        title="Années académiques"
+        description="Gérez le calendrier académique et les semestres"
+        actions={
+          <>
+            <Button variant="destructive" onClick={() => setRolloverOpen(true)}>
+              <RotateCw className="mr-2 h-4 w-4" />
+              Bascule annuelle
+            </Button>
+            <Button
+              onClick={() => {
+                setFormError(null);
+                setCreateOpen(true);
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Nouvelle année
+            </Button>
+          </>
+        }
+      />
 
-      <Card>
+      <Card className="border-slate-200 shadow-sm shadow-slate-200/50">
         <CardHeader>
-          <CardTitle>All Academic Years</CardTitle>
-          <CardDescription>History of all academic years configured in the system.</CardDescription>
+          <CardTitle>Toutes les années académiques</CardTitle>
+          <CardDescription>Historique des années académiques configurées dans le système.</CardDescription>
         </CardHeader>
         <CardContent>
           <DataTable columns={columns} data={years} isLoading={isLoading} paginated />

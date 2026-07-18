@@ -31,50 +31,52 @@ export function AttendanceDetailDialog({
 }: AttendanceDetailDialogProps) {
   return (
     <Dialog open={!!record} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-800/95 backdrop-blur-md border-blue-500/30">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-blue-600">Attendance Record Details</DialogTitle>
-          <DialogDescription className="text-slate-500">
-            Complete information for {record?.studentName}
-          </DialogDescription>
+          <DialogTitle>Détail de la présence</DialogTitle>
+          <DialogDescription>Informations complètes pour {record?.studentName}</DialogDescription>
         </DialogHeader>
 
         {record && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Student Name" value={record.studentName} />
-              <Field label="Student ID" value={`${record.studentId.substring(0, 8)}…`} />
-              <Field label="Subject" value={record.subjectName} />
-              <Field label="Instructor" value={record.instructorName} />
+              <Field label="Étudiant" value={record.studentName} />
+              <Field label="Matière" value={record.subjectName} />
+              <Field label="Professeur" value={record.instructorName} />
               <Field label="Date" value={record.attendanceDate} />
-              <div>
-                <label className="text-sm text-slate-500">Status</label>
-                <StatusBadge status={record.status} withIcon={false} />
+              <Field label="Salle" value={record.room} />
+              <div className="space-y-1">
+                <label className="text-sm text-slate-500">Statut</label>
+                <div>
+                  <StatusBadge status={record.status} withIcon={false} />
+                </div>
               </div>
-              <Field label="Room" value={record.room} />
             </div>
 
             <div className="flex gap-2 pt-4">
               <Button
-                className="flex-1 bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-400/30"
+                variant="outline"
+                className="flex-1 text-emerald-700 border-emerald-200 hover:bg-emerald-50"
                 disabled={isUpdating}
                 onClick={() => onUpdateStatus(record.id, 'PRESENT')}
               >
-                Mark Present
+                Présent
               </Button>
               <Button
-                className="flex-1 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-400/30"
+                variant="outline"
+                className="flex-1 text-amber-700 border-amber-200 hover:bg-amber-50"
                 disabled={isUpdating}
                 onClick={() => onUpdateStatus(record.id, 'EXCUSED')}
               >
-                Excuse
+                Excuser
               </Button>
               <Button
-                className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-400/30"
+                variant="outline"
+                className="flex-1 text-red-700 border-red-200 hover:bg-red-50"
                 disabled={isUpdating}
                 onClick={() => onUpdateStatus(record.id, 'ABSENT')}
               >
-                Mark Absent
+                Absent
               </Button>
             </div>
           </div>
@@ -86,9 +88,9 @@ export function AttendanceDetailDialog({
 
 function Field({ label, value }: { label: string; value: string }) {
   return (
-    <div>
+    <div className="space-y-1">
       <label className="text-sm text-slate-500">{label}</label>
-      <p className="text-slate-900 font-medium">{value}</p>
+      <p className="text-slate-800 font-medium">{value}</p>
     </div>
   );
 }

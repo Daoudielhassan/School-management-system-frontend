@@ -15,7 +15,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Edit, Trash2, Calendar, Layers, Users, FileText } from 'lucide-react';
+import { BookOpen, Edit, Trash2, Calendar, Layers, Users } from 'lucide-react';
 import type { ClassGroup } from '../types';
 
 export interface ClassCardProps {
@@ -44,35 +44,30 @@ export function ClassCard({
   onOpenModules,
 }: ClassCardProps) {
   return (
-    <Card className="bg-blue-500/10 backdrop-blur-md border-blue-400/20 hover:border-blue-400/40 transition-all duration-300 group hover:shadow-lg hover:shadow-blue-500/20">
+    <Card className="border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-blue-500/20 group-hover:bg-blue-500/30 transition-all">
-              <BookOpen className="h-6 w-6 text-blue-400" />
+            <div className="p-3 rounded-xl bg-blue-50 group-hover:scale-105 transition-transform">
+              <BookOpen className="h-6 w-6 text-blue-600" />
             </div>
             <div>
-              <CardTitle className="text-slate-900 group-hover:text-slate-500 transition-colors">
+              <CardTitle className="text-slate-900 group-hover:text-blue-700 transition-colors">
                 {classe.name}
               </CardTitle>
-              <CardDescription className="text-gray-600">
-                {departmentName} · Level {classe.level}
+              <CardDescription className="text-slate-500">
+                {departmentName} · Niveau {classe.level}
               </CardDescription>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:bg-indigo-500/20 text-indigo-700"
-              onClick={() => onEdit(classe)}
-            >
+          <div className="flex gap-1">
+            <Button variant="ghost" size="sm" className="text-slate-500 hover:text-blue-600" onClick={() => onEdit(classe)}>
               <Edit className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              className="hover:bg-red-500/20 text-red-700"
+              className="text-red-600 hover:bg-red-50"
               onClick={() => onDelete(classe)}
             >
               <Trash2 className="h-4 w-4" />
@@ -82,61 +77,33 @@ export function ClassCard({
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-3 gap-4 mb-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-slate-900">{studentCount}</div>
-            <div className="text-xs text-gray-600">Students</div>
+          <div className="text-center rounded-lg bg-slate-50 py-3">
+            <div className="text-2xl font-bold text-slate-800 tabular-nums">{studentCount}</div>
+            <div className="text-xs text-slate-500">Étudiants</div>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-slate-900">{moduleCount}</div>
-            <div className="text-xs text-gray-600">Modules</div>
+          <div className="text-center rounded-lg bg-slate-50 py-3">
+            <div className="text-2xl font-bold text-slate-800 tabular-nums">{moduleCount}</div>
+            <div className="text-xs text-slate-500">Modules</div>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-slate-900">{subjectCount}</div>
-            <div className="text-xs text-gray-600">Subjects</div>
+          <div className="text-center rounded-lg bg-slate-50 py-3">
+            <div className="text-2xl font-bold text-slate-800 tabular-nums">{subjectCount}</div>
+            <div className="text-xs text-slate-500">Matières</div>
           </div>
         </div>
 
-        <div className="space-y-3">
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              className="flex-1 border-indigo-400/30 hover:bg-indigo-500/20 text-indigo-700"
-              onClick={() => onOpenSchedule(classe)}
-            >
-              <Calendar className="h-3 w-3 mr-1" />
-              Attendance
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="flex-1 border-purple-400/30 hover:bg-purple-500/20 text-purple-700"
-              onClick={() => onOpenModules(classe)}
-            >
-              <Layers className="h-3 w-3 mr-1" />
-              Modules
-            </Button>
-          </div>
-
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              className="flex-1 border-blue-400/30 hover:bg-blue-500/20 text-blue-600"
-              onClick={() => onOpenStudents(classe)}
-            >
-              <Users className="h-3 w-3 mr-1" />
-              Students ({studentCount})
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="flex-1 border-green-400/30 hover:bg-green-500/20 text-green-700"
-            >
-              <FileText className="h-3 w-3 mr-1" />
-              Reports
-            </Button>
-          </div>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" className="flex-1" onClick={() => onOpenSchedule(classe)}>
+            <Calendar className="h-3.5 w-3.5 mr-1.5" />
+            Présences
+          </Button>
+          <Button size="sm" variant="outline" className="flex-1" onClick={() => onOpenModules(classe)}>
+            <Layers className="h-3.5 w-3.5 mr-1.5" />
+            Modules
+          </Button>
+          <Button size="sm" variant="outline" className="flex-1" onClick={() => onOpenStudents(classe)}>
+            <Users className="h-3.5 w-3.5 mr-1.5" />
+            Étudiants
+          </Button>
         </div>
       </CardContent>
     </Card>

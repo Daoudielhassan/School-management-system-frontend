@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react"
 import Link from "next/link"
+import { Outfit } from "next/font/google"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Sidebar } from "@/components/ui/sidebar" // Ajuste le chemin selon ton projet
@@ -41,6 +42,10 @@ import {
 } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import { AdminProvider, useAdmin } from "@/context/AdminContext"
+
+// Distinctive display font, scoped to the admin section only (via
+// `adminDisplayFont.className` below) — the rest of the app keeps Inter.
+const adminDisplayFont = Outfit({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-admin-display" })
 
 // 1. Transformation de la navigation simple en sections catégorisées
 const sidebarSections = [
@@ -112,38 +117,41 @@ function AdminLayoutContent({
   }
 
   // Préparation des données utilisateur pour le Layout et la Sidebar
-  const firstName = adminData?.firstname || "Hassan"
+  const firstName = adminData?.firstname || "Admin"
   const lastName = adminData?.lastname || ""
   const initials = `${firstName.charAt(0)}${lastName ? lastName.charAt(0) : ""}`
-  
+
   const currentUser = {
     name: `${firstName} ${lastName}`.trim(),
     role: "Administrator",
   }
 
   return (
-    // Application du fond premium en dégradé
-    <div className="min-h-screen flex bg-gradient-to-br from-[#f8fafc] to-[#f2f5fa]">
-      
+    // Application du fond premium en dégradé — police d'affichage propre à l'espace admin
+    <div className={`${adminDisplayFont.variable} min-h-screen flex bg-gradient-to-br from-[#f8fafc] to-[#f2f5fa]`}>
+
       {/* Intégration de la nouvelle Sidebar */}
-      <Sidebar 
-        sections={sidebarSections} 
+      <Sidebar
+        sections={sidebarSections}
         user={currentUser}
-        onLogout={handleLogout} 
-        defaultCollapsed 
+        onLogout={handleLogout}
+        defaultCollapsed
       />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header Premium - Sans logo, avec recherche centrale */}
         <header className="z-40 px-[40px] pt-[32px] pb-4">
           <div className="flex items-center justify-between gap-8">
-            
+
             {/* Gauche : Message de bienvenue */}
             <div className="flex flex-col flex-shrink-0">
-              <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
-                Bonjour {firstName} 👋
+              <h2
+                className="text-[26px] font-semibold text-slate-800 tracking-tight leading-none"
+                style={{ fontFamily: "var(--font-admin-display)" }}
+              >
+                Bonjour {firstName}
               </h2>
-              <p className="text-sm font-medium text-slate-500 mt-1">
+              <p className="text-sm font-medium text-slate-500 mt-1.5">
                 Bienvenue dans votre espace d'administration
               </p>
             </div>

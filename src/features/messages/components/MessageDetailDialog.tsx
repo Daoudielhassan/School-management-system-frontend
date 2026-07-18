@@ -52,72 +52,58 @@ export function MessageDetailDialog({
 
   return (
     <Dialog open={!!message} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-gray-900/95 backdrop-blur-md border-blue-500/30 max-w-3xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="text-blue-300">Message Details</DialogTitle>
-          <DialogDescription className="text-gray-300">
-            Full message content and actions
-          </DialogDescription>
+          <DialogTitle>Détail du message</DialogTitle>
+          <DialogDescription>Contenu complet et actions</DialogDescription>
         </DialogHeader>
         {message && (
           <div className="space-y-6">
-            <div className="flex items-center gap-4 p-4 bg-blue-900/20 rounded-lg">
-              <Avatar className="h-12 w-12 border-2 border-blue-400/50">
+            <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg border border-slate-100">
+              <Avatar className="h-12 w-12 border border-slate-200">
                 <AvatarImage src="/user.png" />
-                <AvatarFallback className="bg-blue-600 text-white">
-                  {counterpartLabel.charAt(0)}
+                <AvatarFallback className="bg-blue-50 text-blue-700 font-semibold">
+                  {counterpartLabel.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <h3 className="text-white font-medium">{counterpartLabel}</h3>
-                <p className="text-sm text-blue-300">{box === 'sent' ? 'To' : 'From'}</p>
-                <p className="text-xs text-gray-400">{new Date(message.createdAt).toLocaleString()}</p>
+                <h3 className="text-slate-800 font-medium">{counterpartLabel}</h3>
+                <p className="text-sm text-slate-500">{box === 'sent' ? 'À' : 'De'}</p>
+                <p className="text-xs text-slate-400">{new Date(message.createdAt).toLocaleString()}</p>
               </div>
             </div>
 
             <div>
-              <h4 className="text-lg font-medium text-white mb-2">
-                {message.subject || '(No subject)'}
+              <h4 className="text-lg font-medium text-slate-800 mb-2">
+                {message.subject || '(Sans objet)'}
               </h4>
-              <div className="bg-black/20 p-4 rounded-lg">
-                <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{message.content}</p>
+              <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">{message.content}</p>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                className="border-blue-400/30 text-blue-300 hover:bg-blue-500/20"
-                onClick={() => onReply(message)}
-              >
+              <Button variant="outline" onClick={() => onReply(message)}>
                 <Reply className="mr-2 h-4 w-4" />
-                Reply
+                Répondre
               </Button>
               {canActAsReceiver && (
                 <>
-                  <Button
-                    variant="outline"
-                    className="border-blue-400/30 text-blue-300 hover:bg-blue-500/20"
-                    onClick={() => onStar(message)}
-                  >
-                    <Star className="mr-2 h-4 w-4" />
-                    {message.starred ? 'Starred' : 'Star'}
+                  <Button variant="outline" onClick={() => onStar(message)}>
+                    <Star className={`mr-2 h-4 w-4 ${message.starred ? 'fill-amber-400 text-amber-400' : ''}`} />
+                    {message.starred ? 'Favori' : 'Marquer favori'}
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="border-gray-400/30 text-gray-300 hover:bg-gray-500/20"
-                    onClick={() => onArchive(message)}
-                  >
+                  <Button variant="outline" onClick={() => onArchive(message)}>
                     <Archive className="mr-2 h-4 w-4" />
-                    {message.archived ? 'Archived' : 'Archive'}
+                    {message.archived ? 'Archivé' : 'Archiver'}
                   </Button>
                   <Button
                     variant="outline"
-                    className="border-red-400/30 text-red-300 hover:bg-red-500/20"
+                    className="text-red-600 border-red-200 hover:bg-red-50"
                     onClick={() => onDelete(message)}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
+                    Supprimer
                   </Button>
                 </>
               )}

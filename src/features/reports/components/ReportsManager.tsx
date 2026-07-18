@@ -7,6 +7,8 @@
  * subject) — the backend has no "generated report file" concept.
  */
 import { useState } from 'react';
+import { PieChart } from 'lucide-react';
+import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { useUserStats } from '@/features/users';
 import { useAuditLogStats } from '@/features/audit-logs';
 import { useStudents } from '@/features/students';
@@ -34,14 +36,12 @@ export function ReportsManager() {
   const gradeReport = useGradeReport(scope as GradeScope, kind === 'grades' ? entityId : undefined);
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <div className="space-y-6 p-6">
-        <div>
-          <h1 className="text-4xl font-bold text-blue-400">
-            Reports &amp; Analytics
-          </h1>
-          <p className="text-gray-300 mt-2">System overview and on-demand attendance/grade reports</p>
-        </div>
+    <div className="space-y-6">
+        <AdminPageHeader
+          icon={PieChart}
+          title="Rapports &amp; analytiques"
+          description="Vue d'ensemble du système et rapports de présence / notes à la demande"
+        />
 
         <ReportStatsCards
           isLoading={userStatsLoading || auditStatsLoading}
@@ -64,22 +64,21 @@ export function ReportsManager() {
         />
 
         {!entityId ? (
-          <p className="text-gray-400 text-center py-12">
-            Select a {scope === 'student' ? 'student' : scope === 'class-group' ? 'class' : 'subject'} above
-            to view its report.
+          <p className="text-slate-400 text-center py-12">
+            Sélectionnez un {scope === 'student' ? 'étudiant' : scope === 'class-group' ? 'classe' : 'sujet'} ci-dessus
+            pour afficher son rapport.
           </p>
         ) : kind === 'attendance' ? (
           attendanceReport.isLoading ? (
-            <div className="animate-pulse bg-gray-800/50 backdrop-blur-md rounded-xl h-48 border border-gray-600/30" />
+            <div className="animate-pulse bg-slate-100 rounded-xl h-48" />
           ) : attendanceReport.data ? (
             <AttendanceReportView report={attendanceReport.data} />
           ) : null
         ) : gradeReport.isLoading ? (
-          <div className="animate-pulse bg-gray-800/50 backdrop-blur-md rounded-xl h-48 border border-gray-600/30" />
+          <div className="animate-pulse bg-slate-100 rounded-xl h-48" />
         ) : gradeReport.data ? (
           <GradeReportView report={gradeReport.data} />
         ) : null}
-      </div>
     </div>
   );
 }

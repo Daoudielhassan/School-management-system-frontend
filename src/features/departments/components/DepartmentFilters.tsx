@@ -16,7 +16,7 @@ export function DepartmentFilters({ filters, onChange }: DepartmentFiltersProps)
       <CardContent className="p-4">
         <div className="flex gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-blue-400" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
             <Input
               placeholder="Search departments..."
               value={filters.search}

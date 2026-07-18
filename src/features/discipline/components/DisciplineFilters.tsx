@@ -23,15 +23,13 @@ export interface DisciplineFiltersProps {
   onReset: () => void;
 }
 
-const triggerStyle = { backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)' };
-
 export function DisciplineFilters({ filters, onChange, onReset }: DisciplineFiltersProps) {
   return (
-    <Card style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-light)' }}>
+    <Card className="border-slate-200 shadow-sm shadow-slate-200/50">
       <CardContent className="p-4">
         <div className="flex flex-wrap gap-3">
           <Select value={filters.status} onValueChange={(status) => onChange({ ...filters, status })}>
-            <SelectTrigger className="w-44" style={triggerStyle}>
+            <SelectTrigger className="w-44">
               <SelectValue placeholder="Statut" />
             </SelectTrigger>
             <SelectContent>
@@ -48,7 +46,7 @@ export function DisciplineFilters({ filters, onChange, onReset }: DisciplineFilt
             value={filters.severity}
             onValueChange={(severity) => onChange({ ...filters, severity })}
           >
-            <SelectTrigger className="w-44" style={triggerStyle}>
+            <SelectTrigger className="w-44">
               <SelectValue placeholder="Sévérité" />
             </SelectTrigger>
             <SelectContent>
@@ -61,12 +59,7 @@ export function DisciplineFilters({ filters, onChange, onReset }: DisciplineFilt
             </SelectContent>
           </Select>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            style={{ color: 'var(--text-secondary)' }}
-            onClick={onReset}
-          >
+          <Button variant="ghost" size="sm" className="text-slate-500" onClick={onReset}>
             Réinitialiser
           </Button>
         </div>

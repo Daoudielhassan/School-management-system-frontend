@@ -11,6 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { extractErrorMessage } from '@/lib/api-error';
 import { useUsers } from '@/features/users';
@@ -119,32 +120,27 @@ export function MessagesManager() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="space-y-6 p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl lg:text-4xl font-bold text-blue-700">
-              Communication Center
-            </h1>
-            <p className="text-slate-600 mt-2">Private messaging between users</p>
-          </div>
-          <Button
-            className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20"
-            onClick={openCompose}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Compose Message
-          </Button>
-        </div>
+    <div className="space-y-6">
+        <AdminPageHeader
+          icon={MessageSquare}
+          title="Centre de communication"
+          description="Messagerie privée entre utilisateurs"
+          actions={
+            <Button className="shadow-sm shadow-blue-600/20" onClick={openCompose}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nouveau message
+            </Button>
+          }
+        />
 
         <MessageStatsCards messages={filtered} unreadCount={unreadCount} />
 
         <MessageFilters filters={filters} onChange={setFilters} />
 
         <Tabs value={box} onValueChange={(v) => setBox(v as MessageBox)} className="space-y-4">
-          <TabsList className="bg-blue-900/20 backdrop-blur-md border border-blue-500/30">
+          <TabsList>
             {BOX_OPTIONS.map((o) => (
-              <TabsTrigger key={o.value} value={o.value} className="data-[state=active]:bg-blue-500/30">
+              <TabsTrigger key={o.value} value={o.value}>
                 {o.label}
               </TabsTrigger>
             ))}
@@ -154,26 +150,22 @@ export function MessagesManager() {
             {isLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="animate-pulse bg-blue-900/20 backdrop-blur-md rounded-xl h-48 border border-blue-500/30"
-                  />
+                  <div key={i} className="animate-pulse bg-slate-100 rounded-xl h-48" />
                 ))}
               </div>
             ) : filtered.length === 0 ? (
-              <Card className="bg-blue-900/20 backdrop-blur-md border-blue-500/30">
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <MessageSquare className="h-12 w-12 text-blue-400/50 mb-4" />
-                  <h3 className="text-lg font-semibold text-white mb-2">No messages found</h3>
-                  <p className="text-gray-300 text-center mb-4">
-                    {filters.search ? 'Try adjusting your search terms' : 'Nothing here yet'}
+              <Card className="border-slate-200 border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-14">
+                  <div className="p-3 rounded-2xl bg-blue-50 mb-4">
+                    <MessageSquare className="h-8 w-8 text-blue-500" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-800 mb-1">Aucun message</h3>
+                  <p className="text-slate-500 text-center mb-4">
+                    {filters.search ? 'Essayez d\'ajuster votre recherche' : 'Rien ici pour le moment'}
                   </p>
-                  <Button
-                    onClick={openCompose}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
+                  <Button onClick={openCompose}>
                     <Plus className="mr-2 h-4 w-4" />
-                    Compose Message
+                    Nouveau message
                   </Button>
                 </CardContent>
               </Card>
@@ -222,14 +214,13 @@ export function MessagesManager() {
           onOpenChange={(open) => {
             if (!open) setPendingDelete(null);
           }}
-          title="Delete message"
-          description="Are you sure you want to delete this message? This cannot be undone."
-          confirmLabel="Delete"
+          title="Supprimer le message"
+          description="Voulez-vous vraiment supprimer ce message ? Cette action est irréversible."
+          confirmLabel="Supprimer"
           variant="destructive"
           isConfirming={deleteMessage.isPending}
           onConfirm={handleDeleteConfirm}
         />
-      </div>
     </div>
   );
 }

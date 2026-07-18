@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DataTable } from '@/components/shared/DataTable';
+import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { extractErrorMessage } from '@/lib/api-error';
 import { useUsers } from '@/features/users';
 import { SendNotificationForm } from './SendNotificationForm';
@@ -63,13 +64,15 @@ export function NotificationsManager() {
   };
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
-          <p className="text-muted-foreground">Send a notification to a user and review their inbox.</p>
-        </div>
+    <div className="space-y-6">
+      <AdminPageHeader
+        icon={Bell}
+        title="Notifications"
+        description="Envoyez une notification à un utilisateur et consultez sa boîte de réception"
+      />
 
+      <div className="grid gap-6 md:grid-cols-2">
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Send Notification</CardTitle>
@@ -119,11 +122,12 @@ export function NotificationsManager() {
               <DataTable columns={columns} data={notifications} isLoading={isLoading} paginated />
             ) : (
               <p className="text-center text-muted-foreground py-12">
-                Select a user above to view their notifications.
+                Sélectionnez un utilisateur ci-dessus pour voir ses notifications.
               </p>
             )}
           </CardContent>
         </Card>
+      </div>
       </div>
     </div>
   );

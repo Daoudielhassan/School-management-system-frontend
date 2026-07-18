@@ -17,17 +17,20 @@ export interface ClassStatsCardsProps {
 
 export function ClassStatsCards({ stats }: ClassStatsCardsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-      <StatCard icon={<BookOpen className="h-8 w-8 text-blue-400 mx-auto mb-2" />} value={stats.totalClasses} label="Total Classes" />
-      <StatCard icon={<Users className="h-8 w-8 text-green-400 mx-auto mb-2" />} value={stats.totalStudents} label="Total Students" />
-      <StatCard icon={<Layers className="h-8 w-8 text-purple-400 mx-auto mb-2" />} value={stats.totalModules} label="Total Modules" />
-      <Card className="bg-white/70 backdrop-blur-md border-slate-200">
-        <CardContent className="p-6 text-center">
-          <Calendar className="h-8 w-8 text-orange-400 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-slate-900">{stats.todayAttendance}</div>
-          <div className="text-sm text-gray-600">Today's Attendance</div>
-          <div className="text-xs text-green-400 mt-1">
-            Present: {stats.presentToday} | Absent: {stats.absentToday}
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+      <StatCard icon={BookOpen} value={stats.totalClasses} label="Classes" />
+      <StatCard icon={Users} value={stats.totalStudents} label="Étudiants" />
+      <StatCard icon={Layers} value={stats.totalModules} label="Modules" />
+      <Card className="border-slate-200 hover:shadow-lg transition-all duration-300 group">
+        <CardContent className="p-5 flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-blue-50 group-hover:scale-110 transition-transform">
+            <Calendar className="h-5 w-5 text-blue-600" />
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-slate-800 tabular-nums">{stats.todayAttendance}</div>
+            <div className="text-xs text-slate-500">
+              Présents {stats.presentToday} · Absents {stats.absentToday}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -35,13 +38,25 @@ export function ClassStatsCards({ stats }: ClassStatsCardsProps) {
   );
 }
 
-function StatCard({ icon, value, label }: { icon: React.ReactNode; value: number; label: string }) {
+function StatCard({
+  icon: Icon,
+  value,
+  label,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  value: number;
+  label: string;
+}) {
   return (
-    <Card className="bg-white/70 backdrop-blur-md border-slate-200">
-      <CardContent className="p-6 text-center">
-        {icon}
-        <div className="text-2xl font-bold text-slate-900">{value}</div>
-        <div className="text-sm text-gray-600">{label}</div>
+    <Card className="border-slate-200 hover:shadow-lg transition-all duration-300 group">
+      <CardContent className="p-5 flex items-center gap-3">
+        <div className="p-2.5 rounded-xl bg-blue-50 group-hover:scale-110 transition-transform">
+          <Icon className="h-5 w-5 text-blue-600" />
+        </div>
+        <div>
+          <div className="text-2xl font-bold text-slate-800 tabular-nums">{value}</div>
+          <div className="text-xs text-slate-500">{label}</div>
+        </div>
       </CardContent>
     </Card>
   );

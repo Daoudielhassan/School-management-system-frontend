@@ -4,7 +4,6 @@
  * Role-based permissions overview (read-only grid grouped by role).
  */
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -14,7 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Plus, Trash2 } from 'lucide-react';
+import { Shield } from 'lucide-react';
+import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { usePermissionsByRole } from '../hooks/usePermissions';
 import { ROLES } from '../constants';
 
@@ -23,24 +23,17 @@ export function PermissionsManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Permissions Management</h1>
-          <p className="text-muted-foreground">
-            Configure role-based access control (RBAC) policies.
-          </p>
-        </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Permission
-        </Button>
-      </div>
+      <AdminPageHeader
+        icon={Shield}
+        title="Permissions"
+        description="Aperçu du contrôle d'accès par rôle (RBAC)"
+      />
 
       <div className="grid gap-6">
         {ROLES.map((role) => {
           const perms = byRole[role] ?? [];
           return (
-            <Card key={role}>
+            <Card key={role} className="border-slate-200 shadow-sm shadow-slate-200/50">
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle>{role}</CardTitle>
@@ -51,9 +44,8 @@ export function PermissionsManager() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Resource</TableHead>
+                      <TableHead>Ressource</TableHead>
                       <TableHead>Actions</TableHead>
-                      <TableHead className="text-right">Manage</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -62,7 +54,7 @@ export function PermissionsManager() {
                         <TableRow key={perm.id}>
                           <TableCell className="font-medium">{perm.resource}</TableCell>
                           <TableCell>
-                            <div className="flex gap-2">
+                            <div className="flex flex-wrap gap-2">
                               {perm.actions.map((action) => (
                                 <Badge key={action} variant="secondary">
                                   {action}
@@ -70,17 +62,12 @@ export function PermissionsManager() {
                               ))}
                             </div>
                           </TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="sm" className="text-red-600">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={3} className="text-center text-muted-foreground h-24">
-                          No explicit permissions defined. Using defaults.
+                        <TableCell colSpan={2} className="text-center text-muted-foreground h-24">
+                          Aucune permission explicite définie. Les valeurs par défaut s'appliquent.
                         </TableCell>
                       </TableRow>
                     )}

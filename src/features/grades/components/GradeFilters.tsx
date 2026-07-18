@@ -21,24 +21,24 @@ export interface GradeFiltersProps {
 
 export function GradeFilters({ filters, subjects, onChange }: GradeFiltersProps) {
   return (
-    <Card className="bg-[var(--secondary)]/10 backdrop-blur-md border-[var(--accent)]/30">
+    <Card className="border-slate-200 shadow-sm shadow-slate-200/50">
       <CardContent className="p-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-[var(--primary)]" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
             <Input
-              placeholder="Search by student, subject, or ID..."
+              placeholder="Rechercher par étudiant ou matière…"
               value={filters.search}
               onChange={(e) => onChange({ ...filters, search: e.target.value })}
-              className="pl-10 bg-[var(--secondary)]/50 border-[var(--accent)]/30 text-[var(--text)] placeholder-[var(--text-muted)] focus:border-[var(--primary)]"
+              className="pl-10"
             />
           </div>
           <Select value={filters.subject} onValueChange={(subject) => onChange({ ...filters, subject })}>
-            <SelectTrigger className="w-48 bg-[var(--secondary)]/50 border-[var(--accent)]/30 text-[var(--text)]">
-              <SelectValue placeholder="Filter by subject" />
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Matière" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={SUBJECT_FILTER_ALL}>All Subjects</SelectItem>
+              <SelectItem value={SUBJECT_FILTER_ALL}>Toutes les matières</SelectItem>
               {subjects.map((s) => (
                 <SelectItem key={s.id} value={s.id}>
                   {s.name}
@@ -50,11 +50,11 @@ export function GradeFilters({ filters, subjects, onChange }: GradeFiltersProps)
             value={filters.performance}
             onValueChange={(performance) => onChange({ ...filters, performance })}
           >
-            <SelectTrigger className="w-48 bg-[var(--secondary)]/50 border-[var(--accent)]/30 text-[var(--text)]">
-              <SelectValue placeholder="Filter by performance" />
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Performance" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={PERFORMANCE_FILTER_ALL}>All Performance</SelectItem>
+              <SelectItem value={PERFORMANCE_FILTER_ALL}>Toutes performances</SelectItem>
               {PERFORMANCE_OPTIONS.map((o) => (
                 <SelectItem key={o.value} value={o.value}>
                   {o.label}

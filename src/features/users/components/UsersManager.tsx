@@ -7,8 +7,9 @@
  */
 import { useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
-import { Plus } from 'lucide-react';
+import { Plus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { Pagination } from '@/components/shared/Pagination';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { extractErrorMessage } from '@/lib/api-error';
@@ -72,13 +73,13 @@ export function UsersManager() {
     try {
       if (dialog.mode === 'create') {
         await createUser.mutateAsync(toCreateUserPayload(values));
-        toast.success('User created successfully!');
+        toast.success('User created');
       } else if (dialog.user) {
         await updateUser.mutateAsync({
           id: dialog.user.id,
           payload: toUpdateUserPayload(values),
         });
-        toast.success('User updated successfully!');
+        toast.success('User updated');
       }
       setDialog(null);
     } catch (error) {
@@ -92,7 +93,7 @@ export function UsersManager() {
     if (!deleting) return;
     try {
       await deleteUser.mutateAsync(deleting.id);
-      toast.success('User deleted successfully!');
+      toast.success('User deleted');
     } catch (error) {
       toast.error(extractErrorMessage(error, 'Failed to delete user'));
     } finally {
@@ -102,20 +103,21 @@ export function UsersManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestion des utilisateurs</h1>
-          <p className="text-gray-600">Gestion des comptes utilisateurs du système</p>
-        </div>
-        <Button onClick={() => setDialog({ mode: 'create', user: null })}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add User
-        </Button>
-      </div>
+      <AdminPageHeader
+        icon={Users}
+        title="Utilisateurs"
+        description="Gérez les comptes utilisateurs du système"
+        actions={
+          <Button onClick={() => setDialog({ mode: 'create', user: null })}>
+            <Plus className="h-4 w-4 mr-2" />
+            Ajouter un utilisateur
+          </Button>
+        }
+      />
 
       <UserFilters filters={filters} onChange={handleFiltersChange} />
 
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm shadow-slate-200/50">
         <UsersTable
           users={paged.rows}
           isLoading={isLoading}

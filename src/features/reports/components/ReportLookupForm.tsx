@@ -47,10 +47,10 @@ export function ReportLookupForm({
         : subjects.map((s) => ({ value: s.id, label: s.name }));
 
   return (
-    <Card className="bg-gray-900/50 backdrop-blur-md border-gray-700/30">
+    <Card className="border-slate-200 shadow-sm shadow-slate-200/50">
       <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="space-y-1">
-          <Label className="text-gray-300">Report</Label>
+        <div className="space-y-1.5">
+          <Label className="text-slate-600">Rapport</Label>
           <Select
             value={kind}
             onValueChange={(v) => {
@@ -59,7 +59,7 @@ export function ReportLookupForm({
               onEntityChange('');
             }}
           >
-            <SelectTrigger className="bg-gray-800/50 border-gray-600/30 text-white">
+            <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -72,8 +72,8 @@ export function ReportLookupForm({
           </Select>
         </div>
 
-        <div className="space-y-1">
-          <Label className="text-gray-300">Scope</Label>
+        <div className="space-y-1.5">
+          <Label className="text-slate-600">Portée</Label>
           <Select
             value={scope}
             onValueChange={(v) => {
@@ -81,7 +81,7 @@ export function ReportLookupForm({
               onEntityChange('');
             }}
           >
-            <SelectTrigger className="bg-gray-800/50 border-gray-600/30 text-white">
+            <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -94,13 +94,13 @@ export function ReportLookupForm({
           </Select>
         </div>
 
-        <div className="space-y-1">
-          <Label className="text-gray-300">
-            {scope === 'student' ? 'Student' : scope === 'class-group' ? 'Class' : 'Subject'}
+        <div className="space-y-1.5">
+          <Label className="text-slate-600">
+            {scope === 'student' ? 'Étudiant' : scope === 'class-group' ? 'Classe' : 'Sujet'}
           </Label>
           <Select value={entityId} onValueChange={onEntityChange}>
-            <SelectTrigger className="bg-gray-800/50 border-gray-600/30 text-white">
-              <SelectValue placeholder="Select..." />
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner…" />
             </SelectTrigger>
             <SelectContent>
               {entityOptions.map((o) => (

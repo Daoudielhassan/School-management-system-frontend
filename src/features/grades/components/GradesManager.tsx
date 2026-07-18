@@ -7,10 +7,10 @@
  */
 import { useState } from 'react';
 import { toast } from 'react-toastify';
-import { Plus, TrendingUp } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { extractErrorMessage } from '@/lib/api-error';
 import { GradeStatsCards } from './GradeStatsCards';
@@ -45,7 +45,7 @@ export function GradesManager() {
   const handleCreate = async (values: GradeFormValues) => {
     try {
       await createGrade.mutateAsync(toGradeMutationPayload(values));
-      toast.success('Grade recorded');
+      toast.success('Note enregistrée');
       setFormOpen(false);
     } catch (error) {
       toast.error(extractErrorMessage(error, 'Failed to record grade'));
@@ -56,7 +56,7 @@ export function GradesManager() {
     if (!pendingDelete) return;
     try {
       await deleteGrade.mutateAsync(pendingDelete.id);
-      toast.success('Grade deleted');
+      toast.success('Note supprimée');
     } catch (error) {
       toast.error(extractErrorMessage(error, 'Failed to delete grade'));
     } finally {
@@ -66,70 +66,33 @@ export function GradesManager() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--text)]">
-      <div className="space-y-6 p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-blue-400">
-              Academic Performance Tracking
-            </h1>
-            <p className="text-[var(--text-muted)] mt-2">
-              Advanced analytics dashboard for student performance monitoring
-            </p>
-          </div>
-          <Button
-            className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20"
-            onClick={() => setFormOpen(true)}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Record Grade
-          </Button>
-        </div>
+    <div className="space-y-6">
+        <AdminPageHeader
+          icon={Award}
+          title="Notes"
+          description="Suivi des performances académiques des étudiants"
+          actions={
+            <Button className="shadow-sm shadow-blue-600/20" onClick={() => setFormOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Enregistrer une note
+            </Button>
+          }
+        />
 
         <GradeStatsCards stats={stats} />
 
         <GradeFilters filters={filters} subjects={bundle?.subjects ?? []} onChange={setFilters} />
 
         <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList className="bg-[var(--secondary)]/50 backdrop-blur-md border border-[var(--accent)]/30">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-[var(--primary)]/30">
-              Performance Overview
-            </TabsTrigger>
-            <TabsTrigger value="trends" className="data-[state=active]:bg-[var(--primary)]/30">
-              Trends Analysis
-            </TabsTrigger>
-            <TabsTrigger value="alerts" className="data-[state=active]:bg-[var(--primary)]/30">
-              Performance Alerts
+          <TabsList>
+            <TabsTrigger value="overview">Vue d&apos;ensemble</TabsTrigger>
+            <TabsTrigger value="alerts">
+              Alertes{weakGrades.length > 0 ? ` (${weakGrades.length})` : ''}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
             <GradeGrid grades={filtered} isLoading={isLoading} onView={setSelected} />
-          </TabsContent>
-
-          <TabsContent value="trends" className="space-y-4">
-            <Card className="bg-[var(--secondary)]/10 backdrop-blur-md border-[var(--accent)]/30">
-              <CardHeader>
-                <CardTitle className="text-[var(--text)] flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-[var(--primary)]" />
-                  Performance Trends
-                </CardTitle>
-                <CardDescription className="text-[var(--text-muted)]">
-                  Student performance evolution over time
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">📈</div>
-                  <h3 className="text-xl font-semibold text-[var(--text)] mb-2">
-                    Trend Analysis Dashboard
-                  </h3>
-                  <p className="text-[var(--text-muted)]">
-                    Advanced performance tracking charts coming soon...
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="alerts" className="space-y-4">
@@ -160,14 +123,13 @@ export function GradesManager() {
           onOpenChange={(open) => {
             if (!open) setPendingDelete(null);
           }}
-          title="Delete grade"
-          description="Are you sure you want to delete this grade? This cannot be undone."
-          confirmLabel="Delete"
+          title="Supprimer la note"
+          description="Voulez-vous vraiment supprimer cette note ? Cette action est irréversible."
+          confirmLabel="Supprimer"
           variant="destructive"
           isConfirming={deleteGrade.isPending}
           onConfirm={handleDeleteConfirm}
         />
-      </div>
     </div>
   );
 }

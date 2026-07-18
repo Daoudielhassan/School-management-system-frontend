@@ -73,7 +73,7 @@ export function DisciplineManager({ students }: DisciplineManagerProps) {
       const student = students.find((s) => s.id === values.studentId);
       const studentName = student ? `${student.firstName} ${student.lastName}` : values.studentName;
       await createCase.mutateAsync(toCreateCasePayload({ ...values, studentName }));
-      toast.success('Dossier créé avec succès');
+      toast.success('Dossier créé');
       setCreateOpen(false);
     } catch (error) {
       const message = extractErrorMessage(error, 'Erreur lors de la création');
@@ -108,17 +108,20 @@ export function DisciplineManager({ students }: DisciplineManagerProps) {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-            <Gavel className="h-6 w-6 text-red-600" />
+        <div className="flex items-center gap-3.5">
+          <div className="flex-shrink-0 grid place-items-center h-11 w-11 rounded-2xl bg-red-50 ring-1 ring-inset ring-red-100">
+            <Gavel className="h-[22px] w-[22px] text-red-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+            <h1
+              className="text-[26px] font-semibold text-slate-900 tracking-tight leading-none"
+              style={{ fontFamily: 'var(--font-admin-display, inherit)' }}
+            >
               Discipline
             </h1>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Gestion des dossiers disciplinaires · Les cas AUTO sont créés automatiquement après 8
-              absences non justifiées (48h)
+            <p className="text-sm text-slate-500 mt-1.5">
+              Gestion des dossiers disciplinaires · les cas AUTO sont créés après 8 absences non
+              justifiées (48h)
             </p>
           </div>
         </div>
@@ -157,10 +160,10 @@ export function DisciplineManager({ students }: DisciplineManagerProps) {
         onReset={() => handleFiltersChange(EMPTY_FILTERS)}
       />
 
-      <Card style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-light)' }}>
+      <Card className="border-slate-200 shadow-sm shadow-slate-200/50">
         <CardHeader>
-          <CardTitle style={{ color: 'var(--text-primary)' }}>Dossiers disciplinaires</CardTitle>
-          <CardDescription style={{ color: 'var(--text-secondary)' }}>
+          <CardTitle className="text-slate-900">Dossiers disciplinaires</CardTitle>
+          <CardDescription className="text-slate-500">
             {`Page ${(casesPage?.number ?? 0) + 1} / ${totalPages}`}
           </CardDescription>
         </CardHeader>
@@ -182,7 +185,7 @@ export function DisciplineManager({ students }: DisciplineManagerProps) {
               >
                 Précédent
               </Button>
-              <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <span className="text-sm text-slate-500">
                 Page {(casesPage?.number ?? 0) + 1} / {totalPages}
               </span>
               <Button

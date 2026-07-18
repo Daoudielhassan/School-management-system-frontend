@@ -7,8 +7,9 @@
  */
 import { useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
-import { Plus } from 'lucide-react';
+import { Plus, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { extractErrorMessage } from '@/lib/api-error';
 import { ClassStatsCards } from './ClassStatsCards';
@@ -66,13 +67,13 @@ export function ClassesManager() {
     try {
       if (formDialog.mode === 'create') {
         await createClass.mutateAsync(toClassPayload(values));
-        toast.success('Class created successfully!');
+        toast.success('Class created');
       } else if (formDialog.classe) {
         await updateClass.mutateAsync({
           id: formDialog.classe.id,
           payload: toClassPayload(values),
         });
-        toast.success('Class updated successfully!');
+        toast.success('Class updated');
       }
       setFormDialog(null);
     } catch (error) {
@@ -86,7 +87,7 @@ export function ClassesManager() {
     if (!deleting) return;
     try {
       await deleteClass.mutateAsync(deleting.id);
-      toast.success('Class deleted successfully!');
+      toast.success('Class deleted');
     } catch (error) {
       toast.error(extractErrorMessage(error, 'Failed to delete class'));
     } finally {
@@ -96,19 +97,20 @@ export function ClassesManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-slate-900">Class Management</h1>
-          <p className="text-gray-600 mt-2">Manage academic classes, schedules, and curriculum</p>
-        </div>
-        <Button
-          className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20"
-          onClick={() => setFormDialog({ mode: 'create', classe: null })}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Class
-        </Button>
-      </div>
+      <AdminPageHeader
+        icon={BookOpen}
+        title="Classes"
+        description="Gérez les classes, groupes et emplois du temps"
+        actions={
+          <Button
+            className="shadow-sm shadow-blue-600/20"
+            onClick={() => setFormDialog({ mode: 'create', classe: null })}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Ajouter une classe
+          </Button>
+        }
+      />
 
       <ClassStatsCards stats={stats} />
 

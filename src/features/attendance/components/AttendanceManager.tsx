@@ -7,10 +7,10 @@
  */
 import { useState } from 'react';
 import { toast } from 'react-toastify';
-import { Calendar, Download, AlertTriangle } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { ClipboardList, AlertTriangle } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { extractErrorMessage } from '@/lib/api-error';
 import { AttendanceStatsCards } from './AttendanceStatsCards';
 import { AttendanceFilters } from './AttendanceFilters';
@@ -45,54 +45,31 @@ export function AttendanceManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-blue-400">
-            Attendance Management
-          </h1>
-          <p className="text-slate-500 mt-2">Monitor and validate student attendance records</p>
-        </div>
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            className="border-blue-400/30 bg-blue-500/20 text-blue-600 hover:bg-blue-500/30"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Export Data
-          </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20">
-            <Calendar className="mr-2 h-4 w-4" />
-            Schedule Review
-          </Button>
-        </div>
-      </div>
+      <AdminPageHeader
+        icon={ClipboardList}
+        title="Présences"
+        description="Suivez et validez les présences des étudiants"
+      />
 
       <AttendanceStatsCards stats={stats} />
 
       <AttendanceFilters filters={filters} onChange={setFilters} />
 
       {isError && (
-        <Card className="bg-red-500/20 backdrop-blur-md border-red-400/30">
+        <Card className="bg-red-50 border-red-200">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-red-700">
               <AlertTriangle className="h-4 w-4" />
-              <span>Failed to load attendance data</span>
+              <span>Impossible de charger les présences</span>
             </div>
           </CardContent>
         </Card>
       )}
 
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="bg-white/70 backdrop-blur-md border border-slate-200">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-blue-500/30">
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="pending" className="data-[state=active]:bg-yellow-500/30">
-            Justifications
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="data-[state=active]:bg-purple-500/30">
-            Analytics
-          </TabsTrigger>
+        <TabsList>
+          <TabsTrigger value="overview">Vue d&apos;ensemble</TabsTrigger>
+          <TabsTrigger value="pending">Justifications</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -110,24 +87,6 @@ export function AttendanceManager() {
             onView={setSelected}
             onExcuse={(r) => handleUpdateStatus(r.id, 'EXCUSED')}
           />
-        </TabsContent>
-
-        <TabsContent value="analytics" className="space-y-4">
-          <Card className="bg-white/70 backdrop-blur-md border-slate-200">
-            <CardHeader>
-              <CardTitle className="text-slate-900">Attendance Analytics</CardTitle>
-              <CardDescription className="text-slate-500">
-                Detailed insights and trends
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <div className="text-6xl mb-4">📊</div>
-                <h3 className="text-xl font-semibold text-slate-900 mb-2">Analytics Dashboard</h3>
-                <p className="text-slate-500">Advanced attendance analytics coming soon...</p>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
       </Tabs>
 

@@ -10,6 +10,7 @@ import { Database } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/shared/DataTable';
+import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { extractErrorMessage } from '@/lib/api-error';
 import { BackupStatsCards } from './BackupStatsCards';
@@ -28,7 +29,7 @@ export function BackupsManager() {
 
   const handleCreate = () => {
     createBackup.mutate(undefined, {
-      onSuccess: () => toast.success('Backup created successfully'),
+      onSuccess: () => toast.success('Sauvegarde créée'),
       onError: (error) => toast.error(extractErrorMessage(error, 'Failed to create backup')),
     });
   };
@@ -37,7 +38,7 @@ export function BackupsManager() {
     if (!restoring) return;
     try {
       await restoreBackup.mutateAsync(restoring.id);
-      toast.success('System restored successfully');
+      toast.success('Système restauré');
     } catch (error) {
       toast.error(extractErrorMessage(error, 'Failed to restore backup'));
     } finally {
@@ -47,23 +48,24 @@ export function BackupsManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Backup &amp; Restore</h1>
-          <p className="text-muted-foreground">Manage database backups and system restoration.</p>
-        </div>
-        <Button onClick={handleCreate} disabled={createBackup.isPending}>
-          <Database className="mr-2 h-4 w-4" />
-          {createBackup.isPending ? 'Creating...' : 'Create Backup'}
-        </Button>
-      </div>
+      <AdminPageHeader
+        icon={Database}
+        title="Sauvegarde &amp; restauration"
+        description="Gérez les sauvegardes de la base de données et la restauration système"
+        actions={
+          <Button onClick={handleCreate} disabled={createBackup.isPending}>
+            <Database className="mr-2 h-4 w-4" />
+            {createBackup.isPending ? 'Création…' : 'Créer une sauvegarde'}
+          </Button>
+        }
+      />
 
       <BackupStatsCards backups={backups} />
 
-      <Card>
+      <Card className="border-slate-200 shadow-sm shadow-slate-200/50">
         <CardHeader>
-          <CardTitle>Backup History</CardTitle>
-          <CardDescription>List of all available system backups.</CardDescription>
+          <CardTitle>Historique des sauvegardes</CardTitle>
+          <CardDescription>Liste de toutes les sauvegardes système disponibles.</CardDescription>
         </CardHeader>
         <CardContent>
           <DataTable columns={columns} data={backups} isLoading={isLoading} paginated />

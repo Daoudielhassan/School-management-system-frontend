@@ -26,26 +26,18 @@ export interface AuditLogFiltersProps {
   onReset: () => void;
 }
 
-const inputStyle = {
-  backgroundColor: 'var(--bg-secondary)',
-  borderColor: 'var(--border-light)',
-  color: 'var(--text-primary)',
-};
-
 export function AuditLogFilters({ filters, onChange, onReset }: AuditLogFiltersProps) {
   const set = (patch: Partial<AuditLogFilterValues>) => onChange({ ...filters, ...patch });
 
   return (
-    <Card style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-light)' }}>
+    <Card className="border-slate-200 shadow-sm shadow-slate-200/50">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>
-          Filters
-        </CardTitle>
+        <CardTitle className="text-sm font-semibold text-slate-500">Filtres</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           <Select value={filters.action} onValueChange={(action) => set({ action })}>
-            <SelectTrigger style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)' }}>
+            <SelectTrigger>
               <SelectValue placeholder="Action" />
             </SelectTrigger>
             <SelectContent>
@@ -58,32 +50,20 @@ export function AuditLogFilters({ filters, onChange, onReset }: AuditLogFiltersP
           </Select>
 
           <Input
-            placeholder="Resource (e.g. /api/sessions)"
+            placeholder="Ressource (ex. /api/sessions)"
             value={filters.resource}
             onChange={(e) => set({ resource: e.target.value })}
-            style={inputStyle}
           />
           <Input
-            placeholder="User ID"
+            placeholder="ID utilisateur"
             value={filters.userId}
             onChange={(e) => set({ userId: e.target.value })}
-            style={inputStyle}
           />
-          <Input
-            type="date"
-            value={filters.from}
-            onChange={(e) => set({ from: e.target.value })}
-            style={inputStyle}
-          />
-          <Input
-            type="date"
-            value={filters.to}
-            onChange={(e) => set({ to: e.target.value })}
-            style={inputStyle}
-          />
+          <Input type="date" value={filters.from} onChange={(e) => set({ from: e.target.value })} />
+          <Input type="date" value={filters.to} onChange={(e) => set({ to: e.target.value })} />
 
-          <Button variant="ghost" onClick={onReset} style={{ color: 'var(--text-secondary)' }}>
-            Reset
+          <Button variant="ghost" onClick={onReset} className="text-slate-500">
+            Réinitialiser
           </Button>
         </div>
       </CardContent>

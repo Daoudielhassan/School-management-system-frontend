@@ -51,81 +51,69 @@ export function ClassStudentsDialog({ open, onOpenChange, classe }: ClassStudent
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-800/95 backdrop-blur-md border-slate-200 max-w-6xl max-h-[80vh] overflow-hidden">
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
         <DialogHeader>
-          <DialogTitle className="text-slate-900">Students in {classe?.name}</DialogTitle>
-          <DialogDescription className="text-gray-600">
-            Manage students enrolled in this class
-          </DialogDescription>
+          <DialogTitle>Étudiants — {classe?.name}</DialogTitle>
+          <DialogDescription>Étudiants inscrits dans cette classe</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 overflow-auto">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400" />
-              <span className="ml-2 text-gray-600">Loading students...</span>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+              <span className="ml-2 text-slate-500">Chargement…</span>
             </div>
           ) : (
             <>
               <Table>
                 <TableHeader>
-                  <TableRow className="border-slate-200">
-                    <TableHead className="text-gray-600">Student</TableHead>
-                    <TableHead className="text-gray-600">Email</TableHead>
-                    <TableHead className="text-gray-600">Phone</TableHead>
-                    <TableHead className="text-gray-600">Status</TableHead>
+                  <TableRow>
+                    <TableHead>Étudiant</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Téléphone</TableHead>
+                    <TableHead>Statut</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {pageRows.length > 0 ? (
                     pageRows.map((student) => (
-                      <TableRow key={student.id} className="border-white/5 hover:bg-white/70">
+                      <TableRow key={student.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
-                              <AvatarFallback className="bg-blue-500/20 text-blue-600">
+                              <AvatarFallback className="bg-blue-50 text-blue-700 text-xs font-semibold">
                                 {student.firstName.charAt(0)}
                                 {student.lastName.charAt(0)}
                               </AvatarFallback>
                             </Avatar>
-                            <div>
-                              <div className="font-medium text-slate-900">
-                                {student.firstName} {student.lastName}
-                              </div>
-                              <div className="text-xs text-gray-600">ID: {student.id}</div>
+                            <div className="font-medium text-slate-800">
+                              {student.firstName} {student.lastName}
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Mail className="h-3 w-3 text-blue-400" />
-                            <span className="text-gray-600">{student.email}</span>
+                            <Mail className="h-3.5 w-3.5 text-slate-400" />
+                            <span className="text-slate-600">{student.email}</span>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Phone className="h-3 w-3 text-blue-400" />
-                            <span className="text-gray-600">{student.phoneNumber ?? '—'}</span>
+                            <Phone className="h-3.5 w-3.5 text-slate-400" />
+                            <span className="text-slate-600">{student.phoneNumber ?? '—'}</span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge
-                            variant={student.status === 'active' ? 'default' : 'secondary'}
-                            className={
-                              student.status === 'active'
-                                ? 'bg-green-500/20 text-green-300'
-                                : 'bg-red-500/20 text-red-300'
-                            }
-                          >
-                            {student.status ?? 'unknown'}
+                          <Badge variant={student.status === 'active' ? 'default' : 'secondary'}>
+                            {student.status ?? 'inconnu'}
                           </Badge>
                         </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-slate-500 py-8">
-                        No students found in this class
+                      <TableCell colSpan={4} className="text-center text-slate-400 py-8">
+                        Aucun étudiant dans cette classe
                       </TableCell>
                     </TableRow>
                   )}

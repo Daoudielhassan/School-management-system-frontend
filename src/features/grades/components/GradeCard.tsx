@@ -1,6 +1,6 @@
 'use client';
 
-import { TrendingUp, TrendingDown, Target, Award, Eye, Zap } from 'lucide-react';
+import { TrendingUp, TrendingDown, Target, Award, Eye } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,17 +10,17 @@ import type { StudentGrade } from '../types';
 function TrendIcon({ trend, performance }: { trend: string; performance: string }) {
   const color =
     performance === 'excellent' || performance === 'good'
-      ? 'text-green-400'
+      ? 'text-emerald-600'
       : performance === 'average'
-        ? 'text-yellow-400'
-        : 'text-red-400';
+        ? 'text-amber-600'
+        : 'text-red-600';
   if (trend === 'up') return <TrendingUp className={`h-4 w-4 ${color}`} />;
   if (trend === 'down') return <TrendingDown className={`h-4 w-4 ${color}`} />;
   return <Target className={`h-4 w-4 ${color}`} />;
 }
 
 function scoreColor(percentage: number): string {
-  return percentage >= 80 ? 'text-green-400' : percentage >= 60 ? 'text-yellow-400' : 'text-red-400';
+  return percentage >= 80 ? 'text-emerald-600' : percentage >= 60 ? 'text-amber-600' : 'text-red-600';
 }
 
 export function GradeCard({
@@ -31,37 +31,32 @@ export function GradeCard({
   onView: (grade: StudentGrade) => void;
 }) {
   return (
-    <Card className="bg-[var(--secondary)]/10 backdrop-blur-md border-[var(--accent)]/30 hover:border-[var(--primary)]/50 transition-all duration-300 group hover:shadow-lg hover:shadow-[var(--primary)]/20">
+    <Card className="border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded-lg ${performanceBg(grade.performance)}`}>
-              <Award className="h-5 w-5 text-[var(--primary)]" />
+              <Award className="h-5 w-5 text-blue-600" />
             </div>
-            <div>
-              <h3 className="font-medium text-[var(--text)] group-hover:text-[var(--primary)] transition-colors">
-                {grade.studentName}
-              </h3>
-              <p className="text-xs text-[var(--text-muted)]">{grade.studentId}</p>
-            </div>
+            <h3 className="font-medium text-slate-800 group-hover:text-blue-700 transition-colors">
+              {grade.studentName}
+            </h3>
           </div>
           <div className="flex items-center gap-2">
             <TrendIcon trend={grade.trend} performance={grade.performance} />
-            <Badge className={`border ${performanceBg(grade.performance)} text-[var(--text)]`}>
-              {grade.performance}
-            </Badge>
+            <Badge variant="secondary">{grade.performance}</Badge>
           </div>
         </div>
 
         <div className="space-y-2 text-sm">
-          <Row label="Subject" value={grade.subject} />
+          <Row label="Matière" value={grade.subject} />
           <div className="flex justify-between">
-            <span className="text-[var(--text-muted)]">Score:</span>
+            <span className="text-slate-500">Note</span>
             <div className="flex items-center gap-2">
               <span className={`font-bold ${scoreColor(grade.percentage)}`}>
                 {grade.grade}/{grade.maxGrade}
               </span>
-              <span className="text-xs text-[var(--text-muted)]">({grade.percentage}%)</span>
+              <span className="text-xs text-slate-400">({grade.percentage}%)</span>
             </div>
           </div>
           <Row label="Type" value={grade.examType} />
@@ -69,7 +64,7 @@ export function GradeCard({
         </div>
 
         <div className="mt-4">
-          <div className="w-full bg-[var(--background-light)] rounded-full h-2">
+          <div className="w-full bg-slate-100 rounded-full h-2">
             <div
               className={`h-2 rounded-full ${performanceSolid(grade.performance)} transition-all duration-500`}
               style={{ width: `${grade.percentage}%` }}
@@ -77,22 +72,10 @@ export function GradeCard({
           </div>
         </div>
 
-        <div className="flex gap-2 mt-4">
-          <Button
-            size="sm"
-            variant="outline"
-            className="flex-1 border-[var(--accent)]/30 hover:bg-[var(--accent)]/20 text-[var(--accent)]"
-            onClick={() => onView(grade)}
-          >
-            <Eye className="h-3 w-3 mr-1" />
-            Details
-          </Button>
-          <Button
-            size="sm"
-            className="bg-[var(--secondary)]/50 hover:bg-[var(--secondary)]/60 text-[var(--text)] border border-[var(--accent)]/30"
-          >
-            <Zap className="h-3 w-3 mr-1" />
-            Analyze
+        <div className="mt-4">
+          <Button size="sm" variant="outline" className="w-full" onClick={() => onView(grade)}>
+            <Eye className="h-3.5 w-3.5 mr-1.5" />
+            Détails
           </Button>
         </div>
       </CardContent>
@@ -102,9 +85,9 @@ export function GradeCard({
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between">
-      <span className="text-[var(--text-muted)]">{label}:</span>
-      <span className="text-[var(--text)]">{value}</span>
+    <div className="flex justify-between gap-2">
+      <span className="text-slate-500 flex-shrink-0">{label}</span>
+      <span className="text-slate-800 text-right truncate">{value}</span>
     </div>
   );
 }

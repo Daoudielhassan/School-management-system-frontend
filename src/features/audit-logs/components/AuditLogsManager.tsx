@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Shield, Download, RefreshCw, Trash2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { TableSkeleton, StatsGridSkeleton } from '@/components/shared/Skeletons';
 import { Pagination } from '@/components/shared/Pagination';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
@@ -104,37 +105,29 @@ export function AuditLogsManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-            <Shield className="h-6 w-6" style={{ color: 'var(--accent)' }} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-              Audit Logs
-            </h1>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Monitor all system activity and security events
-            </p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={refresh}>
-            <RefreshCw className="h-4 w-4 mr-1" /> Refresh
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-1" /> Export CSV
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-red-600 hover:text-red-700"
-            onClick={() => setConfirmClear(true)}
-          >
-            <Trash2 className="h-4 w-4 mr-1" /> Clear All
-          </Button>
-        </div>
-      </div>
+      <AdminPageHeader
+        icon={Shield}
+        title="Journaux d'audit"
+        description="Surveillez l'activité système et les événements de sécurité"
+        actions={
+          <>
+            <Button variant="outline" size="sm" onClick={refresh}>
+              <RefreshCw className="h-4 w-4 mr-1.5" /> Actualiser
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExport}>
+              <Download className="h-4 w-4 mr-1.5" /> Exporter CSV
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 hover:border-red-200"
+              onClick={() => setConfirmClear(true)}
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" /> Tout effacer
+            </Button>
+          </>
+        }
+      />
 
       {statsLoad ? <StatsGridSkeleton count={5} /> : <AuditLogStatsBar stats={stats ?? null} loading={false} />}
 
@@ -144,15 +137,15 @@ export function AuditLogsManager() {
         onReset={() => handleFiltersChange(EMPTY_FILTERS)}
       />
 
-      <Card style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-light)' }}>
+      <Card className="border-slate-200 shadow-sm shadow-slate-200/50">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle style={{ color: 'var(--text-primary)' }}>System Activity</CardTitle>
-              <CardDescription style={{ color: 'var(--text-secondary)' }}>
+              <CardTitle className="text-slate-900">Activité système</CardTitle>
+              <CardDescription className="text-slate-500">
                 {paged
-                  ? `${paged.totalElements.toLocaleString()} total events · page ${paged.number + 1} of ${paged.totalPages}`
-                  : `${logs.length} events`}
+                  ? `${paged.totalElements.toLocaleString()} événements · page ${paged.number + 1} sur ${paged.totalPages}`
+                  : `${logs.length} événements`}
               </CardDescription>
             </div>
           </div>

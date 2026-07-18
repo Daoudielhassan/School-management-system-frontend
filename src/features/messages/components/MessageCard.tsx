@@ -25,50 +25,47 @@ export function MessageCard({
   const counterpartLabel = userLabel(users, counterpartId);
 
   return (
-    <Card className="bg-blue-900/20 backdrop-blur-md border-blue-500/30 hover:border-blue-400/50 transition-all duration-300 group hover:shadow-lg hover:shadow-blue-500/20">
+    <Card
+      className={`border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group ${
+        !message.read && box !== 'sent' ? 'bg-blue-50/40' : ''
+      }`}
+    >
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10 border-2 border-blue-400/50">
+            <Avatar className="h-10 w-10 border border-slate-200">
               <AvatarImage src="/user.png" />
-              <AvatarFallback className="bg-blue-600 text-white">
-                {counterpartLabel.charAt(0)}
+              <AvatarFallback className="bg-blue-50 text-blue-700 font-semibold">
+                {counterpartLabel.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h3 className="font-medium text-white group-hover:text-blue-300 transition-colors">
+              <h3 className="font-medium text-slate-800 group-hover:text-blue-700 transition-colors">
                 {counterpartLabel}
               </h3>
-              <p className="text-xs text-blue-300">{box === 'sent' ? 'To' : 'From'}</p>
+              <p className="text-xs text-slate-400">{box === 'sent' ? 'À' : 'De'}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <MessageStatusIcon read={message.read} />
-            {message.starred && <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />}
-            {message.archived && (
-              <Badge className="border bg-gray-500/20 border-gray-400/50 text-gray-200">Archived</Badge>
-            )}
+            {message.starred && <Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
+            {message.archived && <Badge variant="outline">Archivé</Badge>}
           </div>
         </div>
 
-        <div className="space-y-2">
-          <h4 className="font-medium text-white line-clamp-1">{message.subject || '(No subject)'}</h4>
-          <p className="text-sm text-gray-300 line-clamp-2">{message.content}</p>
+        <div className="space-y-1.5">
+          <h4 className="font-medium text-slate-800 line-clamp-1">{message.subject || '(Sans objet)'}</h4>
+          <p className="text-sm text-slate-500 line-clamp-2">{message.content}</p>
         </div>
 
-        <div className="flex items-center justify-between mt-4 pt-3 border-t border-blue-500/20">
-          <div className="flex items-center gap-2 text-xs text-blue-300">
+        <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+          <div className="flex items-center gap-2 text-xs text-slate-400">
             <Clock className="h-3 w-3" />
             {new Date(message.createdAt).toLocaleDateString()}
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            className="border-blue-400/30 hover:bg-blue-500/20 text-blue-300"
-            onClick={() => onOpen(message)}
-          >
-            <Eye className="h-3 w-3 mr-1" />
-            Open
+          <Button size="sm" variant="outline" onClick={() => onOpen(message)}>
+            <Eye className="h-3.5 w-3.5 mr-1.5" />
+            Ouvrir
           </Button>
         </div>
       </CardContent>

@@ -22,23 +22,27 @@ export function ReportStatsCards({
   if (isLoading) return <StatsGridSkeleton count={4} />;
 
   const cards = [
-    { icon: Users, value: totalUsers ?? '—', label: 'Total Users', border: 'hover:border-blue-400/50', color: 'text-blue-400', labelColor: 'text-blue-300' },
-    { icon: TrendingUp, value: activeUsers ?? '—', label: 'Active Users', border: 'hover:border-green-400/50', color: 'text-green-400', labelColor: 'text-green-300' },
-    { icon: Target, value: auditEvents ?? '—', label: 'Audit Events', border: 'hover:border-yellow-400/50', color: 'text-yellow-400', labelColor: 'text-yellow-300' },
-    { icon: Calendar, value: systemErrors ?? '—', label: 'System Errors', border: 'hover:border-purple-400/50', color: 'text-purple-400', labelColor: 'text-purple-300' },
+    { icon: Users, value: totalUsers ?? '—', label: 'Utilisateurs', color: 'text-blue-600', chip: 'bg-blue-50' },
+    { icon: TrendingUp, value: activeUsers ?? '—', label: 'Utilisateurs actifs', color: 'text-emerald-600', chip: 'bg-emerald-50' },
+    { icon: Target, value: auditEvents ?? '—', label: "Événements d'audit", color: 'text-amber-600', chip: 'bg-amber-50' },
+    { icon: Calendar, value: systemErrors ?? '—', label: 'Erreurs système', color: 'text-red-600', chip: 'bg-red-50' },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-      {cards.map(({ icon: Icon, value, label, border, color, labelColor }) => (
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+      {cards.map(({ icon: Icon, value, label, color, chip }) => (
         <Card
           key={label}
-          className={`bg-gray-900/50 backdrop-blur-md border-gray-700/30 ${border} transition-all duration-300 group`}
+          className="border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group"
         >
-          <CardContent className="p-6 text-center">
-            <Icon className={`h-8 w-8 ${color} mx-auto mb-2 group-hover:scale-110 transition-transform`} />
-            <div className="text-2xl font-bold text-white">{value}</div>
-            <div className={`text-sm ${labelColor}`}>{label}</div>
+          <CardContent className="p-5 flex items-center gap-3">
+            <div className={`p-2.5 rounded-xl ${chip} group-hover:scale-110 transition-transform`}>
+              <Icon className={`h-5 w-5 ${color}`} />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-slate-800 tabular-nums">{value}</div>
+              <div className="text-xs text-slate-500">{label}</div>
+            </div>
           </CardContent>
         </Card>
       ))}

@@ -1,14 +1,17 @@
 'use client';
 
+import { Calendar } from 'lucide-react';
+import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { SessionScheduleManager } from '@/features/sessions/components';
 
 export default function AdminSessionsPage() {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Gestion des sessions</h1>
-        <p className="text-gray-600">Planification et gestion des sessions de cours</p>
-      </div>
+      <AdminPageHeader
+        icon={Calendar}
+        title="Sessions"
+        description="Planification et gestion des séances de cours"
+      />
       <SessionScheduleManager />
     </div>
   );

@@ -21,17 +21,12 @@ export function AuditLogStatsBar({
   return (
     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
       {cards.map(({ label, value, icon: Icon, color }) => (
-        <Card
-          key={label}
-          style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-light)' }}
-        >
+        <Card key={label} className="border-slate-200 shadow-sm shadow-slate-200/50">
           <CardContent className="p-4 flex items-center gap-3">
             <Icon className={`h-5 w-5 shrink-0 ${color}`} />
             <div>
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                {label}
-              </p>
-              <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              <p className="text-xs text-slate-500">{label}</p>
+              <p className="text-xl font-bold text-slate-900 tabular-nums">
                 {loading ? '…' : value.toLocaleString()}
               </p>
             </div>

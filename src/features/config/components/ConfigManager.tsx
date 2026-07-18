@@ -4,8 +4,10 @@
  * System configuration screen: configs grouped into tabs by category.
  */
 import { toast } from 'react-toastify';
+import { SlidersHorizontal } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { extractErrorMessage } from '@/lib/api-error';
 import { ConfigCard } from './ConfigCard';
 import { useGroupedConfigs, useUpdateConfig } from '../hooks/useConfig';
@@ -18,26 +20,30 @@ export function ConfigManager() {
     updateConfig.mutate(
       { key, value },
       {
-        onSuccess: () => toast.success('Configuration updated successfully'),
+        onSuccess: () => toast.success('Configuration mise à jour'),
         onError: (error) => toast.error(extractErrorMessage(error, 'Failed to update configuration')),
       }
     );
   };
-
-  if (isLoading) return <div>Loading configuration...</div>;
 
   const hasCategories = categories.length > 0;
   const tabs = hasCategories ? categories : ['general'];
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">System Configuration</h1>
-          <p className="text-muted-foreground">Manage global system settings and parameters.</p>
-        </div>
-      </div>
+      <AdminPageHeader
+        icon={SlidersHorizontal}
+        title="Configuration"
+        description="Gérez les paramètres globaux du système"
+      />
 
+      {isLoading ? (
+        <div className="space-y-3">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="animate-pulse rounded-xl bg-slate-100 h-24" />
+          ))}
+        </div>
+      ) : (
       <Tabs defaultValue={tabs[0]}>
         <TabsList className="mb-4">
           {tabs.map((category) => (
@@ -66,12 +72,13 @@ export function ConfigManager() {
           <TabsContent value="general">
             <Card>
               <CardContent className="pt-6 text-center text-muted-foreground">
-                No configurations found. Initialize the system to see settings here.
+                Aucune configuration trouvée. Initialisez le système pour voir les paramètres ici.
               </CardContent>
             </Card>
           </TabsContent>
         )}
       </Tabs>
+      )}
     </div>
   );
 }
