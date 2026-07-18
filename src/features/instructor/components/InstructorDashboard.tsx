@@ -2,9 +2,11 @@
 
 import { format } from 'date-fns';
 import Link from 'next/link';
-import { CalendarDays, BookOpen, GraduationCap, ClipboardCheck } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, BookOpen, GraduationCap, ClipboardCheck } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { StatTile } from '@/components/shared/StatTile';
 import { useMyInstructorProfile } from '../hooks/useMyProfile';
 import { useMyInstructorStats, useMyInstructorAttendanceStats } from '../hooks/useMyDashboard';
 import { useMyUpcomingSessions, useMySessionDetails } from '../hooks/useMySchedule';
@@ -18,56 +20,29 @@ export function InstructorDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-800">Bonjour {profile?.name ?? ''}</h1>
-        <p className="text-slate-500 mt-1">Votre tableau de bord professeur</p>
-      </div>
+      <PageHeader
+        icon={LayoutDashboard}
+        title={`Bonjour ${profile?.name ?? ''}`}
+        description="Votre tableau de bord professeur"
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-5 flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-blue-50">
-              <CalendarDays className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-800">{stats?.totalSessions ?? '—'}</p>
-              <p className="text-xs text-slate-500">Séances au total</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-5 flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-emerald-50">
-              <BookOpen className="h-5 w-5 text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-800">{stats?.upcomingSessions ?? '—'}</p>
-              <p className="text-xs text-slate-500">Séances à venir</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-5 flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-amber-50">
-              <ClipboardCheck className="h-5 w-5 text-amber-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-800">{attendanceStats?.presentCount ?? '—'}</p>
-              <p className="text-xs text-slate-500">Présences enregistrées</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-5 flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-red-50">
-              <GraduationCap className="h-5 w-5 text-red-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-800">{attendanceStats?.absentCount ?? '—'}</p>
-              <p className="text-xs text-slate-500">Absences enregistrées</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="sm:col-span-2 lg:col-span-1">
+          <StatTile label="Séances à venir" value={stats?.upcomingSessions ?? '—'} icon={BookOpen} emphasis />
+        </div>
+        <StatTile label="Séances au total" value={stats?.totalSessions ?? '—'} icon={CalendarDays} />
+        <StatTile
+          label="Présences enregistrées"
+          value={attendanceStats?.presentCount ?? '—'}
+          icon={ClipboardCheck}
+          tint="emerald"
+        />
+        <StatTile
+          label="Absences enregistrées"
+          value={attendanceStats?.absentCount ?? '—'}
+          icon={GraduationCap}
+          tint="red"
+        />
       </div>
 
       <Card>

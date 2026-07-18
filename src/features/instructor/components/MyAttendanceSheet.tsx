@@ -15,6 +15,8 @@ import {
 } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ClipboardCheck } from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { extractErrorMessage } from '@/lib/api-error';
 import { QueryErrorState } from './QueryErrorState';
 import { useMySessions, useMySessionDetails } from '../hooks/useMySchedule';
@@ -84,7 +86,13 @@ export function MyAttendanceSheet() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <PageHeader
+        icon={ClipboardCheck}
+        title="Feuille de présence"
+        description="Enregistrez les présences de vos séances"
+      />
+
       <div className="max-w-sm space-y-1.5">
         <Label>Séance</Label>
         <Select value={sessionId} onValueChange={setSessionId}>

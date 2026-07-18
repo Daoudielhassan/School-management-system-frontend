@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { extractErrorMessage } from '@/lib/api-error';
 import { useMyInstructorId } from '../hooks/useMyProfile';
 import { useMyGrades, useCreateGrade, useDeleteGrade } from '../hooks/useMyGrades';
@@ -61,21 +62,17 @@ export function MyGradesManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-blue-50">
-            <GraduationCap className="h-6 w-6 text-blue-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Mes notes</h1>
-            <p className="text-sm text-slate-500">Notes saisies pour vos matières</p>
-          </div>
-        </div>
-        <Button onClick={() => { setFormError(null); setFormOpen(true); }} disabled={!instructorId}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nouvelle note
-        </Button>
-      </div>
+      <PageHeader
+        icon={GraduationCap}
+        title="Mes notes"
+        description="Notes saisies pour vos matières"
+        actions={
+          <Button onClick={() => { setFormError(null); setFormOpen(true); }} disabled={!instructorId}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nouvelle note
+          </Button>
+        }
+      />
 
       <Card>
         <CardHeader>

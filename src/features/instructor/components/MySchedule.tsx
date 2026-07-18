@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { useMySessions, useMySessionDetails } from '../hooks/useMySchedule';
 import { QueryErrorState } from './QueryErrorState';
 
@@ -17,15 +18,7 @@ export function MySchedule() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-xl bg-blue-50">
-          <CalendarDays className="h-6 w-6 text-blue-600" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Mon emploi du temps</h1>
-          <p className="text-sm text-slate-500">Toutes vos séances</p>
-        </div>
-      </div>
+      <PageHeader icon={CalendarDays} title="Mon emploi du temps" description="Toutes vos séances" />
 
       <Card>
         <CardHeader>
