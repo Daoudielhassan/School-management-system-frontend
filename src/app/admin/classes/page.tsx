@@ -1,7 +1,15 @@
 'use client';
 
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { ClassesManager } from '@/features/classes/components';
+
+/** Reads `?q=` (from the global search) — isolated so only this leaf opts into `useSearchParams`. */
+function ClassesManagerWithSearch() {
+  const searchParams = useSearchParams();
+  return <ClassesManager initialSearch={searchParams.get('q') ?? undefined} />;
+}
 
 export default function AdminClassesPage() {
   const { token, isAuthenticated } = useAuth();
@@ -20,5 +28,9 @@ export default function AdminClassesPage() {
     );
   }
 
-  return <ClassesManager />;
+  return (
+    <Suspense fallback={null}>
+      <ClassesManagerWithSearch />
+    </Suspense>
+  );
 }

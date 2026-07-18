@@ -28,6 +28,11 @@ import type { StudentData, StudentFilters as Filters } from '../types';
 
 const EMPTY_FILTERS: Filters = { search: '', departmentId: '', classId: '' };
 
+export interface StudentDirectoryProps {
+  /** Pre-fills the name/email search, e.g. when arriving from the global search. */
+  initialSearch?: string;
+}
+
 /** Map a student entity to the form's value shape (edit flow has no class field). */
 function toFormValues(student: StudentData): CreateStudentFormValues {
   return {
@@ -41,8 +46,11 @@ function toFormValues(student: StudentData): CreateStudentFormValues {
   };
 }
 
-export function StudentDirectory() {
-  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+export function StudentDirectory({ initialSearch }: StudentDirectoryProps = {}) {
+  const [filters, setFilters] = useState<Filters>(() => ({
+    ...EMPTY_FILTERS,
+    search: initialSearch ?? '',
+  }));
   const [page, setPage] = useState(0);
   const [editing, setEditing] = useState<StudentData | null>(null);
   const [deleting, setDeleting] = useState<StudentData | null>(null);

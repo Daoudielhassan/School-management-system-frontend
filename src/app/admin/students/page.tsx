@@ -1,9 +1,17 @@
 'use client';
 
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { GraduationCap } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { AddStudentPanel, StudentDirectory } from '@/features/students/components';
+
+/** Reads `?q=` (from the global search) — isolated so only this leaf opts into `useSearchParams`. */
+function StudentDirectoryWithSearch() {
+  const searchParams = useSearchParams();
+  return <StudentDirectory initialSearch={searchParams.get('q') ?? undefined} />;
+}
 
 export default function AdminStudentsPage() {
   const { token, isAuthenticated } = useAuth();
@@ -30,7 +38,9 @@ export default function AdminStudentsPage() {
         description="Ajout et gestion des étudiants du système"
       />
       <AddStudentPanel />
-      <StudentDirectory />
+      <Suspense fallback={null}>
+        <StudentDirectoryWithSearch />
+      </Suspense>
     </div>
   );
 }

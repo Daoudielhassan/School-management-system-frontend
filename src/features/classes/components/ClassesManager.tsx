@@ -27,6 +27,11 @@ import type { ClassGroup, ClassFilters as Filters } from '../types';
 
 const EMPTY_FILTERS: Filters = { search: '', departmentId: DEPARTMENT_FILTER_ALL };
 
+export interface ClassesManagerProps {
+  /** Pre-fills the name/code search, e.g. when arriving from the global search. */
+  initialSearch?: string;
+}
+
 interface FormDialogState {
   mode: 'create' | 'edit';
   classe: ClassGroup | null;
@@ -41,8 +46,11 @@ function toFormValues(classe: ClassGroup): ClassFormValues {
   };
 }
 
-export function ClassesManager() {
-  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+export function ClassesManager({ initialSearch }: ClassesManagerProps = {}) {
+  const [filters, setFilters] = useState<Filters>(() => ({
+    ...EMPTY_FILTERS,
+    search: initialSearch ?? '',
+  }));
   const [formDialog, setFormDialog] = useState<FormDialogState | null>(null);
   const [deleting, setDeleting] = useState<ClassGroup | null>(null);
   const [studentsFor, setStudentsFor] = useState<ClassGroup | null>(null);

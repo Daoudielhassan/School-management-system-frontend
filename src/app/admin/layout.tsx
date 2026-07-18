@@ -1,11 +1,12 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React from "react"
 import Link from "next/link"
 import { Outfit } from "next/font/google"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Sidebar } from "@/components/ui/sidebar" // Ajuste le chemin selon ton projet
+import { GlobalSearchDialog } from "@/components/shared/GlobalSearchDialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,7 +36,6 @@ import {
   Award,
   SlidersHorizontal,
   Database,
-  Search,
   Briefcase,
   Layers,
   BookMarked,
@@ -105,12 +105,6 @@ function AdminLayoutContent({
 }) {
   const { logout } = useAuth()
   const { adminData } = useAdmin()
-  const [mounted, setMounted] = useState(false)
-
-  // Évite les erreurs d'hydratation côté client pour le raccourci clavier
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   const handleLogout = () => {
     logout()
@@ -158,21 +152,7 @@ function AdminLayoutContent({
 
             {/* Centre : Barre de recherche globale */}
             <div className="flex-1 max-w-2xl hidden md:flex items-center">
-              <button 
-                className="flex items-center justify-between w-full h-12 px-4 bg-white/60 hover:bg-white border border-slate-200/60 hover:border-blue-300 shadow-sm hover:shadow-md hover:shadow-blue-500/5 rounded-2xl text-slate-400 transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-blue-100"
-              >
-                <div className="flex items-center gap-3">
-                  <Search className="w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                  <span className="text-[15px] text-slate-400 group-hover:text-slate-600 transition-colors">
-                    Search students, users, classes...
-                  </span>
-                </div>
-                {mounted && (
-                  <kbd className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-slate-500 bg-slate-100/80 border border-slate-200/60 rounded-lg">
-                    <span className="text-sm">⌘</span>K
-                  </kbd>
-                )}
-              </button>
+              <GlobalSearchDialog />
             </div>
 
             {/* Droite : Actions & Profil */}
