@@ -6,7 +6,9 @@
  * handled generically by `DataTable`.
  */
 import { useMemo } from 'react';
+import Link from 'next/link';
 import type { ColumnDef } from '@tanstack/react-table';
+import { Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/shared/DataTable';
 import { STUDENTS_PAGE_SIZE } from '../constants';
@@ -42,6 +44,11 @@ function getStudentColumns(
       header: 'Actions',
       cell: ({ row }) => (
         <>
+          <Link href={`/admin/students/${row.original.id}`}>
+            <Button variant="outline" size="icon" className="mr-2" title="Voir">
+              <Eye className="h-4 w-4" />
+            </Button>
+          </Link>
           <Button variant="outline" className="mr-2" onClick={() => onEdit(row.original)}>
             Edit
           </Button>

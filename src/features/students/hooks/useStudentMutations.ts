@@ -11,6 +11,7 @@ import {
   updateStudent,
   deleteStudent,
   uploadStudentsFile,
+  fetchStudentAttestation,
 } from '../api/students.api';
 import { STUDENTS_QUERY_KEY } from '../constants';
 import type {
@@ -88,6 +89,15 @@ export function useDeleteStudent() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: STUDENTS_QUERY_KEY });
     },
+  });
+}
+
+/** Generate the student's "Attestation de scolarité" — returns the raw HTML document, no cache. */
+export function useGenerateStudentAttestation() {
+  const { token } = useAuth();
+
+  return useMutation<string, Error, string>({
+    mutationFn: (id) => fetchStudentAttestation(id, token ?? undefined),
   });
 }
 

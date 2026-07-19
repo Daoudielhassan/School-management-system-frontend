@@ -186,6 +186,9 @@ export const API_ENDPOINTS = {
     // JWT-scoped self-service (student portal) — resolved server-side, no id needed.
     ATTENDANCE_ME: `${EDUCATION_CORE_BASE}/api/reports/attendance/me`,
     GRADES_ME: `${EDUCATION_CORE_BASE}/api/reports/grades/me`,
+    // Returns a self-contained HTML document (inline logos) — not JSON.
+    ATTESTATION_SCOLARITE: (studentId: string) =>
+      `${EDUCATION_CORE_BASE}/api/reports/students/${studentId}/attestation-scolarite`,
   },
 
   // Core validations (`validation.api.ValidationController`, bean `coreValidationController`) — unchanged, stays at /api/validations.

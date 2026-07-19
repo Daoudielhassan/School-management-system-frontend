@@ -27,6 +27,7 @@ export const studentFormSchema = z.object({
   // RHF resolver requires.
   phoneNumber: z.string().trim(),
   dateOfBirth: z.string().trim(),
+  cine: z.string().trim(),
 });
 
 /** Create form: same fields plus an optional class group to enroll into. */
@@ -45,6 +46,7 @@ export const emptyCreateStudentForm: CreateStudentFormValues = {
   email: '',
   phoneNumber: '',
   dateOfBirth: '',
+  cine: '',
   classGroupId: '',
 };
 
@@ -57,5 +59,6 @@ export function toStudentPayload(values: StudentFormValues): StudentMutationPayl
     email: values.email,
     phoneNumber: values.phoneNumber ? values.phoneNumber : null,
     dateOfBirth: values.dateOfBirth ? values.dateOfBirth : null,
+    cine: values.cine ? values.cine : null,
   };
 }

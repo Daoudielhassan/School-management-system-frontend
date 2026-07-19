@@ -16,6 +16,8 @@ export interface StudentData {
   email: string;
   phoneNumber?: string;
   dateOfBirth?: string;
+  /** Moroccan national ID card number ("CINE") — optional, used on official documents. */
+  cine?: string;
   createdAt: string;
 }
 
@@ -32,6 +34,7 @@ export interface StudentMutationPayload {
   email: string;
   phoneNumber: string | null;
   dateOfBirth: string | null;
+  cine: string | null;
 }
 
 /** One row of a bulk CSV/XLSX upload result — success or failure. */

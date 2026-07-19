@@ -9,6 +9,7 @@ export {
   useUpdateStudent,
   useDeleteStudent,
   useUploadStudents,
+  useGenerateStudentAttestation,
   type CreateStudentInput,
   type CreateStudentResult,
   type UpdateStudentInput,

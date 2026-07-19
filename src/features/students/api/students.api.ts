@@ -78,6 +78,11 @@ export function deleteStudent(id: string, token?: string): Promise<void> {
   return apiDelete<void>(API_ENDPOINTS.STUDENTS.BY_ID(id), token);
 }
 
+/** Fetch the student's "Attestation de scolarité" as a self-contained HTML document (not JSON). */
+export function fetchStudentAttestation(id: string, token?: string): Promise<string> {
+  return apiGet<string>(API_ENDPOINTS.REPORTS.ATTESTATION_SCOLARITE(id), token);
+}
+
 /**
  * Bulk-upload students from a CSV/XLSX file.
  *

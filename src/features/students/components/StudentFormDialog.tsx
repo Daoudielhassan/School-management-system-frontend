@@ -39,7 +39,8 @@ export function StudentFormDialog({
     base.push(
       { name: 'email', label: 'Email', type: 'email', placeholder: 'john.doe@example.com' },
       { name: 'phoneNumber', label: 'Phone Number', placeholder: '+1 (555) 123-4567', colSpan: 1 },
-      { name: 'dateOfBirth', label: 'Date of Birth', type: 'date', colSpan: 1 }
+      { name: 'dateOfBirth', label: 'Date of Birth', type: 'date', colSpan: 1 },
+      { name: 'cine', label: 'CINE', placeholder: 'AB123456', colSpan: 1 }
     );
     if (classGroups) {
       base.push({

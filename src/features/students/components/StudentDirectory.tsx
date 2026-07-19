@@ -42,6 +42,7 @@ function toFormValues(student: StudentData): CreateStudentFormValues {
     email: student.email,
     phoneNumber: student.phoneNumber ?? '',
     dateOfBirth: student.dateOfBirth ?? '',
+    cine: student.cine ?? '',
     classGroupId: '',
   };
 }
