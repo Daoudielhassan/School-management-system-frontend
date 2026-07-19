@@ -80,10 +80,10 @@ export function StudentDirectory({ initialSearch }: StudentDirectoryProps = {}) 
     setEditError(null);
     try {
       await updateStudent.mutateAsync({ id: editing.id, payload: toStudentPayload(values) });
-      toast.success('Student updated successfully!');
+      toast.success('Étudiant mis à jour');
       setEditing(null);
     } catch (error) {
-      const message = extractErrorMessage(error, 'Failed to update student');
+      const message = extractErrorMessage(error, "Échec de la mise à jour de l'étudiant");
       setEditError(message);
       toast.error(message);
     }
@@ -93,23 +93,18 @@ export function StudentDirectory({ initialSearch }: StudentDirectoryProps = {}) 
     if (!deleting) return;
     try {
       await deleteStudent.mutateAsync(deleting.id);
-      toast.success('Student deleted successfully!');
+      toast.success('Étudiant supprimé');
     } catch (error) {
-      toast.error(extractErrorMessage(error, 'Failed to delete student'));
+      toast.error(extractErrorMessage(error, "Échec de la suppression de l'étudiant"));
     } finally {
       setDeleting(null);
     }
   };
 
   return (
-    <Card
-      style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-light)' }}
-      className="shadow-lg"
-    >
+    <Card className="border-slate-200 shadow-sm shadow-slate-200/50">
       <CardHeader>
-        <CardTitle className="text-xl font-semibold" style={{ color: 'var(--primary)' }}>
-          Student Management
-        </CardTitle>
+        <CardTitle className="text-lg font-semibold text-slate-900">Liste des étudiants</CardTitle>
         <div className="mt-4">
           <StudentFilters
             filters={filters}
@@ -124,7 +119,7 @@ export function StudentDirectory({ initialSearch }: StudentDirectoryProps = {}) 
         <StudentsTable
           students={paged.rows}
           isLoading={isLoading}
-          error={isError ? 'Failed to load students' : null}
+          error={isError ? 'Impossible de charger les étudiants' : null}
           onEdit={setEditing}
           onDelete={setDeleting}
         />
@@ -151,8 +146,8 @@ export function StudentDirectory({ initialSearch }: StudentDirectoryProps = {}) 
               setEditError(null);
             }
           }}
-          title="Edit Student"
-          submitLabel="Save"
+          title="Modifier l'étudiant"
+          submitLabel="Enregistrer"
           defaultValues={editDefaults}
           serverError={editError}
           isSubmitting={updateStudent.isPending}
@@ -166,9 +161,9 @@ export function StudentDirectory({ initialSearch }: StudentDirectoryProps = {}) 
         onOpenChange={(open) => {
           if (!open) setDeleting(null);
         }}
-        title="Confirm Deletion"
-        description="Are you sure you want to delete this student?"
-        confirmLabel="Delete"
+        title="Supprimer l'étudiant"
+        description="Supprimer définitivement cet étudiant ?"
+        confirmLabel="Supprimer"
         variant="destructive"
         isConfirming={deleteStudent.isPending}
         onConfirm={handleDelete}

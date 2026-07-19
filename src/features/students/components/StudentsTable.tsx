@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import Link from 'next/link';
 import type { ColumnDef } from '@tanstack/react-table';
-import { Eye } from 'lucide-react';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/shared/DataTable';
 import { STUDENTS_PAGE_SIZE } from '../constants';
@@ -27,35 +27,37 @@ function getStudentColumns(
   onDelete: (s: StudentData) => void
 ): ColumnDef<StudentData>[] {
   return [
-    { header: 'Student #', accessorKey: 'studentNumber' },
+    { header: 'N° étudiant', accessorKey: 'studentNumber' },
     {
-      header: 'Name',
+      header: 'Nom',
       cell: ({ row }) => `${row.original.firstName} ${row.original.lastName}`,
     },
     { header: 'Email', accessorKey: 'email' },
     {
-      header: 'Created',
+      header: 'Créé le',
       cell: ({ row }) =>
         row.original.createdAt
-          ? new Date(row.original.createdAt).toLocaleDateString()
+          ? new Date(row.original.createdAt).toLocaleDateString('fr-FR')
           : '—',
     },
     {
       header: 'Actions',
       cell: ({ row }) => (
-        <>
+        <div className="flex items-center gap-2">
           <Link href={`/admin/students/${row.original.id}`}>
-            <Button variant="outline" size="icon" className="mr-2" title="Voir">
+            <Button variant="outline" size="icon" title="Voir">
               <Eye className="h-4 w-4" />
             </Button>
           </Link>
-          <Button variant="outline" className="mr-2" onClick={() => onEdit(row.original)}>
-            Edit
+          <Button variant="outline" size="sm" onClick={() => onEdit(row.original)}>
+            <Pencil className="h-4 w-4 mr-1" />
+            Modifier
           </Button>
-          <Button variant="destructive" onClick={() => onDelete(row.original)}>
-            Delete
+          <Button variant="destructive" size="sm" onClick={() => onDelete(row.original)}>
+            <Trash2 className="h-4 w-4 mr-1" />
+            Supprimer
           </Button>
-        </>
+        </div>
       ),
     },
   ];
@@ -76,7 +78,7 @@ export function StudentsTable({
       data={students}
       isLoading={isLoading}
       error={error}
-      emptyMessage="No students found"
+      emptyMessage="Aucun étudiant trouvé"
       skeletonRows={STUDENTS_PAGE_SIZE}
     />
   );

@@ -57,12 +57,12 @@ export function BulkUploadCard({ isUploading = false, onUpload }: BulkUploadCard
     }
     const ext = selected.name.split('.').pop()?.toLowerCase();
     if (!ext || !STUDENT_UPLOAD_EXTENSIONS.includes(ext as never)) {
-      setError('Only CSV or Excel files are supported');
+      setError('Seuls les fichiers CSV ou Excel sont acceptés');
       setFile(null);
       return;
     }
     if (selected.size > STUDENT_UPLOAD_MAX_SIZE_BYTES) {
-      setError('File exceeds the 5 MB limit');
+      setError('Le fichier dépasse la limite de 5 Mo');
       setFile(null);
       return;
     }
@@ -71,16 +71,16 @@ export function BulkUploadCard({ isUploading = false, onUpload }: BulkUploadCard
       const parsed = await parseBulkUploadFile(selected);
       setPreview(parsed);
       if (parsed.missingHeaders.length > 0) {
-        setError(`Missing required column(s): ${parsed.missingHeaders.join(', ')}`);
+        setError(`Colonne(s) requise(s) manquante(s) : ${parsed.missingHeaders.join(', ')}`);
       }
     } catch {
-      setError('Unable to read this file — please check its format');
+      setError('Impossible de lire ce fichier — vérifiez son format');
     }
   };
 
   const handleSubmit = async () => {
     if (!file) {
-      setError('Please select a file to upload');
+      setError('Veuillez sélectionner un fichier à importer');
       return;
     }
     if (preview && preview.missingHeaders.length > 0) {
@@ -99,14 +99,14 @@ export function BulkUploadCard({ isUploading = false, onUpload }: BulkUploadCard
         <div className="w-full space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
-              <h3 className="font-medium text-blue-800 mb-1">Bulk Upload Students</h3>
+              <h3 className="font-medium text-blue-800 mb-1">Import en masse des étudiants</h3>
               <p className="text-sm text-gray-600">
-                Upload a CSV or Excel file containing student information.
+                Importez un fichier CSV ou Excel contenant les informations des étudiants.
               </p>
             </div>
             <Button variant="outline" size="sm" onClick={downloadTemplate} type="button">
               <Download className="mr-2 h-4 w-4" />
-              Download template
+              Télécharger le modèle
             </Button>
           </div>
 
@@ -129,10 +129,10 @@ export function BulkUploadCard({ isUploading = false, onUpload }: BulkUploadCard
           >
             <UploadCloud className="mx-auto h-8 w-8 text-blue-400 mb-2" />
             <p className="text-sm text-gray-600">
-              {file ? file.name : 'Drag & drop a file here, or click to browse'}
+              {file ? file.name : 'Glissez-déposez un fichier ici, ou cliquez pour parcourir'}
             </p>
             <Label htmlFor="file-upload" className="sr-only">
-              Upload File
+              Importer un fichier
             </Label>
             <input
               id="file-upload"
@@ -153,7 +153,7 @@ export function BulkUploadCard({ isUploading = false, onUpload }: BulkUploadCard
           {preview && preview.missingHeaders.length === 0 && (
             <div className="space-y-2">
               <p className="text-sm text-blue-800 font-medium">
-                {preview.totalRows} student{preview.totalRows === 1 ? '' : 's'} detected — preview of the first rows:
+                {preview.totalRows} étudiant{preview.totalRows === 1 ? '' : 's'} détecté{preview.totalRows === 1 ? '' : 's'} — aperçu des premières lignes :
               </p>
               <div className="bg-white rounded-md border border-blue-100 overflow-x-auto">
                 <Table>
@@ -182,7 +182,7 @@ export function BulkUploadCard({ isUploading = false, onUpload }: BulkUploadCard
 
           <div className="flex justify-end">
             <Button onClick={handleSubmit} disabled={!canSubmit}>
-              {isUploading ? 'Uploading…' : 'Upload'}
+              {isUploading ? 'Import en cours…' : 'Importer'}
             </Button>
           </div>
         </div>

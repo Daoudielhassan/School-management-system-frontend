@@ -58,7 +58,7 @@ export function AddStudentPanel() {
       setIsFormOpen(false);
 
       if (enrollmentFailed) {
-        toast.warn('Student created but enrollment failed.');
+        toast.warn("Étudiant créé, mais l'inscription en classe a échoué");
       }
       if (student.temporaryPassword) {
         setTempPassword({
@@ -67,10 +67,10 @@ export function AddStudentPanel() {
           password: student.temporaryPassword,
         });
       } else {
-        toast.success('Student added successfully!');
+        toast.success('Étudiant ajouté');
       }
     } catch (error) {
-      const message = extractErrorMessage(error, 'Failed to add student');
+      const message = extractErrorMessage(error, "Échec de l'ajout de l'étudiant");
       setServerError(message);
       toast.error(message);
     }
@@ -81,13 +81,13 @@ export function AddStudentPanel() {
       const result = await uploadStudents.mutateAsync(file);
       setUploadResult(result);
       if (result.failureCount === 0) {
-        toast.success(`${result.successCount} student(s) created successfully!`);
+        toast.success(`${result.successCount} étudiant(s) créé(s)`);
       } else {
-        toast.warn(`${result.successCount} created, ${result.failureCount} failed — see details below.`);
+        toast.warn(`${result.successCount} créé(s), ${result.failureCount} échec(s) — voir le détail ci-dessous`);
       }
     } catch (error) {
-      const message = extractErrorMessage(error, 'Failed to upload students');
-      toast.error(`Upload failed: ${message}`);
+      const message = extractErrorMessage(error, "Échec de l'import des étudiants");
+      toast.error(message);
     }
   };
 
@@ -106,9 +106,9 @@ export function AddStudentPanel() {
           setIsFormOpen(open);
           if (!open) setServerError(null);
         }}
-        title="Add Student"
-        description="Fill out the form below to add a new student."
-        submitLabel="Add Student"
+        title="Ajouter un étudiant"
+        description="Renseignez le formulaire ci-dessous pour ajouter un nouvel étudiant."
+        submitLabel="Ajouter"
         defaultValues={emptyCreateStudentForm}
         classGroups={reference?.classGroups ?? []}
         serverError={serverError}
@@ -116,29 +116,23 @@ export function AddStudentPanel() {
         onSubmit={handleCreate}
       />
 
-      <Card
-        style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-light)' }}
-        className="shadow-md rounded-lg overflow-hidden"
-      >
-        <CardHeader
-          style={{ backgroundColor: 'var(--primary)', color: 'var(--background)' }}
-          className="p-6"
-        >
-          <CardTitle className="text-2xl font-bold">Student Management</CardTitle>
-          <CardDescription style={{ color: 'var(--background)' }}>
-            Add new students individually or in bulk
+      <Card className="border-slate-200 shadow-sm shadow-slate-200/50">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-slate-900">Ajouter des étudiants</CardTitle>
+          <CardDescription className="text-slate-500">
+            Individuellement ou en masse via un fichier CSV/Excel
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent>
           <Tabs defaultValue="manual" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="manual" className="flex items-center gap-2">
                 <UserPlus size={18} />
-                <span>Add Manually</span>
+                <span>Ajout manuel</span>
               </TabsTrigger>
               <TabsTrigger value="upload" className="flex items-center gap-2">
                 <Upload size={18} />
-                <span>Bulk Upload</span>
+                <span>Import en masse</span>
               </TabsTrigger>
             </TabsList>
 
@@ -149,7 +143,7 @@ export function AddStudentPanel() {
                   onClick={() => setIsFormOpen(true)}
                 >
                   <UserPlus size={18} />
-                  Add Student Manually
+                  Ajouter un étudiant
                 </Button>
               </div>
             </TabsContent>
@@ -160,9 +154,9 @@ export function AddStudentPanel() {
             </TabsContent>
           </Tabs>
         </CardContent>
-        <CardFooter className="p-6 pt-0">
-          <p className="text-sm text-gray-500">
-            Need help? Contact the IT department at{' '}
+        <CardFooter>
+          <p className="text-sm text-slate-500">
+            Besoin d&apos;aide ? Contactez le service informatique à l&apos;adresse{' '}
             <a href="mailto:it.club@aiac.ma" className="text-blue-600 hover:underline">
               it.club@aiac.ma
             </a>

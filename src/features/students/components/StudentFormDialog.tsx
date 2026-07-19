@@ -29,25 +29,25 @@ export function StudentFormDialog({
 }: StudentFormDialogProps) {
   const fields = useMemo<FieldConfig<CreateStudentFormValues>[]>(() => {
     const base: FieldConfig<CreateStudentFormValues>[] = [
-      { name: 'firstName', label: 'First Name', placeholder: 'John', colSpan: 1 },
-      { name: 'lastName', label: 'Last Name', placeholder: 'Doe', colSpan: 1 },
+      { name: 'firstName', label: 'Prénom', placeholder: 'Jean', colSpan: 1 },
+      { name: 'lastName', label: 'Nom', placeholder: 'Dupont', colSpan: 1 },
     ];
     if (!classGroups) {
       // Edit mode only — the student number is generated server-side on create.
-      base.push({ name: 'studentNumber', label: 'Student Number' });
+      base.push({ name: 'studentNumber', label: "Numéro d'étudiant" });
     }
     base.push(
-      { name: 'email', label: 'Email', type: 'email', placeholder: 'john.doe@example.com' },
-      { name: 'phoneNumber', label: 'Phone Number', placeholder: '+1 (555) 123-4567', colSpan: 1 },
-      { name: 'dateOfBirth', label: 'Date of Birth', type: 'date', colSpan: 1 },
+      { name: 'email', label: 'Email', type: 'email', placeholder: 'jean.dupont@exemple.com' },
+      { name: 'phoneNumber', label: 'Téléphone', placeholder: '+212 6 12 34 56 78', colSpan: 1 },
+      { name: 'dateOfBirth', label: 'Date de naissance', type: 'date', colSpan: 1 },
       { name: 'cine', label: 'CINE', placeholder: 'AB123456', colSpan: 1 }
     );
     if (classGroups) {
       base.push({
         name: 'classGroupId',
-        label: 'Class (optional)',
+        label: 'Classe (optionnel)',
         type: 'select',
-        placeholder: 'Select a class',
+        placeholder: 'Sélectionner une classe',
         options: classGroups.map((c) => ({ value: c.id, label: `${c.name} (L${c.level})` })),
       });
     }

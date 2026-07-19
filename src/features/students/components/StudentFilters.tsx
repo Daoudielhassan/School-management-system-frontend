@@ -37,7 +37,7 @@ export function StudentFilters({
     <div className="flex flex-wrap gap-2">
       <Input
         type="text"
-        placeholder="Search by name, email or student number"
+        placeholder="Rechercher par nom, email ou numéro d'étudiant"
         value={filters.search}
         onChange={(e) => onChange({ ...filters, search: e.target.value })}
         className="flex-1 min-w-[200px]"
@@ -50,10 +50,10 @@ export function StudentFilters({
         }
       >
         <SelectTrigger className="w-48">
-          <SelectValue placeholder="All Departments" />
+          <SelectValue placeholder="Tous les départements" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={ALL}>All Departments</SelectItem>
+          <SelectItem value={ALL}>Tous les départements</SelectItem>
           {departments.map((d) => (
             <SelectItem key={d.id} value={d.id}>
               {d.name}
@@ -79,10 +79,10 @@ export function StudentFilters({
         }}
       >
         <SelectTrigger className="w-48">
-          <SelectValue placeholder="All Classes" />
+          <SelectValue placeholder="Toutes les classes" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={ALL}>All Classes</SelectItem>
+          <SelectItem value={ALL}>Toutes les classes</SelectItem>
           {classGroups.map((c) => (
             <SelectItem key={c.id} value={c.id}>
               {c.name} (L{c.level})
@@ -97,7 +97,7 @@ export function StudentFilters({
           className="text-sm"
           onClick={() => onChange({ search: '', departmentId: '', classId: '' })}
         >
-          Clear filters
+          Réinitialiser les filtres
         </Button>
       )}
     </div>

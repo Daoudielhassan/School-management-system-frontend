@@ -38,26 +38,26 @@ export function BulkUploadResultsPanel({ result }: BulkUploadResultsPanelProps) 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Upload results</CardTitle>
+        <CardTitle>Résultat de l&apos;import</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2 text-sm">
             <span className="font-medium text-slate-700">{result.totalRows}</span>
-            <span className="text-slate-500">rows total</span>
+            <span className="text-slate-500">lignes au total</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-green-700">
             <CheckCircle2 className="h-4 w-4" />
-            <span className="font-medium">{result.successCount}</span> created
+            <span className="font-medium">{result.successCount}</span> créé(s)
           </div>
           <div className="flex items-center gap-2 text-sm text-red-700">
             <XCircle className="h-4 w-4" />
-            <span className="font-medium">{result.failureCount}</span> failed
+            <span className="font-medium">{result.failureCount}</span> échec(s)
           </div>
           {hasCredentials && (
             <Button variant="outline" size="sm" onClick={() => downloadCredentialsCsv(result)} className="ml-auto">
               <Download className="mr-2 h-4 w-4" />
-              Download credentials
+              Télécharger les identifiants
             </Button>
           )}
         </div>
@@ -65,22 +65,22 @@ export function BulkUploadResultsPanel({ result }: BulkUploadResultsPanelProps) 
         {hasCredentials && (
           <Alert>
             <AlertDescription>
-              Temporary passwords are only shown in the downloaded CSV — they cannot be retrieved again afterwards.
+              Les mots de passe temporaires ne sont visibles que dans le CSV téléchargé — ils ne peuvent pas être récupérés ensuite.
             </AlertDescription>
           </Alert>
         )}
 
         {failedRows.length > 0 && (
           <div className="space-y-2">
-            <p className="text-sm font-medium text-slate-700">Failed rows</p>
+            <p className="text-sm font-medium text-slate-700">Lignes en échec</p>
             <div className="rounded-md border overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Row</TableHead>
-                    <TableHead>Name</TableHead>
+                    <TableHead>Ligne</TableHead>
+                    <TableHead>Nom</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Reason</TableHead>
+                    <TableHead>Motif</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
