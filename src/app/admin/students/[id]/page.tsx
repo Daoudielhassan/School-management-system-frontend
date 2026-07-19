@@ -35,21 +35,24 @@ export default function AdminStudentDetailPage() {
     // Open synchronously (inside the click handler, before any await) so the
     // browser ties this window to the user gesture — opening it after the
     // network call resolves gets blocked as a pop-up by most browsers.
-    const attestationWindow = window.open('', '_blank');
-    if (attestationWindow) {
-      attestationWindow.document.write(
-        '<p style="font-family:sans-serif;padding:2rem;color:#64748b">Génération en cours…</p>'
-      );
-    }
+    // Never touch `.document` on the resulting window reference: some browsers
+    // isolate even same-origin popups (COOP-style), and reading/writing a
+    // cross-context `.document` throws "Blocked a frame ... from accessing a
+    // cross-origin frame". Navigating via `.location` has no such restriction.
+    const loadingHtml =
+      '<p style="font-family:sans-serif;padding:2rem;color:#64748b">Génération en cours…</p>';
+    const attestationWindow = window.open(`data:text/html,${encodeURIComponent(loadingHtml)}`, '_blank');
+
     generateAttestation.mutate(student.id, {
       onSuccess: (html) => {
         if (!attestationWindow) {
           toast.error('Autorisez les fenêtres pop-up pour afficher l’attestation');
           return;
         }
-        attestationWindow.document.open();
-        attestationWindow.document.write(html);
-        attestationWindow.document.close();
+        const blobUrl = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+        attestationWindow.location.href = blobUrl;
+        // Give the new tab time to load the blob before releasing it.
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
       },
       onError: (error) => {
         attestationWindow?.close();
