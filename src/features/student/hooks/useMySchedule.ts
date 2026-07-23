@@ -12,6 +12,7 @@ import {
   fetchWeekSchedule,
   fetchInstructor,
   fetchTeachingAssignment,
+  fetchTeachingAssignmentsByClassGroup,
 } from '../api/schedule.api';
 import {
   STUDENT_ENROLLMENTS_QUERY_KEY,
@@ -146,5 +147,47 @@ export function useMySchedule(weekStart: string): UseMyScheduleResult {
     isLoading: scheduleQuery.isLoading,
     isError: scheduleQuery.isError,
     refetch: scheduleQuery.refetch,
+  };
+}
+
+/**
+ * Every instructor teaching the student's own (active) class group — used to
+ * populate a name-based recipient picker (e.g. composing a message), never a
+ * raw id input. Distinct from `useInstructorNames`, which only resolves
+ * instructors for sessions that happen to fall in one particular week.
+ */
+export function useMyInstructors(): { instructors: InstructorLite[]; isLoading: boolean } {
+  const { token } = useAuth();
+  const classGroupId = useMyActiveClassGroupId();
+
+  const assignmentsQuery = useQuery<TeachingAssignment[]>({
+    queryKey: [...STUDENT_TEACHING_ASSIGNMENT_QUERY_KEY, 'by-class-group', classGroupId],
+    queryFn: () => fetchTeachingAssignmentsByClassGroup(classGroupId as string, token ?? undefined),
+    enabled: !!classGroupId && !!token,
+    staleTime: 10 * 60_000,
+  });
+
+  const instructorIds = useMemo(
+    () => Array.from(new Set((assignmentsQuery.data ?? []).map((a) => a.instructorId))),
+    [assignmentsQuery.data]
+  );
+
+  const instructorResults = useQueries({
+    queries: instructorIds.map((id) => ({
+      queryKey: [...STUDENT_INSTRUCTOR_QUERY_KEY, id],
+      queryFn: () => fetchInstructor(id, token ?? undefined),
+      enabled: !!token,
+      staleTime: 10 * 60_000,
+    })),
+  });
+
+  const instructors = instructorResults
+    .map((r) => r.data)
+    .filter((i): i is InstructorLite => !!i)
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  return {
+    instructors,
+    isLoading: assignmentsQuery.isLoading || instructorResults.some((r) => r.isLoading),
   };
 }

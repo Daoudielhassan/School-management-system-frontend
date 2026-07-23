@@ -37,3 +37,11 @@ export function fetchInstructor(instructorId: string, token?: string): Promise<I
 export function fetchTeachingAssignment(id: string, token?: string): Promise<TeachingAssignment> {
   return apiGet<TeachingAssignment>(API_ENDPOINTS.TEACHING_ASSIGNMENTS.BY_ID(id), token);
 }
+
+/** `GET /api/teaching-assignments?classGroupId=...` — every assignment for the student's own class. */
+export function fetchTeachingAssignmentsByClassGroup(
+  classGroupId: string,
+  token?: string
+): Promise<TeachingAssignment[]> {
+  return apiGet<TeachingAssignment[]>(API_ENDPOINTS.TEACHING_ASSIGNMENTS.FILTER({ classGroupId }), token);
+}
