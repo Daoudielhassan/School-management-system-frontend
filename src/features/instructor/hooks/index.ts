@@ -3,6 +3,7 @@ export * from './useMyTeachingAssignments';
 export * from './useMySchedule';
 export * from './useSessionAttendance';
 export * from './useClassGroupStudents';
+export * from './useMyStudents';
 export * from './useStudentNames';
 export * from './useMyGrades';
 export * from './useMyMessages';

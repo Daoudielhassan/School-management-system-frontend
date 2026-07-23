@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import {
   Dialog,
@@ -14,8 +14,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { RecipientPicker, type RecipientOption } from '@/components/shared/RecipientPicker';
 import { extractErrorMessage } from '@/lib/api-error';
 import { useSendMyMessage } from '../hooks/useMyMessages';
+import { useManagerInstructors } from '../hooks/useTeachingAssignments';
+import { useDepartmentStudents } from '../hooks/useDepartmentStudents';
 
 export interface ComposeMessageDialogProps {
   open: boolean;
@@ -26,9 +29,19 @@ export interface ComposeMessageDialogProps {
 
 export function ComposeMessageDialog({ open, onOpenChange, defaultReceiverId }: ComposeMessageDialogProps) {
   const sendMessage = useSendMyMessage();
+  const { data: instructors = [] } = useManagerInstructors();
+  const { students } = useDepartmentStudents();
   const [receiverId, setReceiverId] = useState(defaultReceiverId ?? '');
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
+
+  const recipients = useMemo<RecipientOption[]>(
+    () => [
+      ...instructors.map((i) => ({ id: i.userId, name: i.name, subtitle: 'Instructeur' })),
+      ...students.map((s) => ({ id: s.userId, name: `${s.firstName} ${s.lastName}`, subtitle: 'Étudiant' })),
+    ],
+    [instructors, students]
+  );
 
   const reset = () => {
     setReceiverId(defaultReceiverId ?? '');
@@ -64,12 +77,11 @@ export function ComposeMessageDialog({ open, onOpenChange, defaultReceiverId }: 
 
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="receiverId">Identifiant du destinataire</Label>
-            <Input
-              id="receiverId"
+            <Label>Destinataire</Label>
+            <RecipientPicker
+              recipients={recipients}
               value={receiverId}
-              onChange={(e) => setReceiverId(e.target.value)}
-              placeholder="ID utilisateur"
+              onChange={setReceiverId}
               disabled={!!defaultReceiverId}
             />
           </div>

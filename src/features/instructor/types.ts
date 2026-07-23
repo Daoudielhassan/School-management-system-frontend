@@ -109,6 +109,8 @@ export interface EnrollmentLite {
 /** Matches `StudentResponse` (`GET /api/students/{id}`). */
 export interface StudentLite {
   id: string;
+  /** The identity-service user id — this is what messaging's `receiverId` expects, not `id`. */
+  userId: string;
   studentNumber: string;
   firstName: string;
   lastName: string;
