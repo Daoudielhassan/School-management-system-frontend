@@ -22,17 +22,17 @@ export interface UserFormDialogProps {
 export function UserFormDialog({ mode, ...props }: UserFormDialogProps) {
   const fields = useMemo<FieldConfig<UserFormValues>[]>(() => {
     const list: FieldConfig<UserFormValues>[] = [
-      { name: 'firstname', label: 'First Name', colSpan: 1 },
-      { name: 'lastname', label: 'Last Name', colSpan: 1 },
-      { name: 'username', label: 'Username', required: true },
+      { name: 'firstname', label: 'Prénom', colSpan: 1 },
+      { name: 'lastname', label: 'Nom', colSpan: 1 },
+      { name: 'username', label: "Nom d'utilisateur", required: true },
       { name: 'email', label: 'Email', type: 'email', required: true },
     ];
     if (mode === 'create') {
-      list.push({ name: 'password', label: 'Password', type: 'password', required: true });
+      list.push({ name: 'password', label: 'Mot de passe', type: 'password', required: true });
     }
     list.push({
       name: 'role',
-      label: 'Role',
+      label: 'Rôle',
       type: 'select',
       required: true,
       options: USER_ROLES.map((r) => ({ value: r, label: formatRole(r) })),
@@ -43,8 +43,8 @@ export function UserFormDialog({ mode, ...props }: UserFormDialogProps) {
   return (
     <EntityFormDialog<UserFormValues>
       {...props}
-      title={mode === 'create' ? 'Add User' : 'Edit User'}
-      submitLabel={mode === 'create' ? 'Create' : 'Save'}
+      title={mode === 'create' ? 'Ajouter un utilisateur' : "Modifier l'utilisateur"}
+      submitLabel={mode === 'create' ? 'Créer' : 'Enregistrer'}
       schema={buildUserSchema(mode)}
       fields={fields}
     />

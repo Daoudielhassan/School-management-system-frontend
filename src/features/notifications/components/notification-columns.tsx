@@ -11,16 +11,16 @@ export function buildNotificationColumns(
   onDismiss: (notification: NotificationResponse) => void
 ): ColumnDef<NotificationResponse>[] {
   return [
-    { accessorKey: 'title', header: 'Title' },
+    { accessorKey: 'title', header: 'Titre' },
     {
       accessorKey: 'type',
       header: 'Type',
       cell: ({ row }) => <Badge variant="outline">{row.getValue('type')}</Badge>,
     },
-    { accessorKey: 'channel', header: 'Channel' },
+    { accessorKey: 'channel', header: 'Canal' },
     {
       accessorKey: 'status',
-      header: 'Status',
+      header: 'Statut',
       cell: ({ row }) => {
         const status = row.getValue('status') as string;
         return (
@@ -32,7 +32,7 @@ export function buildNotificationColumns(
     },
     {
       accessorKey: 'createdAt',
-      header: 'Created At',
+      header: 'Créée le',
       cell: ({ row }) => format(new Date(row.getValue('createdAt')), 'PP p'),
     },
     {
@@ -44,12 +44,12 @@ export function buildNotificationColumns(
           <div className="flex justify-end gap-2">
             {notification.status === 'UNREAD' && (
               <Button size="sm" variant="outline" onClick={() => onMarkRead(notification)}>
-                Mark read
+                Marquer comme lu
               </Button>
             )}
             {notification.status !== 'DISMISSED' && (
               <Button size="sm" variant="outline" onClick={() => onDismiss(notification)}>
-                Dismiss
+                Ignorer
               </Button>
             )}
           </div>

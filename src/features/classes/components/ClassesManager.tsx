@@ -75,17 +75,17 @@ export function ClassesManager({ initialSearch }: ClassesManagerProps = {}) {
     try {
       if (formDialog.mode === 'create') {
         await createClass.mutateAsync(toClassPayload(values));
-        toast.success('Class created');
+        toast.success('Classe créée');
       } else if (formDialog.classe) {
         await updateClass.mutateAsync({
           id: formDialog.classe.id,
           payload: toClassPayload(values),
         });
-        toast.success('Class updated');
+        toast.success('Classe mise à jour');
       }
       setFormDialog(null);
     } catch (error) {
-      const message = extractErrorMessage(error, 'Operation failed');
+      const message = extractErrorMessage(error, "Échec de l'opération");
       setFormError(message);
       toast.error(message);
     }
@@ -95,9 +95,9 @@ export function ClassesManager({ initialSearch }: ClassesManagerProps = {}) {
     if (!deleting) return;
     try {
       await deleteClass.mutateAsync(deleting.id);
-      toast.success('Class deleted');
+      toast.success('Classe supprimée');
     } catch (error) {
-      toast.error(extractErrorMessage(error, 'Failed to delete class'));
+      toast.error(extractErrorMessage(error, 'Échec de la suppression de la classe'));
     } finally {
       setDeleting(null);
     }
@@ -168,11 +168,11 @@ export function ClassesManager({ initialSearch }: ClassesManagerProps = {}) {
         onOpenChange={(open) => {
           if (!open) setDeleting(null);
         }}
-        title="Delete Class"
+        title="Supprimer la classe"
         description={
-          deleting ? `Are you sure you want to delete "${deleting.name}"?` : undefined
+          deleting ? `Supprimer définitivement « ${deleting.name} » ?` : undefined
         }
-        confirmLabel="Delete"
+        confirmLabel="Supprimer"
         variant="destructive"
         isConfirming={deleteClass.isPending}
         onConfirm={handleDelete}

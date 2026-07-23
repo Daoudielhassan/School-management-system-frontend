@@ -67,17 +67,17 @@ export function DepartmentsManager() {
     try {
       if (formDialog.mode === 'create') {
         await createDept.mutateAsync(toDepartmentPayload(values));
-        toast.success('Department created');
+        toast.success('Département créé');
       } else if (formDialog.department) {
         await updateDept.mutateAsync({
           id: formDialog.department.id,
           payload: toDepartmentPayload(values),
         });
-        toast.success('Department updated');
+        toast.success('Département mis à jour');
       }
       setFormDialog(null);
     } catch (error) {
-      const message = extractErrorMessage(error, 'Operation failed');
+      const message = extractErrorMessage(error, "Échec de l'opération");
       setFormError(message);
       toast.error(message);
     }
@@ -88,9 +88,9 @@ export function DepartmentsManager() {
     try {
       await deleteDept.mutateAsync(deleting.id);
       if (selectedId === deleting.id) setSelectedId(null);
-      toast.success('Department deleted');
+      toast.success('Département supprimé');
     } catch (error) {
-      toast.error(extractErrorMessage(error, 'Failed to delete department'));
+      toast.error(extractErrorMessage(error, 'Échec de la suppression du département'));
     } finally {
       setDeleting(null);
     }
@@ -156,9 +156,9 @@ export function DepartmentsManager() {
         onOpenChange={(open) => {
           if (!open) setDeleting(null);
         }}
-        title="Delete Department"
-        description={deleting ? `Delete department "${deleting.name}"?` : undefined}
-        confirmLabel="Delete"
+        title="Supprimer le département"
+        description={deleting ? `Supprimer définitivement le département « ${deleting.name} » ?` : undefined}
+        confirmLabel="Supprimer"
         variant="destructive"
         isConfirming={deleteDept.isPending}
         onConfirm={handleDelete}

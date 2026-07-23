@@ -35,8 +35,8 @@ export function AcademicYearsManager() {
     () =>
       buildAcademicYearColumns((id) => {
         setActive.mutate(id, {
-          onSuccess: () => toast.success('Active academic year updated'),
-          onError: (error) => toast.error(extractErrorMessage(error, 'Failed to update active year')),
+          onSuccess: () => toast.success('Année académique active mise à jour'),
+          onError: (error) => toast.error(extractErrorMessage(error, "Échec de la mise à jour de l'année active")),
         });
       }, setActive.isPending),
     [setActive]
@@ -49,7 +49,7 @@ export function AcademicYearsManager() {
       toast.success('Année académique créée');
       setCreateOpen(false);
     } catch (error) {
-      const message = extractErrorMessage(error, 'Failed to create academic year');
+      const message = extractErrorMessage(error, "Échec de la création de l'année académique");
       setFormError(message);
       toast.error(message);
     }

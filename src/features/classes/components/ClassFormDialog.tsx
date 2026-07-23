@@ -24,22 +24,22 @@ export interface ClassFormDialogProps {
 export function ClassFormDialog({ mode, departments, ...props }: ClassFormDialogProps) {
   const fields = useMemo<FieldConfig<ClassFormValues>[]>(
     () => [
-      { name: 'code', label: 'Code', placeholder: 'e.g., CS1A' },
-      { name: 'name', label: 'Class Name', placeholder: 'e.g., Computer Science 1A' },
+      { name: 'code', label: 'Code', placeholder: 'ex : CS1A' },
+      { name: 'name', label: 'Nom de la classe', placeholder: 'ex : Informatique 1A' },
       {
         name: 'departmentId',
-        label: 'Department',
+        label: 'Département',
         type: 'select',
-        placeholder: 'Select department',
+        placeholder: 'Sélectionner un département',
         options: departments.map((d) => ({ value: d.id, label: d.name })),
       },
       {
         name: 'level',
-        label: 'Level',
+        label: 'Niveau',
         type: 'select',
-        placeholder: 'Select level',
+        placeholder: 'Sélectionner un niveau',
         valueAsNumber: true,
-        options: CLASS_LEVELS.map((l) => ({ value: String(l), label: `Level ${l}` })),
+        options: CLASS_LEVELS.map((l) => ({ value: String(l), label: `Niveau ${l}` })),
       },
     ],
     [departments]
@@ -48,13 +48,13 @@ export function ClassFormDialog({ mode, departments, ...props }: ClassFormDialog
   return (
     <EntityFormDialog<ClassFormValues>
       {...props}
-      title={mode === 'create' ? 'Create New Class' : 'Edit Class'}
+      title={mode === 'create' ? 'Créer une classe' : 'Modifier la classe'}
       description={
         mode === 'create'
-          ? 'Add a new class to the academic structure'
-          : 'Update this class in the academic structure'
+          ? "Ajouter une nouvelle classe à la structure académique"
+          : 'Mettre à jour cette classe dans la structure académique'
       }
-      submitLabel={mode === 'create' ? 'Create Class' : 'Save'}
+      submitLabel={mode === 'create' ? 'Créer' : 'Enregistrer'}
       schema={classFormSchema}
       fields={fields}
     />

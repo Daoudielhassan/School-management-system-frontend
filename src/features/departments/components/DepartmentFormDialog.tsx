@@ -7,8 +7,8 @@ import { EntityFormDialog, type FieldConfig } from '@/components/shared/EntityFo
 import { departmentFormSchema, type DepartmentFormValues } from '../validations';
 
 const FIELDS: FieldConfig<DepartmentFormValues>[] = [
-  { name: 'code', label: 'Code', placeholder: 'e.g., CS' },
-  { name: 'name', label: 'Department Name', placeholder: 'e.g., Computer Science' },
+  { name: 'code', label: 'Code', placeholder: 'ex : CS' },
+  { name: 'name', label: 'Nom du département', placeholder: 'ex : Informatique' },
 ];
 
 export interface DepartmentFormDialogProps {
@@ -25,13 +25,13 @@ export function DepartmentFormDialog({ mode, ...props }: DepartmentFormDialogPro
   return (
     <EntityFormDialog<DepartmentFormValues>
       {...props}
-      title={mode === 'create' ? 'Create New Department' : 'Edit Department'}
+      title={mode === 'create' ? 'Créer un département' : 'Modifier le département'}
       description={
         mode === 'create'
-          ? 'Add a new department to the academic structure'
-          : 'Update department details'
+          ? 'Ajouter un nouveau département à la structure académique'
+          : 'Mettre à jour les informations du département'
       }
-      submitLabel={mode === 'create' ? 'Create Department' : 'Save Changes'}
+      submitLabel={mode === 'create' ? 'Créer' : 'Enregistrer'}
       schema={departmentFormSchema}
       fields={FIELDS}
     />

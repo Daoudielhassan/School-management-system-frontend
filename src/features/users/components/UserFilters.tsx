@@ -18,7 +18,7 @@ export function UserFilters({ filters, onChange }: UserFiltersProps) {
     <div className="flex flex-wrap items-center gap-4">
       <Input
         type="text"
-        placeholder="Search users..."
+        placeholder="Rechercher des utilisateurs..."
         value={filters.search}
         onChange={(e) => onChange({ ...filters, search: e.target.value })}
         className="max-w-xs"
@@ -31,7 +31,7 @@ export function UserFilters({ filters, onChange }: UserFiltersProps) {
             className="capitalize"
             onClick={() => onChange({ ...filters, role: role as Filters['role'] })}
           >
-            {role === ROLE_FILTER_ALL ? 'All' : formatRole(role)}
+            {role === ROLE_FILTER_ALL ? 'Tous' : formatRole(role)}
           </Button>
         ))}
       </div>

@@ -73,9 +73,9 @@ export function SendNotificationForm({
   }, [resetSignal]);
 
   const selectedUserName = (() => {
-    if (!userId) return 'Select user...';
+    if (!userId) return 'Sélectionner un utilisateur...';
     const u = users.find((x) => x.id === userId);
-    return u ? `${u.firstname ?? ''} ${u.lastname ?? ''} (${u.email})` : 'Select user...';
+    return u ? `${u.firstname ?? ''} ${u.lastname ?? ''} (${u.email})` : 'Sélectionner un utilisateur...';
   })();
 
   const filteredUsers = users.filter((u) => {
@@ -90,7 +90,7 @@ export function SendNotificationForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-2">
-        <Label>Recipient</Label>
+        <Label>Destinataire</Label>
         <Popover open={userSearchOpen} onOpenChange={setUserSearchOpen}>
           <PopoverTrigger asChild>
             <Button type="button" variant="outline" role="combobox" className="w-full justify-between">
@@ -101,12 +101,12 @@ export function SendNotificationForm({
           <PopoverContent className="w-full p-0" align="start">
             <Command>
               <CommandInput
-                placeholder="Search users..."
+                placeholder="Rechercher des utilisateurs..."
                 value={userSearchValue}
                 onValueChange={setUserSearchValue}
               />
               <CommandList>
-                <CommandEmpty>No user found.</CommandEmpty>
+                <CommandEmpty>Aucun utilisateur trouvé.</CommandEmpty>
                 <CommandGroup>
                   {filteredUsers.map((user) => (
                     <CommandItem
@@ -142,14 +142,14 @@ export function SendNotificationForm({
       </div>
 
       <div className="space-y-2">
-        <Label>Title</Label>
-        <Input placeholder="System Maintenance" {...register('title')} />
+        <Label>Titre</Label>
+        <Input placeholder="Maintenance du système" {...register('title')} />
         {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
       </div>
 
       <div className="space-y-2">
         <Label>Message</Label>
-        <Textarea placeholder="The system will be down for maintenance..." {...register('message')} />
+        <Textarea placeholder="Le système sera indisponible pour maintenance..." {...register('message')} />
         {errors.message && <p className="text-sm text-destructive">{errors.message.message}</p>}
       </div>
 
@@ -162,7 +162,7 @@ export function SendNotificationForm({
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder="Sélectionner un type" />
                 </SelectTrigger>
                 <SelectContent>
                   {TYPE_OPTIONS.map((o) => (
@@ -177,14 +177,14 @@ export function SendNotificationForm({
         </div>
 
         <div className="space-y-2">
-          <Label>Channel</Label>
+          <Label>Canal</Label>
           <Controller
             control={control}
             name="channel"
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select channel" />
+                  <SelectValue placeholder="Sélectionner un canal" />
                 </SelectTrigger>
                 <SelectContent>
                   {CHANNEL_OPTIONS.map((o) => (
@@ -201,10 +201,10 @@ export function SendNotificationForm({
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? (
-          'Sending...'
+          'Envoi en cours...'
         ) : (
           <>
-            <Send className="mr-2 h-4 w-4" /> Send Notification
+            <Send className="mr-2 h-4 w-4" /> Envoyer la notification
           </>
         )}
       </Button>

@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
-import { FileArchive, Download, RotateCcw } from 'lucide-react';
+import { FileArchive, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatSize } from '../lib/format-size';
@@ -12,7 +12,7 @@ export function buildBackupColumns(onRestore: (backup: Backup) => void): ColumnD
   return [
     {
       accessorKey: 'filename',
-      header: 'Filename',
+      header: 'Nom du fichier',
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <FileArchive className="h-4 w-4 text-muted-foreground" />
@@ -22,17 +22,17 @@ export function buildBackupColumns(onRestore: (backup: Backup) => void): ColumnD
     },
     {
       accessorKey: 'size',
-      header: 'Size',
+      header: 'Taille',
       cell: ({ row }) => formatSize(row.getValue('size')),
     },
     {
       accessorKey: 'createdAt',
-      header: 'Created At',
+      header: 'Créée le',
       cell: ({ row }) => format(new Date(row.getValue('createdAt')), 'PP p'),
     },
     {
       accessorKey: 'status',
-      header: 'Status',
+      header: 'Statut',
       cell: ({ row }) => (
         <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
           {row.getValue('status')}
@@ -43,9 +43,6 @@ export function buildBackupColumns(onRestore: (backup: Backup) => void): ColumnD
       id: 'actions',
       cell: ({ row }) => (
         <div className="flex justify-end gap-2">
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4" />
-          </Button>
           <Button variant="destructive" size="sm" onClick={() => onRestore(row.original)}>
             <RotateCcw className="h-4 w-4" />
           </Button>

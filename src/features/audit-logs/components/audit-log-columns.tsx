@@ -30,7 +30,7 @@ export function StatusBadge({ status }: { status?: number }) {
 export const auditLogColumns: ColumnDef<AuditLog>[] = [
   {
     accessorKey: 'timestamp',
-    header: 'Date & Time',
+    header: 'Date et heure',
     cell: ({ row }) => {
       const ts = row.getValue('timestamp') as string;
       try {
@@ -46,7 +46,7 @@ export const auditLogColumns: ColumnDef<AuditLog>[] = [
   },
   {
     accessorKey: 'username',
-    header: 'User',
+    header: 'Utilisateur',
     cell: ({ row }) => (
       <div>
         <p className="text-xs font-semibold">{row.getValue('username') || '—'}</p>
@@ -63,7 +63,7 @@ export const auditLogColumns: ColumnDef<AuditLog>[] = [
   },
   {
     accessorKey: 'resource',
-    header: 'Resource',
+    header: 'Ressource',
     cell: ({ row }) => (
       <div>
         <code className="text-xs bg-muted px-1 rounded">{row.getValue('resource')}</code>
@@ -77,14 +77,14 @@ export const auditLogColumns: ColumnDef<AuditLog>[] = [
   },
   {
     accessorKey: 'httpMethod',
-    header: 'Method',
+    header: 'Méthode',
     cell: ({ row }) => (
       <span className="text-xs font-mono font-bold">{row.getValue('httpMethod')}</span>
     ),
   },
   {
     accessorKey: 'httpStatus',
-    header: 'Status',
+    header: 'Statut',
     cell: ({ row }) => <StatusBadge status={row.getValue('httpStatus')} />,
   },
   {
@@ -96,7 +96,7 @@ export const auditLogColumns: ColumnDef<AuditLog>[] = [
   },
   {
     accessorKey: 'details',
-    header: 'Details',
+    header: 'Détails',
     cell: ({ row }) => (
       <span
         className="truncate max-w-[250px] block text-xs text-muted-foreground"

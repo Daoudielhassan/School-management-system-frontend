@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Users, GraduationCap, Briefcase, Shield, TrendingUp, AlertCircle, Bell, Settings, ChevronDown, Search, Calendar, BookOpen, Award, Activity, ArrowRight, Radio, FileText } from "lucide-react"
+import { Users, GraduationCap, Briefcase, Shield, TrendingUp, AlertCircle, Bell, Settings, ChevronDown, Search, Calendar, BookOpen, Award, Activity, ArrowRight, Radio, FileText, LayoutDashboard } from "lucide-react"
+import { PageHeader } from "@/components/shared/PageHeader"
 import { useAuth } from "@/context/AuthContext"
 import { debounce } from "lodash"
 import { apiGet, apiPost, API_ENDPOINTS } from "@/config/api"
@@ -69,19 +70,19 @@ interface PaginatedUsersResponse {
 }
 
 const ROLE_STYLES: Record<string, { name: string; className: string }> = {
-  STUDENT: { name: "Student", className: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  ETUDIANT: { name: "Student", className: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  STUDENT: { name: "Étudiant", className: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  ETUDIANT: { name: "Étudiant", className: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   MANAGER: { name: "Manager", className: "bg-blue-50 text-blue-700 border-blue-200" },
   ADMIN: { name: "Admin", className: "bg-indigo-50 text-indigo-700 border-indigo-200" },
   ADMINISTRATEUR: { name: "Admin", className: "bg-indigo-50 text-indigo-700 border-indigo-200" },
-  INSTRUCTOR: { name: "Instructor", className: "bg-sky-50 text-sky-700 border-sky-200" },
-  PROFESSEUR: { name: "Instructor", className: "bg-sky-50 text-sky-700 border-sky-200" },
+  INSTRUCTOR: { name: "Professeur", className: "bg-sky-50 text-sky-700 border-sky-200" },
+  PROFESSEUR: { name: "Professeur", className: "bg-sky-50 text-sky-700 border-sky-200" },
 }
 
 function UserCard({ user }: { user: User }) {
   const router = useRouter()
   const displayName = user.firstname ? `${user.firstname} ${user.lastname ?? ""}`.trim() : user.username
-  const role = ROLE_STYLES[user.role] || { name: user.role ?? "Unknown", className: "bg-slate-50 text-slate-700 border-slate-200" }
+  const role = ROLE_STYLES[user.role] || { name: user.role ?? "Inconnu", className: "bg-slate-50 text-slate-700 border-slate-200" }
   const initials = displayName.slice(0, 2).toUpperCase()
 
   return (
@@ -94,7 +95,7 @@ function UserCard({ user }: { user: User }) {
           <h3 className="font-medium text-slate-800 truncate">{displayName}</h3>
           <div className="flex items-center gap-2 mt-1">
             <span className={`text-xs px-2 py-0.5 rounded-full border ${role.className}`}>{role.name}</span>
-            <span className="text-xs text-slate-400">Active</span>
+            <span className="text-xs text-slate-400">Actif</span>
           </div>
         </div>
       </div>
@@ -104,7 +105,7 @@ function UserCard({ user }: { user: User }) {
           size="sm"
           className="h-8 w-8 p-0 text-slate-500 hover:text-blue-600"
           onClick={() => router.push(`/admin/users/${user.id}`)}
-          title="View / edit user"
+          title="Voir / modifier l'utilisateur"
         >
           <Settings className="h-4 w-4" />
         </Button>
@@ -151,7 +152,7 @@ function StatTile({
             <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${emphasis ? "text-blue-100" : changePositive ? "text-emerald-600" : "text-red-500"}`}>
               <TrendingUp className={`h-3 w-3 ${changePositive ? "" : "rotate-180"}`} />
               {change}
-              <span className={emphasis ? "text-blue-200" : "text-slate-400"}>vs last month</span>
+              <span className={emphasis ? "text-blue-200" : "text-slate-400"}>vs le mois dernier</span>
             </div>
           </div>
           <div
@@ -226,7 +227,7 @@ function DashboardStats() {
           const cur = items.filter((i: any) => inMonth(i[dateField], thisYear, thisMonth)).length
           const prev = items.filter((i: any) => inMonth(i[dateField], lastMonthYear, lastMonth)).length
           if (prev === 0 && cur === 0) return { label: "0%", positive: true }
-          if (prev === 0) return { label: `+${cur} new`, positive: true }
+          if (prev === 0) return { label: `+${cur}`, positive: true }
           const pct = Math.round(((cur - prev) / prev) * 100)
           return { label: (pct >= 0 ? "+" : "") + pct + "%", positive: pct >= 0 }
         }
@@ -263,7 +264,7 @@ function DashboardStats() {
         })
       } catch (err) {
         console.error("Error fetching stats:", err)
-        setError("Error loading stats")
+        setError("Erreur lors du chargement des statistiques")
       } finally {
         setLoading(false)
       }
@@ -288,7 +289,7 @@ function DashboardStats() {
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
       <div className="lg:col-span-1 lg:row-span-2">
         <StatTile
-          title="Total Users"
+          title="Total utilisateurs"
           value={stats?.totalUsers || 0}
           icon={Users}
           change={stats?.studentChange ?? "—"}
@@ -296,10 +297,10 @@ function DashboardStats() {
           emphasis
         />
       </div>
-      <StatTile title="Students" value={stats?.totalStudents || 0} icon={GraduationCap} change={stats?.studentChange ?? "—"} changePositive={stats?.studentChangePositive ?? true} />
-      <StatTile title="Professors" value={stats?.totalProfessors || 0} icon={BookOpen} change="—" changePositive />
+      <StatTile title="Étudiants" value={stats?.totalStudents || 0} icon={GraduationCap} change={stats?.studentChange ?? "—"} changePositive={stats?.studentChangePositive ?? true} />
+      <StatTile title="Professeurs" value={stats?.totalProfessors || 0} icon={BookOpen} change="—" changePositive />
       <StatTile title="Managers" value={stats?.totalManagers || 0} icon={Shield} change="—" changePositive />
-      <StatTile title="Departments" value={stats?.totalDepartments || 0} icon={Briefcase} change={stats?.departmentChange ?? "—"} changePositive={stats?.departmentChangePositive ?? true} />
+      <StatTile title="Départements" value={stats?.totalDepartments || 0} icon={Briefcase} change={stats?.departmentChange ?? "—"} changePositive={stats?.departmentChangePositive ?? true} />
       <StatTile title="Classes" value={stats?.totalClasses || 0} icon={Calendar} change={stats?.classChange ?? "—"} changePositive={stats?.classChangePositive ?? true} />
       <StatTile title="Sessions" value={stats?.totalSessions || 0} icon={Activity} change={stats?.sessionChange ?? "—"} changePositive={stats?.sessionChangePositive ?? true} />
     </div>
@@ -340,12 +341,12 @@ function AddUserForm({ onClose, onCreated }: { onClose: () => void; onCreated: (
         },
         token || undefined
       )
-      toast.success("User created successfully")
+      toast.success("Utilisateur créé")
       onClose()
       onCreated()
     } catch (error) {
       console.error("Error creating user:", error)
-      toast.error("Failed to create user")
+      toast.error("Échec de la création de l'utilisateur")
     } finally {
       setLoading(false)
     }
@@ -355,16 +356,16 @@ function AddUserForm({ onClose, onCreated }: { onClose: () => void; onCreated: (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-slate-700">First Name</label>
+          <label className="text-sm font-medium text-slate-700">Prénom</label>
           <Input value={formData.firstname} onChange={(e) => setFormData({ ...formData, firstname: e.target.value })} required />
         </div>
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-slate-700">Last Name</label>
+          <label className="text-sm font-medium text-slate-700">Nom</label>
           <Input value={formData.lastname} onChange={(e) => setFormData({ ...formData, lastname: e.target.value })} required />
         </div>
       </div>
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-slate-700">Username</label>
+        <label className="text-sm font-medium text-slate-700">Nom d&apos;utilisateur</label>
         <Input value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} required />
       </div>
       <div className="space-y-1.5">
@@ -372,29 +373,29 @@ function AddUserForm({ onClose, onCreated }: { onClose: () => void; onCreated: (
         <Input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
       </div>
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-slate-700">Role</label>
+        <label className="text-sm font-medium text-slate-700">Rôle</label>
         <Select value={formData.identity} onValueChange={(v) => setFormData({ ...formData, identity: v })}>
           <SelectTrigger className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ETUDIANT">Student</SelectItem>
-            <SelectItem value="PROFESSEUR">Professor</SelectItem>
+            <SelectItem value="ETUDIANT">Étudiant</SelectItem>
+            <SelectItem value="PROFESSEUR">Professeur</SelectItem>
             <SelectItem value="MANAGER">Manager</SelectItem>
-            <SelectItem value="ADMINISTRATEUR">Administrator</SelectItem>
+            <SelectItem value="ADMINISTRATEUR">Administrateur</SelectItem>
           </SelectContent>
         </Select>
       </div>
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-slate-700">Password</label>
+        <label className="text-sm font-medium text-slate-700">Mot de passe</label>
         <Input type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} required />
       </div>
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
+          Annuler
         </Button>
         <Button type="submit" disabled={loading}>
-          {loading ? "Creating…" : "Create User"}
+          {loading ? "Création…" : "Créer l'utilisateur"}
         </Button>
       </div>
     </form>
@@ -402,18 +403,17 @@ function AddUserForm({ onClose, onCreated }: { onClose: () => void; onCreated: (
 }
 
 function BroadcastForm({ onClose }: { onClose: () => void }) {
-  const { userId } = useAuth()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({ subject: "", messageText: "", scope: "ALL", priority: "NORMAL" })
 
+  // The messaging backend only supports 1:1 messages — there is no
+  // broadcast/bulk-send endpoint yet. Be honest about that instead of
+  // showing a fake "queued" success for a message that goes nowhere.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
-      toast.success("Broadcast message queued. It will be delivered when the messaging service is available.")
-      onClose()
-    } catch (error) {
-      console.error("Error broadcasting:", error)
+      toast.error("La diffusion groupée n'est pas encore prise en charge par le serveur.")
     } finally {
       setLoading(false)
     }
@@ -422,7 +422,7 @@ function BroadcastForm({ onClose }: { onClose: () => void }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-slate-700">Subject</label>
+        <label className="text-sm font-medium text-slate-700">Objet</label>
         <Input value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })} required />
       </div>
       <div className="space-y-1.5">
@@ -436,38 +436,38 @@ function BroadcastForm({ onClose }: { onClose: () => void }) {
         />
       </div>
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-slate-700">Scope</label>
+        <label className="text-sm font-medium text-slate-700">Portée</label>
         <Select value={formData.scope} onValueChange={(v) => setFormData({ ...formData, scope: v })}>
           <SelectTrigger className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">All Users</SelectItem>
-            <SelectItem value="STUDENTS">Students Only</SelectItem>
-            <SelectItem value="PROFESSORS">Professors Only</SelectItem>
-            <SelectItem value="MANAGERS">Managers Only</SelectItem>
+            <SelectItem value="ALL">Tous les utilisateurs</SelectItem>
+            <SelectItem value="STUDENTS">Étudiants uniquement</SelectItem>
+            <SelectItem value="PROFESSORS">Professeurs uniquement</SelectItem>
+            <SelectItem value="MANAGERS">Managers uniquement</SelectItem>
           </SelectContent>
         </Select>
       </div>
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-slate-700">Priority</label>
+        <label className="text-sm font-medium text-slate-700">Priorité</label>
         <Select value={formData.priority} onValueChange={(v) => setFormData({ ...formData, priority: v })}>
           <SelectTrigger className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="NORMAL">Normal</SelectItem>
-            <SelectItem value="HIGH">High</SelectItem>
-            <SelectItem value="URGENT">Urgent</SelectItem>
+            <SelectItem value="NORMAL">Normale</SelectItem>
+            <SelectItem value="HIGH">Haute</SelectItem>
+            <SelectItem value="URGENT">Urgente</SelectItem>
           </SelectContent>
         </Select>
       </div>
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
+          Annuler
         </Button>
         <Button type="submit" disabled={loading}>
-          {loading ? "Sending…" : "Send Broadcast"}
+          {loading ? "Envoi…" : "Envoyer la diffusion"}
         </Button>
       </div>
     </form>
@@ -479,15 +479,16 @@ function GenerateReportForm({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({ type: "attendance", name: "", description: "" })
 
+  // No "saved report request" endpoint exists — this is a shortcut into the
+  // real Reports screen, not a persisted request, so the copy must not claim
+  // otherwise. The type/name/description entered here are not carried over;
+  // the actual report is built on the Reports page itself.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
-      toast.success("Report request saved. Redirecting to Reports…")
       onClose()
       router.push("/admin/reports")
-    } catch (error) {
-      console.error("Error generating report:", error)
     } finally {
       setLoading(false)
     }
@@ -496,21 +497,21 @@ function GenerateReportForm({ onClose }: { onClose: () => void }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-slate-700">Report Name</label>
+        <label className="text-sm font-medium text-slate-700">Nom du rapport</label>
         <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
       </div>
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-slate-700">Report Type</label>
+        <label className="text-sm font-medium text-slate-700">Type de rapport</label>
         <Select value={formData.type} onValueChange={(v) => setFormData({ ...formData, type: v })}>
           <SelectTrigger className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="attendance">Attendance Report</SelectItem>
-            <SelectItem value="grades">Grades Report</SelectItem>
-            <SelectItem value="enrollment">Enrollment Report</SelectItem>
-            <SelectItem value="financial">Financial Report</SelectItem>
-            <SelectItem value="performance">Performance Report</SelectItem>
+            <SelectItem value="attendance">Rapport de présence</SelectItem>
+            <SelectItem value="grades">Rapport de notes</SelectItem>
+            <SelectItem value="enrollment">Rapport d&apos;inscriptions</SelectItem>
+            <SelectItem value="financial">Rapport financier</SelectItem>
+            <SelectItem value="performance">Rapport de performance</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -525,10 +526,10 @@ function GenerateReportForm({ onClose }: { onClose: () => void }) {
       </div>
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
+          Annuler
         </Button>
         <Button type="submit" disabled={loading}>
-          {loading ? "Generating…" : "Generate Report"}
+          {loading ? "Ouverture…" : "Aller aux rapports"}
         </Button>
       </div>
     </form>
@@ -542,11 +543,11 @@ function QuickActions({ onUserCreated }: { onUserCreated: () => void }) {
   const [showReportDialog, setShowReportDialog] = useState(false)
 
   const secondaryActions = [
-    { name: "System Alerts", icon: AlertCircle, href: "/admin/notifications" },
-    { name: "Manage Classes", icon: GraduationCap, href: "/admin/classes" },
-    { name: "Attendance", icon: Calendar, href: "/admin/attendance" },
+    { name: "Alertes système", icon: AlertCircle, href: "/admin/notifications" },
+    { name: "Gérer les classes", icon: GraduationCap, href: "/admin/classes" },
+    { name: "Présences", icon: Calendar, href: "/admin/attendance" },
     { name: "Messages", icon: BookOpen, href: "/admin/messages" },
-    { name: "Settings", icon: Settings, href: "/admin/settings" },
+    { name: "Paramètres", icon: Settings, href: "/admin/settings" },
   ]
 
   return (
@@ -559,8 +560,8 @@ function QuickActions({ onUserCreated }: { onUserCreated: () => void }) {
         >
           <Users className="h-7 w-7 text-blue-100" />
           <div>
-            <p className="font-semibold">Add User</p>
-            <p className="text-xs text-blue-100 mt-0.5">Create a new account</p>
+            <p className="font-semibold">Ajouter un utilisateur</p>
+            <p className="text-xs text-blue-100 mt-0.5">Créer un nouveau compte</p>
           </div>
         </button>
 
@@ -570,8 +571,8 @@ function QuickActions({ onUserCreated }: { onUserCreated: () => void }) {
         >
           <Radio className="h-7 w-7 text-slate-400 group-hover:text-blue-600 transition-colors" />
           <div>
-            <p className="font-semibold text-slate-800">Broadcast</p>
-            <p className="text-xs text-slate-500 mt-0.5">Send an announcement</p>
+            <p className="font-semibold text-slate-800">Diffusion</p>
+            <p className="text-xs text-slate-500 mt-0.5">Envoyer une annonce</p>
           </div>
         </button>
 
@@ -581,8 +582,8 @@ function QuickActions({ onUserCreated }: { onUserCreated: () => void }) {
         >
           <FileText className="h-7 w-7 text-slate-400 group-hover:text-blue-600 transition-colors" />
           <div>
-            <p className="font-semibold text-slate-800">Generate Report</p>
-            <p className="text-xs text-slate-500 mt-0.5">Create a system report</p>
+            <p className="font-semibold text-slate-800">Générer un rapport</p>
+            <p className="text-xs text-slate-500 mt-0.5">Créer un rapport système</p>
           </div>
         </button>
       </div>
@@ -604,8 +605,8 @@ function QuickActions({ onUserCreated }: { onUserCreated: () => void }) {
       <Dialog open={showAddUserDialog} onOpenChange={setShowAddUserDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Add New User</DialogTitle>
-            <DialogDescription>Create a new user account in the system</DialogDescription>
+            <DialogTitle>Ajouter un nouvel utilisateur</DialogTitle>
+            <DialogDescription>Créer un nouveau compte utilisateur dans le système</DialogDescription>
           </DialogHeader>
           <AddUserForm onClose={() => setShowAddUserDialog(false)} onCreated={onUserCreated} />
         </DialogContent>
@@ -614,8 +615,8 @@ function QuickActions({ onUserCreated }: { onUserCreated: () => void }) {
       <Dialog open={showBroadcastDialog} onOpenChange={setShowBroadcastDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Send Broadcast Message</DialogTitle>
-            <DialogDescription>Send a message to all users or specific groups</DialogDescription>
+            <DialogTitle>Envoyer un message de diffusion</DialogTitle>
+            <DialogDescription>Envoyer un message à tous les utilisateurs ou à des groupes spécifiques</DialogDescription>
           </DialogHeader>
           <BroadcastForm onClose={() => setShowBroadcastDialog(false)} />
         </DialogContent>
@@ -624,8 +625,8 @@ function QuickActions({ onUserCreated }: { onUserCreated: () => void }) {
       <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Generate Report</DialogTitle>
-            <DialogDescription>Create a new system report</DialogDescription>
+            <DialogTitle>Générer un rapport</DialogTitle>
+            <DialogDescription>Créer un nouveau rapport système</DialogDescription>
           </DialogHeader>
           <GenerateReportForm onClose={() => setShowReportDialog(false)} />
         </DialogContent>
@@ -666,9 +667,9 @@ function RecentActivity() {
       <CardHeader>
         <CardTitle className="text-slate-900 flex items-center gap-2">
           <Activity className="h-5 w-5 text-blue-600" />
-          Recent Activity
+          Activité récente
         </CardTitle>
-        <CardDescription>Latest scheduled sessions</CardDescription>
+        <CardDescription>Dernières séances programmées</CardDescription>
       </CardHeader>
       <CardContent>
         {loading ? (
@@ -684,7 +685,7 @@ function RecentActivity() {
                 <div className="w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-slate-800">
-                    Session — <span className="text-blue-600 font-medium">Room {activity.room ?? "N/A"}</span>
+                    Séance — <span className="text-blue-600 font-medium">Salle {activity.room ?? "N/A"}</span>
                   </p>
                   <p className="text-xs text-slate-500 mt-0.5">{new Date(activity.startsAt).toLocaleString()}</p>
                 </div>
@@ -692,7 +693,7 @@ function RecentActivity() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-10 text-slate-400 text-sm">No recent activity</div>
+          <div className="text-center py-10 text-slate-400 text-sm">Aucune activité récente</div>
         )}
       </CardContent>
     </Card>
@@ -722,13 +723,13 @@ function UserManagementCard() {
   const formatRole = (role: string) => {
     switch (role) {
       case "STUDENT":
-        return "Student"
+        return "Étudiant"
       case "INSTRUCTOR":
-        return "Professor"
+        return "Professeur"
       case "MANAGER":
         return "Manager"
       case "ADMIN":
-        return "Admin"
+        return "Administrateur"
       default:
         return role
     }
@@ -792,7 +793,7 @@ function UserManagementCard() {
         }
       } catch (error) {
         console.error("Error fetching users:", error)
-        setError("Unable to load users. Please try again later.")
+        setError("Impossible de charger les utilisateurs. Veuillez réessayer plus tard.")
       } finally {
         setLoading(false)
       }
@@ -825,16 +826,16 @@ function UserManagementCard() {
           <div>
             <CardTitle className="text-xl font-semibold flex items-center gap-2 text-slate-900">
               <Users className="h-5 w-5 text-blue-600" />
-              User Management
+              Gestion des utilisateurs
             </CardTitle>
-            <CardDescription>Manage system users and permissions</CardDescription>
+            <CardDescription>Gérez les utilisateurs et permissions du système</CardDescription>
           </div>
           <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
               <Input
                 type="text"
-                placeholder="Search users..."
+                placeholder="Rechercher des utilisateurs..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-8 pr-4"
@@ -843,11 +844,11 @@ function UserManagementCard() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline">
-                  Filter <ChevronDown className="ml-2 h-4 w-4" />
+                  Filtrer <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Filter by Role</DropdownMenuLabel>
+                <DropdownMenuLabel>Filtrer par rôle</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {(Object.keys(roleMapping) as RoleType[]).map((key) => (
                   <DropdownMenuItem key={key} onClick={() => setFilter(key)} className="cursor-pointer">
@@ -865,7 +866,7 @@ function UserManagementCard() {
           <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-4">
             <p>{error}</p>
             <Button onClick={() => setPage(page)} variant="outline" className="mt-2">
-              Retry
+              Réessayer
             </Button>
           </div>
         )}
@@ -881,7 +882,7 @@ function UserManagementCard() {
             {users.length > 0 ? (
               users.map((user) => <UserCard key={user.id} user={user} />)
             ) : (
-              <div className="col-span-full text-center py-10 text-slate-400 text-sm">No users found</div>
+              <div className="col-span-full text-center py-10 text-slate-400 text-sm">Aucun utilisateur trouvé</div>
             )}
           </div>
         )}
@@ -889,13 +890,13 @@ function UserManagementCard() {
 
       <CardFooter className="flex justify-between pt-4 border-t border-slate-100">
         <Button variant="outline" onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1 || loading}>
-          Previous
+          Précédent
         </Button>
         <span className="text-sm text-slate-500 self-center">
-          Page {page} of {totalPages}
+          Page {page} sur {totalPages}
         </span>
         <Button variant="outline" onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page >= totalPages || loading}>
-          Next
+          Suivant
         </Button>
       </CardFooter>
     </Card>
@@ -908,35 +909,31 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1
-            className="text-[32px] font-semibold text-slate-900 tracking-tight leading-tight"
-            style={{ fontFamily: "var(--font-admin-display)" }}
-          >
-            Admin Dashboard
-          </h1>
-          <p className="mt-1.5 text-slate-500">Control center for system management</p>
-        </div>
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={() => router.push("/admin/audit-logs")}>
-            <Activity className="mr-2 h-4 w-4" />
-            System Status
-          </Button>
-          <Button className="shadow-md shadow-blue-600/20" onClick={() => router.push("/admin/reports")}>
-            <Award className="mr-2 h-4 w-4" />
-            Generate Report
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        icon={LayoutDashboard}
+        title="Tableau de bord"
+        description="Centre de contrôle pour la gestion du système"
+        actions={
+          <>
+            <Button variant="outline" onClick={() => router.push("/admin/audit-logs")}>
+              <Activity className="mr-2 h-4 w-4" />
+              État du système
+            </Button>
+            <Button className="shadow-md shadow-blue-600/20" onClick={() => router.push("/admin/reports")}>
+              <Award className="mr-2 h-4 w-4" />
+              Générer un rapport
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </>
+        }
+      />
 
       <DashboardStats key={refreshKey} />
 
       <div>
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-900">
           <Settings className="h-4 w-4 text-blue-600" />
-          Quick Actions
+          Actions rapides
         </h2>
         <QuickActions onUserCreated={() => setRefreshKey((k) => k + 1)} />
       </div>

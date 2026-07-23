@@ -18,7 +18,7 @@ export function DepartmentFilters({ filters, onChange }: DepartmentFiltersProps)
           <div className="relative flex-1">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
             <Input
-              placeholder="Search departments..."
+              placeholder="Rechercher des départements..."
               value={filters.search}
               onChange={(e) => onChange({ search: e.target.value })}
               className="pl-10 bg-white/70 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-400"

@@ -26,7 +26,7 @@ export function AttendanceFilters({ filters, onChange }: AttendanceFiltersProps)
           <div className="relative flex-1">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
             <Input
-              placeholder="Search by student, subject, or instructor..."
+              placeholder="Rechercher par étudiant, matière ou instructeur..."
               value={filters.search}
               onChange={(e) => onChange({ ...filters, search: e.target.value })}
               className="pl-10 bg-white/70 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-400"
@@ -37,10 +37,10 @@ export function AttendanceFilters({ filters, onChange }: AttendanceFiltersProps)
             onValueChange={(status) => onChange({ ...filters, status })}
           >
             <SelectTrigger className="w-48 bg-white/70 border-slate-200 text-slate-900">
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder="Filtrer par statut" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={STATUS_FILTER_ALL}>All Status</SelectItem>
+              <SelectItem value={STATUS_FILTER_ALL}>Tous les statuts</SelectItem>
               {ATTENDANCE_STATUSES.map((s) => (
                 <SelectItem key={s} value={s}>
                   {statusLabel(s)}

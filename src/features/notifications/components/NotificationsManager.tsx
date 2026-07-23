@@ -56,10 +56,10 @@ export function NotificationsManager() {
   const handleSend = async (values: SendNotificationFormValues) => {
     try {
       await sendNotification.mutateAsync(toNotificationRequest(values));
-      toast.success('Notification sent');
+      toast.success('Notification envoyée');
       setResetSignal((n) => n + 1);
     } catch (error) {
-      toast.error(extractErrorMessage(error, 'Failed to send notification'));
+      toast.error(extractErrorMessage(error, "Échec de l'envoi de la notification"));
     }
   };
 
@@ -75,8 +75,8 @@ export function NotificationsManager() {
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Send Notification</CardTitle>
-            <CardDescription>Create a new notification for a specific user.</CardDescription>
+            <CardTitle>Envoyer une notification</CardTitle>
+            <CardDescription>Créer une nouvelle notification pour un utilisateur spécifique.</CardDescription>
           </CardHeader>
           <CardContent>
             <SendNotificationForm
@@ -96,17 +96,17 @@ export function NotificationsManager() {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Bell className="h-4 w-4" />
-                  Inbox
+                  Boîte de réception
                 </CardTitle>
-                <CardDescription>Notifications for the selected user.</CardDescription>
+                <CardDescription>Notifications de l&apos;utilisateur sélectionné.</CardDescription>
               </div>
               {viewUserId && unreadCount !== undefined && unreadCount > 0 && (
-                <Badge>{unreadCount} unread</Badge>
+                <Badge>{unreadCount} non lue(s)</Badge>
               )}
             </div>
             <Select value={viewUserId} onValueChange={setViewUserId}>
               <SelectTrigger className="mt-2">
-                <SelectValue placeholder="Select a user to view their inbox" />
+                <SelectValue placeholder="Sélectionner un utilisateur pour voir sa boîte de réception" />
               </SelectTrigger>
               <SelectContent>
                 {users.map((u) => (

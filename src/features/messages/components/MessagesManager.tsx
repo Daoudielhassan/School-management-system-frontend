@@ -83,11 +83,11 @@ export function MessagesManager() {
         content: values.content,
         parentMessageId: replyToId,
       });
-      toast.success('Message sent');
+      toast.success('Message envoyé');
       setComposeOpen(false);
       setResetSignal((n) => n + 1);
     } catch (error) {
-      toast.error(extractErrorMessage(error, 'Failed to send message'));
+      toast.error(extractErrorMessage(error, "Échec de l'envoi du message"));
     }
   };
 
@@ -110,9 +110,9 @@ export function MessagesManager() {
         messageId: pendingDelete.id,
         receiverId: pendingDelete.receiverId,
       });
-      toast.success('Message deleted');
+      toast.success('Message supprimé');
     } catch (error) {
-      toast.error(extractErrorMessage(error, 'Failed to delete message'));
+      toast.error(extractErrorMessage(error, 'Échec de la suppression du message'));
     } finally {
       setPendingDelete(null);
       setSelected(null);

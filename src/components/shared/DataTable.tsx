@@ -69,10 +69,10 @@ export function DataTable<TData, TValue>({
   data,
   isLoading = false,
   error = null,
-  emptyMessage = 'No results found',
+  emptyMessage = 'Aucun résultat',
   skeletonRows = 10,
   searchKey,
-  searchPlaceholder = 'Search…',
+  searchPlaceholder = 'Rechercher…',
   paginated = false,
   pageSize = 10,
   pageSizeOptions = [10, 20, 30, 40, 50],
@@ -167,7 +167,7 @@ export function DataTable<TData, TValue>({
       {paginated && !isLoading && (
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Rows per page</p>
+            <p className="text-sm font-medium">Lignes par page</p>
             <Select
               value={`${table.getState().pagination.pageSize}`}
               onValueChange={(value) => table.setPageSize(Number(value))}
@@ -186,7 +186,7 @@ export function DataTable<TData, TValue>({
           </div>
           <div className="flex items-center space-x-2">
             <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-              Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+              Page {table.getState().pagination.pageIndex + 1} sur {table.getPageCount()}
             </div>
             <Button
               variant="outline"

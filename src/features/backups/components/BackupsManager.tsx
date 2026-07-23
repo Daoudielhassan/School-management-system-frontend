@@ -30,7 +30,7 @@ export function BackupsManager() {
   const handleCreate = () => {
     createBackup.mutate(undefined, {
       onSuccess: () => toast.success('Sauvegarde créée'),
-      onError: (error) => toast.error(extractErrorMessage(error, 'Failed to create backup')),
+      onError: (error) => toast.error(extractErrorMessage(error, 'Échec de la création de la sauvegarde')),
     });
   };
 
@@ -40,7 +40,7 @@ export function BackupsManager() {
       await restoreBackup.mutateAsync(restoring.id);
       toast.success('Système restauré');
     } catch (error) {
-      toast.error(extractErrorMessage(error, 'Failed to restore backup'));
+      toast.error(extractErrorMessage(error, 'Échec de la restauration de la sauvegarde'));
     } finally {
       setRestoring(null);
     }
@@ -77,9 +77,9 @@ export function BackupsManager() {
         onOpenChange={(open) => {
           if (!open) setRestoring(null);
         }}
-        title="Restore backup"
-        description="Are you sure you want to restore this backup? Current data will be overwritten."
-        confirmLabel="Restore"
+        title="Restaurer la sauvegarde"
+        description="Restaurer cette sauvegarde ? Les données actuelles seront écrasées."
+        confirmLabel="Restaurer"
         variant="destructive"
         isConfirming={restoreBackup.isPending}
         onConfirm={handleRestore}

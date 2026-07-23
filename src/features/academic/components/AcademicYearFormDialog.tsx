@@ -12,8 +12,8 @@ import {
 
 const FIELDS: FieldConfig<AcademicYearFormValues>[] = [
   { name: 'code', label: 'Code', required: true, placeholder: '2026-2027' },
-  { name: 'startDate', label: 'Start Date', type: 'date', required: true, colSpan: 1 },
-  { name: 'endDate', label: 'End Date', type: 'date', required: true, colSpan: 1 },
+  { name: 'startDate', label: 'Date de début', type: 'date', required: true, colSpan: 1 },
+  { name: 'endDate', label: 'Date de fin', type: 'date', required: true, colSpan: 1 },
 ];
 
 export interface AcademicYearFormDialogProps {
@@ -28,8 +28,8 @@ export function AcademicYearFormDialog(props: AcademicYearFormDialogProps) {
   return (
     <EntityFormDialog<AcademicYearFormValues>
       {...props}
-      title="Create Academic Year"
-      submitLabel="Create"
+      title="Créer une année académique"
+      submitLabel="Créer"
       schema={academicYearFormSchema}
       fields={FIELDS}
       defaultValues={emptyAcademicYearForm}

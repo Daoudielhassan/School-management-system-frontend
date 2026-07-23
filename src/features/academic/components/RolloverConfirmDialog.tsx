@@ -69,7 +69,7 @@ export function RolloverConfirmDialog({ open, onOpenChange, years }: RolloverCon
       setResult(summary);
       setStep('result');
     } catch (err) {
-      setError(extractErrorMessage(err, 'Failed to roll over the academic year'));
+      setError(extractErrorMessage(err, "Échec de la bascule de l'année académique"));
       setStep('select');
     }
   };
@@ -88,26 +88,26 @@ export function RolloverConfirmDialog({ open, onOpenChange, years }: RolloverCon
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                Rollover complete
+                Bascule terminée
               </DialogTitle>
-              <DialogDescription>Here is exactly what changed.</DialogDescription>
+              <DialogDescription>Voici précisément ce qui a changé.</DialogDescription>
             </DialogHeader>
             <div className="space-y-2 py-2 text-sm">
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Cohorts promoted</span>
+                <span className="text-muted-foreground">Cohortes promues</span>
                 <span className="font-semibold">{result.promotedCohortsCount}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Cohorts graduated (level 3)</span>
+                <span className="text-muted-foreground">Cohortes diplômées (niveau 3)</span>
                 <span className="font-semibold">{result.graduatedCohortsCount}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Diplomas issued</span>
+                <span className="text-muted-foreground">Diplômes délivrés</span>
                 <span className="font-semibold">{result.diplomasIssuedCount}</span>
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={() => onOpenChange(false)}>Close</Button>
+              <Button onClick={() => onOpenChange(false)}>Fermer</Button>
             </DialogFooter>
           </>
         ) : step === 'confirm' ? (
@@ -115,45 +115,46 @@ export function RolloverConfirmDialog({ open, onOpenChange, years }: RolloverCon
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-destructive">
                 <AlertTriangle className="h-5 w-5" />
-                This cannot be undone
+                Cette action est irréversible
               </DialogTitle>
               <DialogDescription>
-                Every ACTIVE cohort will be promoted to its next level. Every level-3 cohort will be
-                closed out and its actively enrolled students will be graduated and diplomed. This
-                runs institution-wide, immediately, in one transaction.
+                Chaque cohorte ACTIVE sera promue au niveau suivant. Chaque cohorte de niveau 3 sera
+                clôturée et ses étudiants activement inscrits seront diplômés. Cette opération
+                s'exécute pour tout l'établissement, immédiatement, en une seule transaction.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
               <Button variant="outline" onClick={() => setStep('select')} disabled={rollover.isPending}>
-                Back
+                Retour
               </Button>
               <Button variant="destructive" onClick={handleConfirm} disabled={rollover.isPending}>
-                {rollover.isPending ? 'Rolling over…' : 'Yes, roll over the academic year'}
+                {rollover.isPending ? 'Bascule en cours…' : "Oui, basculer l'année académique"}
               </Button>
             </DialogFooter>
           </>
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Academic Year Rollover</DialogTitle>
+              <DialogTitle>Bascule d&apos;année académique</DialogTitle>
               <DialogDescription>
-                Close out the ending year and open the next one. This is the Closure phase — make sure
-                every repeating student has already been processed by managers (Jury phase) first.
+                Clôturer l'année qui se termine et ouvrir la suivante. C'est la phase de clôture —
+                assurez-vous que chaque étudiant redoublant a déjà été traité par les managers (phase
+                jury) au préalable.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4">
               {error && <p className="text-sm text-destructive">{error}</p>}
               <div className="space-y-1.5">
-                <Label>Ending year</Label>
+                <Label>Année se terminant</Label>
                 <Select value={effectiveEndingYearId} onValueChange={setEndingYearId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select the year being closed" />
+                    <SelectValue placeholder="Sélectionner l'année à clôturer" />
                   </SelectTrigger>
                   <SelectContent>
                     {years.map((y) => (
                       <SelectItem key={y.id} value={y.id}>
-                        {y.code} {y.status === 'ACTIVE' ? '(current)' : ''}
+                        {y.code} {y.status === 'ACTIVE' ? '(actuelle)' : ''}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -165,10 +166,10 @@ export function RolloverConfirmDialog({ open, onOpenChange, years }: RolloverCon
               </div>
 
               <div className="space-y-1.5">
-                <Label>Starting year</Label>
+                <Label>Année à ouvrir</Label>
                 <Select value={startingYearId} onValueChange={setStartingYearId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select the year being opened" />
+                    <SelectValue placeholder="Sélectionner l'année à ouvrir" />
                   </SelectTrigger>
                   <SelectContent>
                     {startingOptions.map((y) => (
@@ -183,10 +184,10 @@ export function RolloverConfirmDialog({ open, onOpenChange, years }: RolloverCon
 
             <DialogFooter>
               <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
+                Annuler
               </Button>
               <Button onClick={() => setStep('confirm')} disabled={!canContinue}>
-                Continue
+                Continuer
               </Button>
             </DialogFooter>
           </>

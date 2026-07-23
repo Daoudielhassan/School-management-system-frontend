@@ -24,25 +24,25 @@ function getUserColumns(
   onDelete: (u: UserData) => void
 ): ColumnDef<UserData>[] {
   return [
-    { header: 'Username', accessorKey: 'username' },
+    { header: "Nom d'utilisateur", accessorKey: 'username' },
     {
-      header: 'Name',
+      header: 'Nom',
       cell: ({ row }) =>
         [row.original.firstname, row.original.lastname].filter(Boolean).join(' ') || '—',
     },
     { header: 'Email', accessorKey: 'email' },
-    { header: 'Role', cell: ({ row }) => formatRole(row.original.role) },
+    { header: 'Rôle', cell: ({ row }) => formatRole(row.original.role) },
     {
       header: 'Actions',
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => onEdit(row.original)}>
             <Edit className="h-4 w-4 mr-1" />
-            Edit
+            Modifier
           </Button>
           <Button variant="destructive" size="sm" onClick={() => onDelete(row.original)}>
             <Trash2 className="h-4 w-4 mr-1" />
-            Delete
+            Supprimer
           </Button>
         </div>
       ),
@@ -65,7 +65,7 @@ export function UsersTable({
       data={users}
       isLoading={isLoading}
       error={error}
-      emptyMessage="No users found"
+      emptyMessage="Aucun utilisateur trouvé"
       skeletonRows={USERS_PAGE_SIZE}
     />
   );

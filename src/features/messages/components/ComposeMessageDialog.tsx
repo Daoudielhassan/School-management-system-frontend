@@ -72,9 +72,9 @@ export function ComposeMessageDialog({
   }, [open, resetSignal]);
 
   const selectedUserName = (() => {
-    if (!receiverId) return 'Select user...';
+    if (!receiverId) return 'Sélectionner un utilisateur...';
     const u = users.find((x) => x.id === receiverId);
-    return u ? `${u.firstname ?? ''} ${u.lastname ?? ''} (${u.email})` : 'Select user...';
+    return u ? `${u.firstname ?? ''} ${u.lastname ?? ''} (${u.email})` : 'Sélectionner un utilisateur...';
   })();
 
   const filteredUsers = users.filter((u) => {
@@ -90,15 +90,15 @@ export function ComposeMessageDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-white/95 backdrop-blur-md border-blue-500/30 max-w-2xl shadow-xl">
         <DialogHeader>
-          <DialogTitle className="text-blue-700">New Message</DialogTitle>
+          <DialogTitle className="text-blue-700">Nouveau message</DialogTitle>
           <DialogDescription className="text-slate-600">
-            Send a private message to a user
+            Envoyer un message privé à un utilisateur
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <Label className="text-gray-700">Recipient</Label>
+            <Label className="text-gray-700">Destinataire</Label>
             <Popover open={userSearchOpen} onOpenChange={setUserSearchOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -115,12 +115,12 @@ export function ComposeMessageDialog({
               <PopoverContent className="w-full p-0" align="start">
                 <Command>
                   <CommandInput
-                    placeholder="Search users..."
+                    placeholder="Rechercher des utilisateurs..."
                     value={userSearchValue}
                     onValueChange={setUserSearchValue}
                   />
                   <CommandList>
-                    <CommandEmpty>No user found.</CommandEmpty>
+                    <CommandEmpty>Aucun utilisateur trouvé.</CommandEmpty>
                     <CommandGroup>
                       {filteredUsers.map((user) => (
                         <CommandItem
@@ -158,9 +158,9 @@ export function ComposeMessageDialog({
           </div>
 
           <div>
-            <Label className="text-gray-700">Subject</Label>
+            <Label className="text-gray-700">Objet</Label>
             <Input
-              placeholder="Message subject (optional)"
+              placeholder="Objet du message (optionnel)"
               className="bg-white border-gray-300 text-gray-900 placeholder-gray-500"
               {...register('subject')}
             />
@@ -169,7 +169,7 @@ export function ComposeMessageDialog({
           <div>
             <Label className="text-gray-700">Message</Label>
             <Textarea
-              placeholder="Type your message here..."
+              placeholder="Écrivez votre message ici..."
               className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 min-h-32"
               {...register('content')}
             />
@@ -182,7 +182,7 @@ export function ComposeMessageDialog({
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
           >
             <Send className="mr-2 h-4 w-4" />
-            {isSubmitting ? 'Sending…' : 'Send Message'}
+            {isSubmitting ? 'Envoi…' : 'Envoyer le message'}
           </Button>
         </form>
       </DialogContent>

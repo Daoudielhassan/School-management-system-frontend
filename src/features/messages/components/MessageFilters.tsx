@@ -18,7 +18,7 @@ export function MessageFilters({
         <div className="relative">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-blue-500" />
           <Input
-            placeholder="Search messages by subject or content..."
+            placeholder="Rechercher des messages par objet ou contenu..."
             value={filters.search}
             onChange={(e) => onChange({ ...filters, search: e.target.value })}
             className="pl-10 bg-white border-blue-200 text-slate-800 placeholder-slate-500 focus:border-blue-400"

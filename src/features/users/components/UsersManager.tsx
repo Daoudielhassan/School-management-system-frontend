@@ -73,17 +73,17 @@ export function UsersManager() {
     try {
       if (dialog.mode === 'create') {
         await createUser.mutateAsync(toCreateUserPayload(values));
-        toast.success('User created');
+        toast.success('Utilisateur créé');
       } else if (dialog.user) {
         await updateUser.mutateAsync({
           id: dialog.user.id,
           payload: toUpdateUserPayload(values),
         });
-        toast.success('User updated');
+        toast.success('Utilisateur mis à jour');
       }
       setDialog(null);
     } catch (error) {
-      const message = extractErrorMessage(error, 'Operation failed');
+      const message = extractErrorMessage(error, "Échec de l'opération");
       setFormError(message);
       toast.error(message);
     }
@@ -93,9 +93,9 @@ export function UsersManager() {
     if (!deleting) return;
     try {
       await deleteUser.mutateAsync(deleting.id);
-      toast.success('User deleted');
+      toast.success('Utilisateur supprimé');
     } catch (error) {
-      toast.error(extractErrorMessage(error, 'Failed to delete user'));
+      toast.error(extractErrorMessage(error, "Échec de la suppression de l'utilisateur"));
     } finally {
       setDeleting(null);
     }
@@ -121,7 +121,7 @@ export function UsersManager() {
         <UsersTable
           users={paged.rows}
           isLoading={isLoading}
-          error={isError ? 'Failed to load users.' : null}
+          error={isError ? 'Impossible de charger les utilisateurs.' : null}
           onEdit={(user) => setDialog({ mode: 'edit', user })}
           onDelete={setDeleting}
         />
@@ -157,13 +157,13 @@ export function UsersManager() {
         onOpenChange={(open) => {
           if (!open) setDeleting(null);
         }}
-        title="Delete User"
+        title="Supprimer l'utilisateur"
         description={
           deleting
-            ? `Are you sure you want to delete "${deleting.username}"? This action cannot be undone.`
+            ? `Supprimer définitivement « ${deleting.username} » ? Cette action est irréversible.`
             : undefined
         }
-        confirmLabel="Delete"
+        confirmLabel="Supprimer"
         variant="destructive"
         isConfirming={deleteUser.isPending}
         onConfirm={handleDelete}

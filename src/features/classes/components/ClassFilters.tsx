@@ -28,9 +28,9 @@ export function ClassFilters({ filters, departments, onChange }: ClassFiltersPro
       <CardContent className="p-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-indigo-400" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-blue-400" />
             <Input
-              placeholder="Search classes..."
+              placeholder="Rechercher des classes..."
               value={filters.search}
               onChange={(e) => onChange({ ...filters, search: e.target.value })}
               className="pl-10 bg-white/70 border-slate-200 text-gray-900 placeholder-gray-600 focus:border-blue-400"
@@ -41,10 +41,10 @@ export function ClassFilters({ filters, departments, onChange }: ClassFiltersPro
             onValueChange={(value) => onChange({ ...filters, departmentId: value })}
           >
             <SelectTrigger className="w-48 bg-white/70 border-slate-200 text-gray-900">
-              <SelectValue placeholder="Filter by department" />
+              <SelectValue placeholder="Filtrer par département" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={DEPARTMENT_FILTER_ALL}>All Departments</SelectItem>
+              <SelectItem value={DEPARTMENT_FILTER_ALL}>Tous les départements</SelectItem>
               {departments.map((dept) => (
                 <SelectItem key={dept.id} value={dept.id}>
                   {dept.name}
