@@ -46,7 +46,7 @@ export function AddManagerPanel() {
         password: manager.temporaryPassword,
       });
     } catch (error) {
-      const message = extractErrorMessage(error, 'Failed to add manager');
+      const message = extractErrorMessage(error, "Échec de l'ajout du manager");
       setServerError(message);
       toast.error(message);
     }
@@ -67,9 +67,9 @@ export function AddManagerPanel() {
           setIsFormOpen(open);
           if (!open) setServerError(null);
         }}
-        title="Add Manager"
-        description="Fill out the form below to add a new manager."
-        submitLabel="Add Manager"
+        title="Ajouter un manager"
+        description="Renseignez le formulaire ci-dessous pour ajouter un nouveau manager."
+        submitLabel="Ajouter"
         mode="create"
         defaultValues={emptyManagerForm}
         departments={departments}
@@ -78,21 +78,18 @@ export function AddManagerPanel() {
         onSubmit={handleCreate}
       />
 
-      <Card
-        style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-light)' }}
-        className="shadow-md rounded-lg overflow-hidden"
-      >
-        <CardHeader style={{ backgroundColor: 'var(--primary)', color: 'var(--background)' }} className="p-6">
-          <CardTitle className="text-2xl font-bold">Manager Management</CardTitle>
-          <CardDescription style={{ color: 'var(--background)' }}>
-            Provision new manager accounts
+      <Card className="border-slate-200 shadow-sm shadow-slate-200/50">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-slate-900">Ajouter un manager</CardTitle>
+          <CardDescription className="text-slate-500">
+            Provisionner un nouveau compte manager
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent>
           <div className="flex justify-center">
             <Button className="w-full max-w-md flex items-center gap-2" onClick={() => setIsFormOpen(true)}>
               <UserPlus size={18} />
-              Add Manager
+              Ajouter un manager
             </Button>
           </div>
         </CardContent>

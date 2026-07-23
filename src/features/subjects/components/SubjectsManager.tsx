@@ -32,7 +32,7 @@ export function SubjectsManager() {
   const [deleting, setDeleting] = useState<Subject | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const moduleName = (id: string) => modules.find((m) => m.id === id)?.name ?? id.slice(0, 8);
+  const moduleName = (id: string) => modules.find((m) => m.id === id)?.name ?? 'Module inconnu';
 
   const columns = useMemo(
     () =>

@@ -48,6 +48,7 @@ export function DepartmentOverview() {
             <TabsContent value="attendance">
               <DepartmentAttendanceTable
                 records={attendanceQuery.data ?? []}
+                classGroups={classGroupsQuery.data ?? []}
                 isLoading={attendanceQuery.isLoading}
                 isError={attendanceQuery.isError}
                 onRetry={attendanceQuery.refetch}

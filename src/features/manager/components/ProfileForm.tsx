@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { UserCircle } from 'lucide-react';
 import { extractErrorMessage } from '@/lib/api-error';
+import { useDepartments } from '@/features/departments';
 import { useMyManagerProfile, useUpdateMyManagerProfile } from '../hooks/useMyProfile';
 import { QueryErrorState } from './QueryErrorState';
 import { MANAGER_LEVEL_OPTIONS } from '../constants';
@@ -30,8 +31,10 @@ const EMPTY_FORM: ManagerProfileUpdatePayload = {
 
 export function ProfileForm() {
   const { data: profile, isLoading, isError, refetch } = useMyManagerProfile();
+  const { data: departments = [] } = useDepartments();
   const updateProfile = useUpdateMyManagerProfile();
   const [form, setForm] = useState<ManagerProfileUpdatePayload>(EMPTY_FORM);
+  const departmentName = departments.find((d) => d.id === profile?.departmentId)?.name ?? 'Département inconnu';
 
   useEffect(() => {
     if (!profile) return;
@@ -97,7 +100,7 @@ export function ProfileForm() {
           <dl className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6 text-sm">
             <div>
               <dt className="text-slate-400 text-xs">Département</dt>
-              <dd className="text-slate-700 font-medium">{profile.departmentId.slice(0, 8)}…</dd>
+              <dd className="text-slate-700 font-medium">{departmentName}</dd>
             </div>
             {profile.dateOfBirth && (
               <div>

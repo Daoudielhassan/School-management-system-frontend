@@ -64,10 +64,10 @@ export function ManagerDirectory() {
     setEditError(null);
     try {
       await updateManager.mutateAsync({ id: editing.id, payload: toManagerUpdatePayload(values) });
-      toast.success('Manager updated successfully!');
+      toast.success('Manager mis à jour');
       setEditing(null);
     } catch (error) {
-      const message = extractErrorMessage(error, 'Failed to update manager');
+      const message = extractErrorMessage(error, 'Échec de la mise à jour du manager');
       setEditError(message);
       toast.error(message);
     }
@@ -77,20 +77,18 @@ export function ManagerDirectory() {
     if (!deleting) return;
     try {
       await deleteManager.mutateAsync(deleting.id);
-      toast.success('Manager deleted successfully!');
+      toast.success('Manager supprimé');
     } catch (error) {
-      toast.error(extractErrorMessage(error, 'Failed to delete manager'));
+      toast.error(extractErrorMessage(error, 'Échec de la suppression du manager'));
     } finally {
       setDeleting(null);
     }
   };
 
   return (
-    <Card style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-light)' }} className="shadow-lg">
+    <Card className="border-slate-200 shadow-sm shadow-slate-200/50">
       <CardHeader>
-        <CardTitle className="text-xl font-semibold" style={{ color: 'var(--primary)' }}>
-          Manager Directory
-        </CardTitle>
+        <CardTitle className="text-lg font-semibold text-slate-900">Liste des managers</CardTitle>
         <div className="mt-4">
           <ManagerFilters filters={filters} departments={departments} onChange={handleFiltersChange} />
         </div>
@@ -101,7 +99,7 @@ export function ManagerDirectory() {
           managers={paged.rows}
           departments={departments}
           isLoading={isLoading}
-          error={isError ? 'Failed to load managers' : null}
+          error={isError ? 'Impossible de charger les managers' : null}
           onEdit={setEditing}
           onDelete={setDeleting}
         />
@@ -127,8 +125,8 @@ export function ManagerDirectory() {
               setEditError(null);
             }
           }}
-          title="Edit Manager"
-          submitLabel="Save"
+          title="Modifier le manager"
+          submitLabel="Enregistrer"
           mode="edit"
           defaultValues={editDefaults}
           departments={departments}
@@ -143,9 +141,9 @@ export function ManagerDirectory() {
         onOpenChange={(open) => {
           if (!open) setDeleting(null);
         }}
-        title="Confirm Deletion"
-        description="Are you sure you want to delete this manager?"
-        confirmLabel="Delete"
+        title="Supprimer le manager"
+        description="Supprimer définitivement ce manager ?"
+        confirmLabel="Supprimer"
         variant="destructive"
         isConfirming={deleteManager.isPending}
         onConfirm={handleDelete}

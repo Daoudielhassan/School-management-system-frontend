@@ -91,8 +91,8 @@ export function CreateSessionDialog({
   }, [open, token, classGroupId]);
 
   const activeAssignments = assignments.filter((a) => a.status === 'ACTIVE');
-  const subjectName = (id: string) => subjects.find((s) => s.id === id)?.name ?? id.slice(0, 8);
-  const instructorName = (id: string) => instructors.find((i) => i.id === id)?.name ?? id.slice(0, 8);
+  const subjectName = (id: string) => subjects.find((s) => s.id === id)?.name ?? 'Matière inconnue';
+  const instructorName = (id: string) => instructors.find((i) => i.id === id)?.name ?? 'Instructeur inconnu';
 
   const reset = () => {
     setTeachingAssignmentId('');

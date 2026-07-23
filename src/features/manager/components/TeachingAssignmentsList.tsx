@@ -46,8 +46,8 @@ export function TeachingAssignmentsList({
     return <div className="text-center py-12 text-slate-400">Aucune affectation pour cette classe</div>;
   }
 
-  const subjectName = (id: string) => subjects.find((s) => s.id === id)?.name ?? id.slice(0, 8);
-  const instructorName = (id: string) => instructors.find((i) => i.id === id)?.name ?? id.slice(0, 8);
+  const subjectName = (id: string) => subjects.find((s) => s.id === id)?.name ?? 'Matière inconnue';
+  const instructorName = (id: string) => instructors.find((i) => i.id === id)?.name ?? 'Instructeur inconnu';
 
   const handleCancel = async (id: string) => {
     try {

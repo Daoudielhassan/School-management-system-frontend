@@ -12,16 +12,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useMemo } from 'react';
 import { extractErrorMessage } from '@/lib/api-error';
 import { QueryErrorState } from './QueryErrorState';
 import { attendanceStatusStyle } from '../lib/format';
 import { useUpdateDepartmentAttendanceStatus } from '../hooks/useDepartment';
-import type { AttendanceResponse, AttendanceStatus } from '../types';
+import type { AttendanceResponse, AttendanceStatus, ClassGroupLite } from '../types';
 
 const STATUS_OPTIONS: AttendanceStatus[] = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'];
 
 export interface DepartmentAttendanceTableProps {
   records: AttendanceResponse[];
+  classGroups?: ClassGroupLite[];
   isLoading?: boolean;
   isError?: boolean;
   onRetry?: () => void;
@@ -29,11 +31,16 @@ export interface DepartmentAttendanceTableProps {
 
 export function DepartmentAttendanceTable({
   records,
+  classGroups = [],
   isLoading,
   isError,
   onRetry,
 }: DepartmentAttendanceTableProps) {
   const updateStatus = useUpdateDepartmentAttendanceStatus();
+  const classGroupName = useMemo(() => {
+    const byId = new Map(classGroups.map((c) => [c.id, c.name]));
+    return (id: string) => byId.get(id) ?? 'Classe inconnue';
+  }, [classGroups]);
 
   if (isLoading) {
     return (
@@ -84,7 +91,7 @@ export function DepartmentAttendanceTable({
               <TableCell className="text-slate-600">
                 {format(new Date(record.attendanceDate), 'dd/MM/yyyy')}
               </TableCell>
-              <TableCell className="text-slate-600">{record.classGroupId.slice(0, 8)}…</TableCell>
+              <TableCell className="text-slate-600">{classGroupName(record.classGroupId)}</TableCell>
               <TableCell>
                 <Badge className={style.className} variant="outline">
                   {style.label}

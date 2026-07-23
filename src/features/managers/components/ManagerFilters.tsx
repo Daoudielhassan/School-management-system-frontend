@@ -30,7 +30,7 @@ export function ManagerFilters({ filters, departments, onChange }: ManagerFilter
     <div className="flex flex-wrap gap-2">
       <Input
         type="text"
-        placeholder="Search by name, email or employee number"
+        placeholder="Rechercher par nom, email ou matricule"
         value={filters.search}
         onChange={(e) => onChange({ ...filters, search: e.target.value })}
         className="flex-1 min-w-[200px]"
@@ -41,10 +41,10 @@ export function ManagerFilters({ filters, departments, onChange }: ManagerFilter
         onValueChange={(v) => onChange({ ...filters, departmentId: v === ALL ? '' : v })}
       >
         <SelectTrigger className="w-48">
-          <SelectValue placeholder="All Departments" />
+          <SelectValue placeholder="Tous les départements" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={ALL}>All Departments</SelectItem>
+          <SelectItem value={ALL}>Tous les départements</SelectItem>
           {departments.map((d) => (
             <SelectItem key={d.id} value={d.id}>
               {d.name}
@@ -59,7 +59,7 @@ export function ManagerFilters({ filters, departments, onChange }: ManagerFilter
           className="text-sm"
           onClick={() => onChange({ search: '', departmentId: '' })}
         >
-          Clear filters
+          Réinitialiser les filtres
         </Button>
       )}
     </div>

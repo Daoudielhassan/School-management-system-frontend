@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { toast } from 'react-toastify';
 import type { ColumnDef } from '@tanstack/react-table';
+import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -38,9 +39,9 @@ function StatusCell({ manager }: { manager: ManagerData }) {
   const handleChange = async (status: ManagerStatus) => {
     try {
       await updateStatus.mutateAsync({ id: manager.id, status });
-      toast.success('Status updated');
+      toast.success('Statut mis à jour');
     } catch (error) {
-      toast.error(extractErrorMessage(error, 'Failed to update status'));
+      toast.error(extractErrorMessage(error, 'Échec de la mise à jour du statut'));
     }
   };
 
@@ -65,39 +66,41 @@ function getManagerColumns(
   onEdit: (m: ManagerData) => void,
   onDelete: (m: ManagerData) => void
 ): ColumnDef<ManagerData>[] {
-  const departmentName = (id: string) => departments.find((d) => d.id === id)?.name ?? id.slice(0, 8);
+  const departmentName = (id: string) => departments.find((d) => d.id === id)?.name ?? 'Département inconnu';
   const levelLabel = (level: string) => MANAGER_LEVEL_OPTIONS.find((o) => o.value === level)?.label ?? level;
 
   return [
-    { header: 'Employee #', accessorKey: 'employeeNumber' },
+    { header: 'Matricule', accessorKey: 'employeeNumber' },
     {
-      header: 'Name',
+      header: 'Nom',
       cell: ({ row }) => `${row.original.firstName} ${row.original.lastName}`,
     },
     { header: 'Email', accessorKey: 'email' },
     {
-      header: 'Department',
+      header: 'Département',
       cell: ({ row }) => departmentName(row.original.departmentId),
     },
     {
-      header: 'Level',
+      header: 'Niveau',
       cell: ({ row }) => <Badge variant="outline">{levelLabel(row.original.level)}</Badge>,
     },
     {
-      header: 'Status',
+      header: 'Statut',
       cell: ({ row }) => <StatusCell manager={row.original} />,
     },
     {
       header: 'Actions',
       cell: ({ row }) => (
-        <>
-          <Button variant="outline" className="mr-2" onClick={() => onEdit(row.original)}>
-            Edit
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => onEdit(row.original)}>
+            <Pencil className="h-4 w-4 mr-1" />
+            Modifier
           </Button>
-          <Button variant="destructive" onClick={() => onDelete(row.original)}>
-            Delete
+          <Button variant="destructive" size="sm" onClick={() => onDelete(row.original)}>
+            <Trash2 className="h-4 w-4 mr-1" />
+            Supprimer
           </Button>
-        </>
+        </div>
       ),
     },
   ];
@@ -122,7 +125,7 @@ export function ManagersTable({
       data={managers}
       isLoading={isLoading}
       error={error}
-      emptyMessage="No managers found"
+      emptyMessage="Aucun manager trouvé"
       skeletonRows={MANAGERS_PAGE_SIZE}
     />
   );

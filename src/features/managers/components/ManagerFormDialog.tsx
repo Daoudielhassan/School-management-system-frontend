@@ -31,39 +31,39 @@ export interface ManagerFormDialogProps {
 export function ManagerFormDialog({ mode, departments, ...props }: ManagerFormDialogProps) {
   const fields = useMemo<FieldConfig<ManagerFormValues>[]>(() => {
     const base: FieldConfig<ManagerFormValues>[] = [
-      { name: 'firstName', label: 'First Name', placeholder: 'Alice', colSpan: 1, required: true },
-      { name: 'lastName', label: 'Last Name', placeholder: 'Martin', colSpan: 1, required: true },
-      { name: 'email', label: 'Email', type: 'email', placeholder: 'alice.martin@example.com', required: true },
+      { name: 'firstName', label: 'Prénom', placeholder: 'Alice', colSpan: 1, required: true },
+      { name: 'lastName', label: 'Nom', placeholder: 'Martin', colSpan: 1, required: true },
+      { name: 'email', label: 'Email', type: 'email', placeholder: 'alice.martin@exemple.com', required: true },
     ];
 
     if (mode === 'create') {
       base.push(
         {
           name: 'departmentId',
-          label: 'Department',
+          label: 'Département',
           type: 'select',
-          placeholder: 'Select a department',
+          placeholder: 'Sélectionner un département',
           required: true,
           options: departments.map((d) => ({ value: d.id, label: d.name })),
         },
-        { name: 'dateOfBirth', label: 'Date of Birth', type: 'date', colSpan: 1, required: true },
-        { name: 'hireDate', label: 'Hire Date', type: 'date', colSpan: 1, required: true }
+        { name: 'dateOfBirth', label: 'Date de naissance', type: 'date', colSpan: 1, required: true },
+        { name: 'hireDate', label: "Date d'embauche", type: 'date', colSpan: 1, required: true }
       );
     }
 
     base.push(
       {
         name: 'level',
-        label: 'Level',
+        label: 'Niveau',
         type: 'select',
-        placeholder: 'Select a level',
+        placeholder: 'Sélectionner un niveau',
         colSpan: 1,
         options: MANAGER_LEVEL_OPTIONS,
       },
-      { name: 'phone', label: 'Phone', placeholder: '+33612345678', colSpan: 1 },
-      { name: 'specialization', label: 'Specialization', colSpan: 1 },
-      { name: 'officeLocation', label: 'Office Location', colSpan: 1 },
-      { name: 'officePhone', label: 'Office Phone', colSpan: 1 },
+      { name: 'phone', label: 'Téléphone', placeholder: '+212 6 12 34 56 78', colSpan: 1 },
+      { name: 'specialization', label: 'Spécialisation', colSpan: 1 },
+      { name: 'officeLocation', label: 'Bureau', colSpan: 1 },
+      { name: 'officePhone', label: 'Téléphone bureau', colSpan: 1 },
       { name: 'bio', label: 'Bio', type: 'textarea' }
     );
 

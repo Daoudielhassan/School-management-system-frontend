@@ -35,14 +35,12 @@ export function resolveRecords(bundle: AttendanceBundle): ResolvedAttendanceReco
       id: r.id,
       studentId: r.studentId,
       sessionId: r.sessionId,
-      studentName: student
-        ? `${student.firstName} ${student.lastName}`
-        : r.studentId.substring(0, 8),
+      studentName: student ? `${student.firstName} ${student.lastName}` : 'Étudiant inconnu',
       subjectName: assignment
-        ? subjects.get(assignment.subjectId)?.name ?? assignment.subjectId.substring(0, 8)
+        ? subjects.get(assignment.subjectId)?.name ?? 'Matière inconnue'
         : '-',
       instructorName: assignment
-        ? instructors.get(assignment.instructorId)?.name ?? assignment.instructorId.substring(0, 8)
+        ? instructors.get(assignment.instructorId)?.name ?? 'Instructeur inconnu'
         : '-',
       attendanceDate: r.attendanceDate,
       time: sessionTime(session),
