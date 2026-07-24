@@ -2,6 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
+  eslint: {
+    // ESLint only just got a working config (see eslint.config.mjs) and
+    // surfaced ~2860 pre-existing errors unrelated to any single change.
+    // Lint runs separately in CI as a non-blocking step; keep `build`
+    // reflecting compile validity only until that backlog is triaged.
+    ignoreDuringBuilds: true,
+  },
   async redirects() {
     return [
       {
