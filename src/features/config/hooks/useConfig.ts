@@ -10,7 +10,7 @@ export function useConfigs() {
 
   return useQuery<SystemConfig[]>({
     queryKey: CONFIG_QUERY_KEY,
-    queryFn: () => fetchConfigs(),
+    queryFn: () => fetchConfigs(token ?? undefined),
     enabled: !!token,
     staleTime: 60_000,
   });
@@ -38,10 +38,11 @@ export interface UpdateConfigInput {
 }
 
 export function useUpdateConfig() {
+  const { token } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation<SystemConfig, Error, UpdateConfigInput>({
-    mutationFn: () => updateConfig(),
+    mutationFn: ({ key, value }) => updateConfig(key, value, token ?? undefined),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: CONFIG_QUERY_KEY }),
   });
 }

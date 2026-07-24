@@ -78,9 +78,10 @@ export function BackupsManager() {
           if (!open) setRestoring(null);
         }}
         title="Restaurer la sauvegarde"
-        description="Restaurer cette sauvegarde ? Les données actuelles seront écrasées."
+        description="Les données actuelles seront écrasées par cette sauvegarde. Une sauvegarde de sécurité de l'état actuel sera créée automatiquement avant la restauration."
         confirmLabel="Restaurer"
         variant="destructive"
+        confirmationText={restoring?.filename}
         isConfirming={restoreBackup.isPending}
         onConfirm={handleRestore}
       />

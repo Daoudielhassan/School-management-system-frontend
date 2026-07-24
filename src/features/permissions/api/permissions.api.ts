@@ -1,13 +1,9 @@
 /**
- * Permissions API layer.
- *
- * TODO(backend): no permissions/RBAC-management endpoint exists anywhere in
- * the current backend contract (see ADMIN_BACKEND_TODO.md) — role
- * authorization is hardcoded gateway/service-side, not data-driven. Replace
- * this body with a real call once such an endpoint exists.
+ * Permissions API layer — thin wrapper over the shared HTTP client.
  */
+import { apiGet, API_ENDPOINTS } from '@/config/api';
 import type { Permission } from '../types';
 
-export function fetchPermissions(): Promise<Permission[]> {
-  return Promise.resolve([]);
+export function fetchPermissions(token?: string): Promise<Permission[]> {
+  return apiGet<Permission[]>(API_ENDPOINTS.PERMISSIONS.BASE, token);
 }

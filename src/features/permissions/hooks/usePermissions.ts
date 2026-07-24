@@ -10,7 +10,7 @@ export function usePermissions() {
 
   return useQuery<Permission[]>({
     queryKey: PERMISSIONS_QUERY_KEY,
-    queryFn: () => fetchPermissions(),
+    queryFn: () => fetchPermissions(token ?? undefined),
     enabled: !!token,
     staleTime: 60_000,
   });

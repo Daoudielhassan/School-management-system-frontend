@@ -315,6 +315,20 @@ export const API_ENDPOINTS = {
     DASHBOARD_STATS: `${EDUCATION_CORE_BASE}/api/admin/stats`,
   },
 
+  BACKUPS: {
+    BASE: `${EDUCATION_CORE_BASE}/api/admin/backups`,
+    RESTORE: (id: string) => `${EDUCATION_CORE_BASE}/api/admin/backups/${id}/restore`,
+  },
+
+  SYSTEM_CONFIG: {
+    BASE: `${EDUCATION_CORE_BASE}/api/admin/config`,
+    BY_KEY: (key: string) => `${EDUCATION_CORE_BASE}/api/admin/config/${key}`,
+  },
+
+  PERMISSIONS: {
+    BASE: `${EDUCATION_CORE_BASE}/api/admin/permissions`,
+  },
+
   // communication-hub-service (messaging + notifications)
   MESSAGES: {
     SEND: `${COMMUNICATION_HUB_BASE}/api/messages/send`,
