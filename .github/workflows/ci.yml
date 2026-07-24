@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      # Informational only for now: ESLint had no config before this pipeline
+      # existed, so the codebase carries a large amount of pre-existing lint
+      # debt (~2860 errors) unrelated to any single change. Blocking CI on it
+      # would make every run fail regardless of what's being tested. Once that
+      # backlog is triaged, drop continue-on-error to make this a real gate.
+      - name: Lint (non-blocking)
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+
+      - name: Unit tests
+        run: npm run test
