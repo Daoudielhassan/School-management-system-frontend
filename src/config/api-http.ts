@@ -74,17 +74,25 @@ async function handleResponse(response: Response) {
   const contentType = response.headers.get('content-type');
   let data;
 
-  try {
-    if (response.status === 204) {
+  if (response.status === 204) {
+    data = null;
+  } else {
+    // Read the body exactly once as text, then parse. Reading it twice (e.g.
+    // response.text() as a fallback after a failed response.json()) throws
+    // "body stream already read", so parse the already-read text instead.
+    const rawBody = await response.text();
+    if (rawBody === '') {
       data = null;
     } else if (contentType?.includes('application/json')) {
-      data = await response.json();
+      try {
+        data = JSON.parse(rawBody);
+      } catch (parseError) {
+        httpLogger.warn('Failed to parse JSON response body', { url: response.url, parseError });
+        data = rawBody;
+      }
     } else {
-      data = await response.text();
+      data = rawBody;
     }
-  } catch (parseError) {
-    httpLogger.warn('Failed to parse response body', { url: response.url, parseError });
-    data = await response.text();
   }
 
   if (!response.ok) {
