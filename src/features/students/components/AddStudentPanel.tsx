@@ -76,12 +76,15 @@ export function AddStudentPanel() {
     }
   };
 
-  const handleUpload = async (file: File) => {
+  const handleUpload = async (file: File, classGroupId?: string) => {
     try {
-      const result = await uploadStudents.mutateAsync(file);
+      const result = await uploadStudents.mutateAsync({ file, classGroupId });
       setUploadResult(result);
-      if (result.failureCount === 0) {
+      const enrollmentFailedCount = result.results.filter((r) => r.success && r.enrollmentFailed).length;
+      if (result.failureCount === 0 && enrollmentFailedCount === 0) {
         toast.success(`${result.successCount} étudiant(s) créé(s)`);
+      } else if (result.failureCount === 0) {
+        toast.warn(`${result.successCount} créé(s), ${enrollmentFailedCount} inscription(s) en classe échouée(s) — voir le détail ci-dessous`);
       } else {
         toast.warn(`${result.successCount} créé(s), ${result.failureCount} échec(s) — voir le détail ci-dessous`);
       }
@@ -149,7 +152,11 @@ export function AddStudentPanel() {
             </TabsContent>
 
             <TabsContent value="upload" className="space-y-6">
-              <BulkUploadCard isUploading={uploadStudents.isPending} onUpload={handleUpload} />
+              <BulkUploadCard
+                isUploading={uploadStudents.isPending}
+                classGroups={reference?.classGroups ?? []}
+                onUpload={handleUpload}
+              />
               {uploadResult && <BulkUploadResultsPanel result={uploadResult} />}
             </TabsContent>
           </Tabs>

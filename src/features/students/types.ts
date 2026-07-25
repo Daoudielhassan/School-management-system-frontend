@@ -47,6 +47,8 @@ export interface BulkUploadRowResult {
   email: string;
   temporaryPassword?: string;
   errorMessage?: string;
+  /** True when the student was created but the class-group enrollment failed. */
+  enrollmentFailed?: boolean;
 }
 
 /** Result of a bulk CSV/XLSX upload — matches `BulkStudentUploadResponse`. */

@@ -6,7 +6,7 @@
  * downloadable CSV of credentials for the newly created accounts — bulk
  * equivalent of `TemporaryPasswordDialog` (must be noted now, never stored).
  */
-import { CheckCircle2, XCircle, Download } from 'lucide-react';
+import { CheckCircle2, XCircle, Download, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -33,6 +33,7 @@ function downloadCredentialsCsv(result: BulkUploadResult) {
 
 export function BulkUploadResultsPanel({ result }: BulkUploadResultsPanelProps) {
   const failedRows = result.results.filter((r) => !r.success);
+  const enrollmentFailedRows = result.results.filter((r) => r.success && r.enrollmentFailed);
   const hasCredentials = result.results.some((r) => r.success && r.temporaryPassword);
 
   return (
@@ -66,6 +67,16 @@ export function BulkUploadResultsPanel({ result }: BulkUploadResultsPanelProps) 
           <Alert>
             <AlertDescription>
               Les mots de passe temporaires ne sont visibles que dans le CSV téléchargé — ils ne peuvent pas être récupérés ensuite.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {enrollmentFailedRows.length > 0 && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              {enrollmentFailedRows.length} étudiant(s) créé(s) mais l&apos;inscription en classe a échoué
+              ({enrollmentFailedRows.map((r) => `${r.firstName} ${r.lastName}`).join(', ')}) — à inscrire manuellement.
             </AlertDescription>
           </Alert>
         )}

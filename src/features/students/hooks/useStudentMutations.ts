@@ -101,13 +101,19 @@ export function useGenerateStudentAttestation() {
   });
 }
 
-/** Bulk-upload students from a CSV/XLSX file. */
+export interface UploadStudentsInput {
+  file: File;
+  /** Optional class group to enroll every successfully created student into. */
+  classGroupId?: string;
+}
+
+/** Bulk-upload students from a CSV/XLSX file, optionally enrolling them all into a class group. */
 export function useUploadStudents() {
   const { token } = useAuth();
   const queryClient = useQueryClient();
 
-  return useMutation<BulkUploadResult, Error, File>({
-    mutationFn: (file) => uploadStudentsFile(file, token ?? undefined),
+  return useMutation<BulkUploadResult, Error, UploadStudentsInput>({
+    mutationFn: ({ file, classGroupId }) => uploadStudentsFile(file, classGroupId, token ?? undefined),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: STUDENTS_QUERY_KEY });
     },

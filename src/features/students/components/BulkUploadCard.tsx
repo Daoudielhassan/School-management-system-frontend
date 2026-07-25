@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import {
   STUDENT_UPLOAD_ACCEPT,
@@ -17,10 +18,13 @@ import {
   STUDENT_UPLOAD_MAX_SIZE_BYTES,
 } from '../constants';
 import { parseBulkUploadFile, type BulkUploadPreview } from '../lib/parse-bulk-upload-file';
+import type { ClassGroup } from '../types';
 
 export interface BulkUploadCardProps {
   isUploading?: boolean;
-  onUpload: (file: File) => void | Promise<void>;
+  /** When provided, a class selector lets every imported student be enrolled at once. */
+  classGroups?: ClassGroup[];
+  onUpload: (file: File, classGroupId?: string) => void | Promise<void>;
 }
 
 const TEMPLATE_CSV = 'firstName,lastName,email,phoneNumber,dateOfBirth\nJohn,Doe,john.doe@example.com,+1 (555) 123-4567,2005-03-14\n';
@@ -34,12 +38,13 @@ function downloadTemplate() {
   URL.revokeObjectURL(a.href);
 }
 
-export function BulkUploadCard({ isUploading = false, onUpload }: BulkUploadCardProps) {
+export function BulkUploadCard({ isUploading = false, classGroups, onUpload }: BulkUploadCardProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState('');
   const [preview, setPreview] = useState<BulkUploadPreview | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [classGroupId, setClassGroupId] = useState<string>('');
 
   const reset = () => {
     setFile(null);
@@ -86,8 +91,9 @@ export function BulkUploadCard({ isUploading = false, onUpload }: BulkUploadCard
     if (preview && preview.missingHeaders.length > 0) {
       return;
     }
-    await onUpload(file);
+    await onUpload(file, classGroupId || undefined);
     reset();
+    setClassGroupId('');
   };
 
   const canSubmit = !!file && !isUploading && (!preview || preview.missingHeaders.length === 0);
@@ -109,6 +115,24 @@ export function BulkUploadCard({ isUploading = false, onUpload }: BulkUploadCard
               Télécharger le modèle
             </Button>
           </div>
+
+          {classGroups && classGroups.length > 0 && (
+            <div className="space-y-1.5">
+              <Label htmlFor="bulk-upload-class-group">Classe (optionnel)</Label>
+              <Select value={classGroupId} onValueChange={setClassGroupId}>
+                <SelectTrigger id="bulk-upload-class-group" className="w-full max-w-sm bg-white">
+                  <SelectValue placeholder="Inscrire tous les étudiants importés dans une classe" />
+                </SelectTrigger>
+                <SelectContent>
+                  {classGroups.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name} (L{c.level})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div
             className={cn(

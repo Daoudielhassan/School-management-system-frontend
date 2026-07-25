@@ -93,10 +93,14 @@ export function fetchStudentAttestation(id: string, token?: string): Promise<str
  */
 export async function uploadStudentsFile(
   file: File,
+  classGroupId?: string,
   token?: string
 ): Promise<BulkUploadResult> {
   const formData = new FormData();
   formData.append('file', file);
+  if (classGroupId) {
+    formData.append('classGroupId', classGroupId);
+  }
 
   const res = await fetch(API_ENDPOINTS.STUDENTS.BULK_UPLOAD, {
     method: 'POST',
