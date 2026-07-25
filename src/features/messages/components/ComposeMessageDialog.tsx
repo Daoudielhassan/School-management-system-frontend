@@ -56,6 +56,7 @@ export function ComposeMessageDialog({
     handleSubmit,
     reset,
     setValue,
+    control,
     formState: { errors },
   } = useForm<ComposeFormValues>({
     resolver: zodResolver(composeFormSchema),
@@ -64,7 +65,7 @@ export function ComposeMessageDialog({
 
   const [userSearchOpen, setUserSearchOpen] = useState(false);
   const [userSearchValue, setUserSearchValue] = useState('');
-  const receiverId = useWatch({ name: 'receiverId', defaultValue: defaultValues?.receiverId ?? '' });
+  const receiverId = useWatch({ control, name: 'receiverId', defaultValue: defaultValues?.receiverId ?? '' });
 
   useEffect(() => {
     if (open) reset(defaultValues ?? emptyComposeForm);
