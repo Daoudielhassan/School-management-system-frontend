@@ -133,6 +133,7 @@ export function ClassesManager({ initialSearch }: ClassesManagerProps = {}) {
         departments={reference.departments}
         modules={reference.modules}
         subjects={reference.subjects}
+        enrollments={reference.enrollments}
         isLoading={isLoading}
         hasActiveSearch={!!filters.search}
         onCreate={() => setFormDialog({ mode: 'create', classe: null })}

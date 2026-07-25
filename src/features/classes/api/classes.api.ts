@@ -9,6 +9,7 @@ import type {
   Department,
   Module,
   Subject,
+  Enrollment,
   AttendanceRecord,
   UserStats,
   EnrolledStudent,
@@ -53,10 +54,11 @@ export function deleteClass(id: string, token?: string): Promise<void> {
  */
 export async function fetchClassReferenceData(token?: string): Promise<ClassReferenceData> {
   const today = new Date().toISOString().split('T')[0];
-  const [departments, modules, subjects, attendance, userStats] = await Promise.all([
+  const [departments, modules, subjects, enrollments, attendance, userStats] = await Promise.all([
     apiGet(API_ENDPOINTS.DEPARTMENTS.BASE, token),
     apiGet(API_ENDPOINTS.MODULES.BASE, token),
     apiGet(API_ENDPOINTS.SUBJECTS.BASE, token),
+    apiGet(API_ENDPOINTS.ENROLLMENTS.BASE, token),
     apiGet(API_ENDPOINTS.ATTENDANCE.FILTER({ date: today }), token).catch(() => []),
     apiGet(API_ENDPOINTS.USERS.STATS, token),
   ]);
@@ -65,6 +67,7 @@ export async function fetchClassReferenceData(token?: string): Promise<ClassRefe
     departments: asArray<Department>(departments),
     modules: asArray<Module>(modules),
     subjects: asArray<Subject>(subjects),
+    enrollments: asArray<Enrollment>(enrollments),
     attendanceRecords: asArray<AttendanceRecord>(attendance),
     userStats:
       userStats && typeof userStats === 'object'

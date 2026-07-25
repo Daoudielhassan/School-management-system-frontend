@@ -19,7 +19,15 @@ export interface Department {
 export interface Module {
   id: string;
   name: string;
-  department_id: string;
+  departmentId: string;
+}
+
+/** A student's membership in a class group (education-core `enrollments` shape). */
+export interface Enrollment {
+  id: string;
+  studentId: string;
+  classGroupId: string;
+  status?: string;
 }
 
 export interface Subject {
@@ -76,6 +84,7 @@ export interface ClassReferenceData {
   departments: Department[];
   modules: Module[];
   subjects: Subject[];
+  enrollments: Enrollment[];
   attendanceRecords: AttendanceRecord[];
   userStats: UserStats;
 }

@@ -10,6 +10,7 @@ import type {
   ClassDashboardStats,
   Module,
   Subject,
+  Enrollment,
 } from '../types';
 
 /** Filter classes by name search + department. */
@@ -26,12 +27,17 @@ export function filterClasses(classes: ClassGroup[], filters: ClassFilters): Cla
 
 /** Modules belonging to a department. */
 export function modulesByDepartment(modules: Module[], departmentId?: string): Module[] {
-  return modules.filter((m) => m.department_id === departmentId);
+  return modules.filter((m) => m.departmentId === departmentId);
 }
 
 /** Subjects belonging to a module. */
 export function subjectsByModule(subjects: Subject[], moduleId: string): Subject[] {
   return subjects.filter((s) => s.moduleId === moduleId);
+}
+
+/** Enrollments belonging to a class group (any status — matches `fetchClassStudents`). */
+export function enrollmentsByClassGroup(enrollments: Enrollment[], classGroupId: string): Enrollment[] {
+  return enrollments.filter((e) => e.classGroupId === classGroupId);
 }
 
 /**

@@ -9,14 +9,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BookOpen, Plus } from 'lucide-react';
 import { ClassCard } from './ClassCard';
-import { modulesByDepartment, subjectsByModule } from '../lib/class-selectors';
-import type { ClassGroup, Department, Module, Subject } from '../types';
+import { modulesByDepartment, subjectsByModule, enrollmentsByClassGroup } from '../lib/class-selectors';
+import type { ClassGroup, Department, Module, Subject, Enrollment } from '../types';
 
 export interface ClassGridProps {
   classes: ClassGroup[];
   departments: Department[];
   modules: Module[];
   subjects: Subject[];
+  enrollments: Enrollment[];
   isLoading?: boolean;
   hasActiveSearch?: boolean;
   onCreate: () => void;
@@ -32,6 +33,7 @@ export function ClassGrid({
   departments,
   modules,
   subjects,
+  enrollments,
   isLoading = false,
   hasActiveSearch = false,
   onCreate,
@@ -84,6 +86,7 @@ export function ClassGrid({
         );
         const departmentName =
           departments.find((d) => d.id === classe.departmentId)?.name ?? 'No department';
+        const studentCount = enrollmentsByClassGroup(enrollments, classe.id).length;
 
         return (
           <ClassCard
@@ -92,6 +95,7 @@ export function ClassGrid({
             departmentName={departmentName}
             moduleCount={deptModules.length}
             subjectCount={subjectCount}
+            studentCount={studentCount}
             onEdit={onEdit}
             onDelete={onDelete}
             onOpenStudents={onOpenStudents}

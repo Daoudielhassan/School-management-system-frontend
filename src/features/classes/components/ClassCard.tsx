@@ -2,10 +2,6 @@
 
 /**
  * Presentational class card. Emits action intents; performs no data access.
- *
- * NOTE: `studentCount` defaults to 0 to preserve the original page behaviour
- * (per-class student counts were never wired). Pass a real count once the
- * enrollment data is threaded through — see ClassesManager TODO.
  */
 import {
   Card,

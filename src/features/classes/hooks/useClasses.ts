@@ -18,6 +18,7 @@ const EMPTY_REFERENCE: ClassReferenceData = {
   departments: [],
   modules: [],
   subjects: [],
+  enrollments: [],
   attendanceRecords: [],
   userStats: { totalUsers: 0, admins: 0, managers: 0, instructors: 0, students: 0, enabled: 0, disabled: 0 },
 };
