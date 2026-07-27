@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import {
   Dialog,
@@ -22,7 +22,8 @@ import {
 import { extractErrorMessage } from '@/lib/api-error';
 import { useDepartmentClassGroups } from '../hooks/useDepartment';
 import {
-  useManagerSubjects,
+  useModulesFor,
+  useSubjectsByModule,
   useManagerInstructors,
   useManagerAcademicYears,
   useCreateTeachingAssignment,
@@ -40,21 +41,43 @@ export function CreateTeachingAssignmentDialog({
   defaultClassGroupId,
 }: CreateTeachingAssignmentDialogProps) {
   const { data: classGroups = [] } = useDepartmentClassGroups();
-  const { data: subjects = [] } = useManagerSubjects();
   const { data: instructors = [] } = useManagerInstructors();
   const { data: academicYears = [] } = useManagerAcademicYears();
   const createAssignment = useCreateTeachingAssignment();
 
   const [classGroupId, setClassGroupId] = useState(defaultClassGroupId ?? '');
+  const [moduleId, setModuleId] = useState('');
   const [subjectId, setSubjectId] = useState('');
   const [instructorId, setInstructorId] = useState('');
   const [academicYearId, setAcademicYearId] = useState('');
 
+  // The module choices are the selected class's filière, narrowed to its
+  // niveau — not a free global list. Subject choices then narrow further to
+  // that single module. Neither step is available until its predecessor is.
+  const selectedClassGroup = useMemo(
+    () => classGroups.find((c) => c.id === classGroupId),
+    [classGroups, classGroupId]
+  );
+  const { data: modules = [] } = useModulesFor(selectedClassGroup?.departmentId, selectedClassGroup?.level);
+  const { data: subjects = [] } = useSubjectsByModule(moduleId || undefined);
+
   const reset = () => {
     setClassGroupId(defaultClassGroupId ?? '');
+    setModuleId('');
     setSubjectId('');
     setInstructorId('');
     setAcademicYearId('');
+  };
+
+  const handleClassGroupChange = (value: string) => {
+    setClassGroupId(value);
+    setModuleId('');
+    setSubjectId('');
+  };
+
+  const handleModuleChange = (value: string) => {
+    setModuleId(value);
+    setSubjectId('');
   };
 
   const canSubmit = classGroupId && subjectId && instructorId && academicYearId;
@@ -88,7 +111,7 @@ export function CreateTeachingAssignmentDialog({
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label>Classe</Label>
-            <Select value={classGroupId} onValueChange={setClassGroupId}>
+            <Select value={classGroupId} onValueChange={handleClassGroupChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner une classe" />
               </SelectTrigger>
@@ -103,10 +126,30 @@ export function CreateTeachingAssignmentDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label>Matière</Label>
-            <Select value={subjectId} onValueChange={setSubjectId}>
+            <Label>Module</Label>
+            <Select value={moduleId} onValueChange={handleModuleChange} disabled={!classGroupId}>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionner une matière" />
+                <SelectValue
+                  placeholder={classGroupId ? 'Sélectionner un module' : "Choisissez d'abord une classe"}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {modules.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    {m.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Matière</Label>
+            <Select value={subjectId} onValueChange={setSubjectId} disabled={!moduleId}>
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={moduleId ? 'Sélectionner une matière' : "Choisissez d'abord un module"}
+                />
               </SelectTrigger>
               <SelectContent>
                 {subjects.map((s) => (

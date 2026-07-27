@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useId, useMemo, useState } from 'react';
-import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -28,28 +27,20 @@ import { useDepartmentClassGroups, useDepartmentSessions } from '../hooks/useDep
 import { useTeachingAssignments, useManagerSubjects, useManagerInstructors } from '../hooks/useTeachingAssignments';
 import { useMyManagerProfile, useMyManagerId } from '../hooks/useMyProfile';
 import { MANAGER_DEPARTMENT_SESSIONS_QUERY_KEY } from '../constants';
+import { SESSION_SLOTS, type SessionSlotId } from '@/features/sessions';
 
 export interface CreateSessionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Prefills the start/end inputs, e.g. when opened from a calendar slot click. ISO strings. */
+  /** Prefills the date/slot, e.g. when opened from a calendar slot click. ISO strings. */
   defaultStartsAt?: string;
   defaultEndsAt?: string;
 }
 
-const DURATION_PRESETS = [
-  { label: '30 min', minutes: 30 },
-  { label: '1 h', minutes: 60 },
-  { label: '1 h 30', minutes: 90 },
-  { label: '2 h', minutes: 120 },
-] as const;
-
-const DEFAULT_DURATION_MINUTES = 90;
-
-/** `Date` -> `datetime-local` input value, in local time (not UTC — avoids date/hour shifting). */
-function toDatetimeLocal(date: Date): string {
+/** `Date` -> `YYYY-MM-DD`, in local time (not UTC — avoids date shifting). */
+function toDateInputValue(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 export function CreateSessionDialog({ open, onOpenChange, defaultStartsAt, defaultEndsAt }: CreateSessionDialogProps) {
@@ -66,9 +57,8 @@ export function CreateSessionDialog({ open, onOpenChange, defaultStartsAt, defau
   const roomListId = useId();
 
   const [teachingAssignmentId, setTeachingAssignmentId] = useState('');
-  const [startsAt, setStartsAt] = useState('');
-  const [duration, setDuration] = useState<number | 'custom'>(DEFAULT_DURATION_MINUTES);
-  const [customEndsAt, setCustomEndsAt] = useState('');
+  const [date, setDate] = useState('');
+  const [slotId, setSlotId] = useState<SessionSlotId | ''>('');
   const [room, setRoom] = useState('');
 
   const activeAssignments = assignments.filter((a) => a.status === 'ACTIVE');
@@ -83,14 +73,6 @@ export function CreateSessionDialog({ open, onOpenChange, defaultStartsAt, defau
     return Array.from(rooms).sort();
   }, [departmentSessions]);
 
-  const computedEndsAt = useMemo(() => {
-    if (duration === 'custom') return customEndsAt;
-    if (!startsAt) return '';
-    const start = new Date(startsAt);
-    if (Number.isNaN(start.getTime())) return '';
-    return toDatetimeLocal(new Date(start.getTime() + duration * 60_000));
-  }, [startsAt, duration, customEndsAt]);
-
   // Skip a click when the class only has one active assignment.
   useEffect(() => {
     if (activeAssignments.length === 1 && !teachingAssignmentId) {
@@ -99,41 +81,36 @@ export function CreateSessionDialog({ open, onOpenChange, defaultStartsAt, defau
   }, [activeAssignments, teachingAssignmentId]);
 
   useEffect(() => {
-    if (!open || !defaultStartsAt || !defaultEndsAt) return;
-    setStartsAt(defaultStartsAt.slice(0, 16));
-    const diffMinutes = Math.round(
-      (new Date(defaultEndsAt).getTime() - new Date(defaultStartsAt).getTime()) / 60_000
-    );
-    const preset = DURATION_PRESETS.find((p) => p.minutes === diffMinutes);
-    if (preset) {
-      setDuration(preset.minutes);
-    } else {
-      setDuration('custom');
-      setCustomEndsAt(defaultEndsAt.slice(0, 16));
-    }
+    if (!open || !defaultStartsAt) return;
+    const start = new Date(defaultStartsAt);
+    setDate(toDateInputValue(start));
+    // Whichever fixed slot the clicked time falls closest into.
+    setSlotId(start.getHours() < 13 ? 'MORNING' : 'AFTERNOON');
   }, [open, defaultStartsAt, defaultEndsAt]);
 
   const reset = () => {
     setClassGroupId('');
     setTeachingAssignmentId('');
-    setStartsAt('');
-    setDuration(DEFAULT_DURATION_MINUTES);
-    setCustomEndsAt('');
+    setDate('');
+    setSlotId('');
     setRoom('');
   };
 
-  const canSubmit =
-    classGroupId && teachingAssignmentId && startsAt && computedEndsAt && computedEndsAt > startsAt;
+  const canSubmit = classGroupId && teachingAssignmentId && date && slotId;
 
   const handleSubmit = async () => {
     if (!canSubmit || !profile) return;
+    const slot = SESSION_SLOTS.find((s) => s.id === slotId);
+    if (!slot) return;
     try {
       await createSession.mutateAsync({
         managerId,
         departmentId: profile.departmentId,
         teachingAssignmentId,
-        startsAt: new Date(startsAt).toISOString(),
-        endsAt: new Date(computedEndsAt).toISOString(),
+        // Interpreted as local time, then converted to an ISO instant — same
+        // approach the old datetime-local input relied on.
+        startsAt: new Date(`${date}T${slot.start}:00`).toISOString(),
+        endsAt: new Date(`${date}T${slot.end}:00`).toISOString(),
         room: room || undefined,
       });
       queryClient.invalidateQueries({ queryKey: MANAGER_DEPARTMENT_SESSIONS_QUERY_KEY });
@@ -202,53 +179,28 @@ export function CreateSessionDialog({ open, onOpenChange, defaultStartsAt, defau
           </div>
 
           <div className="space-y-1.5">
-            <Label>Début</Label>
-            <Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
+            <Label>Date</Label>
+            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
 
           <div className="space-y-1.5">
-            <Label>Durée</Label>
+            <Label>Créneau</Label>
             <div className="flex flex-wrap gap-2">
-              {DURATION_PRESETS.map((p) => (
+              {SESSION_SLOTS.map((s) => (
                 <button
-                  key={p.minutes}
+                  key={s.id}
                   type="button"
-                  onClick={() => setDuration(p.minutes)}
+                  onClick={() => setSlotId(s.id)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all active:scale-95 ${
-                    duration === p.minutes
+                    slotId === s.id
                       ? 'bg-blue-600 border-blue-600 text-white'
                       : 'border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50'
                   }`}
                 >
-                  {p.label}
+                  {s.label} ({s.start}–{s.end})
                 </button>
               ))}
-              <button
-                type="button"
-                onClick={() => setDuration('custom')}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all active:scale-95 ${
-                  duration === 'custom'
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50'
-                }`}
-              >
-                Personnalisé
-              </button>
             </div>
-            {duration === 'custom' ? (
-              <Input
-                type="datetime-local"
-                className="mt-2"
-                value={customEndsAt}
-                onChange={(e) => setCustomEndsAt(e.target.value)}
-              />
-            ) : (
-              computedEndsAt && (
-                <p className="text-xs text-slate-400 mt-1">
-                  Se termine à {format(new Date(computedEndsAt), 'HH:mm')}
-                </p>
-              )
-            )}
           </div>
 
           <div className="space-y-1.5">

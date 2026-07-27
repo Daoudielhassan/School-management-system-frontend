@@ -59,11 +59,26 @@ export const API_ENDPOINTS = {
   MODULES: {
     BASE: `${EDUCATION_CORE_BASE}/api/modules`,
     BY_ID: (id: string) => `${EDUCATION_CORE_BASE}/api/modules/${id}`,
+    // departmentId + level narrow the module choices to a class group's filière/niveau.
+    FILTER: (params?: { departmentId?: string; level?: number }) => {
+      const query = new URLSearchParams();
+      if (params?.departmentId) query.set('departmentId', params.departmentId);
+      if (params?.level != null) query.set('level', String(params.level));
+      const qs = query.toString();
+      return `${EDUCATION_CORE_BASE}/api/modules${qs ? `?${qs}` : ''}`;
+    },
   },
 
   SUBJECTS: {
     BASE: `${EDUCATION_CORE_BASE}/api/subjects`,
     BY_ID: (id: string) => `${EDUCATION_CORE_BASE}/api/subjects/${id}`,
+    // moduleId narrows the subject choices to a single teaching module.
+    FILTER: (params?: { moduleId?: string }) => {
+      const query = new URLSearchParams();
+      if (params?.moduleId) query.set('moduleId', params.moduleId);
+      const qs = query.toString();
+      return `${EDUCATION_CORE_BASE}/api/subjects${qs ? `?${qs}` : ''}`;
+    },
   },
 
   INSTRUCTORS: {

@@ -27,10 +27,11 @@ import { QueryErrorState } from './QueryErrorState';
 import type { SessionData } from '../types';
 
 /**
- * Manager's department schedule: a real calendar (not a fixed-slot grid or a
- * flat table) where sessions can be dragged to a new time/day, resized to
- * change duration, or clicked to cancel — every change round-trips through
- * `PUT /api/sessions/{id}` and reverts in place if the request fails.
+ * Manager's department schedule: sessions can be dragged to a new day/slot or
+ * clicked to cancel — every change round-trips through `PUT /api/sessions/{id}`
+ * and reverts in place if the request fails. No resize: a session always runs
+ * a full fixed slot (see `SESSION_SLOTS`), so duration isn't draggable — the
+ * calendar's `businessHours` constraint keeps drags snapped to a valid slot.
  */
 export function SessionScheduleBoard() {
   const queryClient = useQueryClient();
@@ -133,7 +134,6 @@ export function SessionScheduleBoard() {
           editable
           onEventClick={(id) => setSelected(sessionById.get(id) ?? null)}
           onEventDrop={reschedule}
-          onEventResize={reschedule}
           onSlotSelect={(startsAt, endsAt) => {
             setCreateDefaults({ startsAt, endsAt });
             setCreateOpen(true);

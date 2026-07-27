@@ -6,16 +6,27 @@ import {
   createTeachingAssignment,
   cancelTeachingAssignment,
   fetchSubjects,
+  fetchModulesByDepartmentAndLevel,
+  fetchSubjectsByModule,
   fetchInstructors,
   fetchAcademicYears,
 } from '../api/teachingAssignments.api';
 import {
   MANAGER_TEACHING_ASSIGNMENTS_QUERY_KEY,
   MANAGER_SUBJECTS_QUERY_KEY,
+  MANAGER_MODULES_QUERY_KEY,
+  MANAGER_MODULE_SUBJECTS_QUERY_KEY,
   MANAGER_INSTRUCTORS_QUERY_KEY,
   MANAGER_ACADEMIC_YEARS_QUERY_KEY,
 } from '../constants';
-import type { TeachingAssignment, TeachingAssignmentCreatePayload, SubjectLite, InstructorLite, AcademicYearLite } from '../types';
+import type {
+  TeachingAssignment,
+  TeachingAssignmentCreatePayload,
+  ModuleLite,
+  SubjectLite,
+  InstructorLite,
+  AcademicYearLite,
+} from '../types';
 
 /** `GET /api/teaching-assignments?classGroupId=` — scoped to a single class group at a time. */
 export function useTeachingAssignments(classGroupId?: string) {
@@ -37,6 +48,34 @@ export function useManagerSubjects() {
     queryKey: MANAGER_SUBJECTS_QUERY_KEY,
     queryFn: () => fetchSubjects(token ?? undefined),
     enabled: !!token,
+    staleTime: 5 * 60_000,
+  });
+}
+
+/**
+ * `GET /api/modules?departmentId=&level=` — the modules of a class group's
+ * filière, narrowed to its level. Used for the create-assignment form's
+ * module step; disabled (returns []) until both are known.
+ */
+export function useModulesFor(departmentId?: string, level?: number) {
+  const { token } = useAuth();
+
+  return useQuery<ModuleLite[]>({
+    queryKey: [...MANAGER_MODULES_QUERY_KEY, departmentId, level],
+    queryFn: () => fetchModulesByDepartmentAndLevel({ departmentId, level }, token ?? undefined),
+    enabled: !!token && !!departmentId && level != null,
+    staleTime: 5 * 60_000,
+  });
+}
+
+/** `GET /api/subjects?moduleId=` — the subjects of a single module, for the create-assignment form. */
+export function useSubjectsByModule(moduleId?: string) {
+  const { token } = useAuth();
+
+  return useQuery<SubjectLite[]>({
+    queryKey: [...MANAGER_MODULE_SUBJECTS_QUERY_KEY, moduleId],
+    queryFn: () => fetchSubjectsByModule(moduleId, token ?? undefined),
+    enabled: !!token && !!moduleId,
     staleTime: 5 * 60_000,
   });
 }

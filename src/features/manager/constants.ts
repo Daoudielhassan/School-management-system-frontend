@@ -17,6 +17,8 @@ export const MANAGER_MESSAGES_QUERY_KEY = ['manager', 'messages'] as const;
 export const MANAGER_NOTIFICATIONS_QUERY_KEY = ['manager', 'notifications'] as const;
 export const MANAGER_DASHBOARD_QUERY_KEY = ['manager', 'dashboard'] as const;
 export const MANAGER_SUBJECTS_QUERY_KEY = ['manager', 'subjects'] as const;
+export const MANAGER_MODULES_QUERY_KEY = ['manager', 'modules'] as const;
+export const MANAGER_MODULE_SUBJECTS_QUERY_KEY = ['manager', 'module-subjects'] as const;
 export const MANAGER_INSTRUCTORS_QUERY_KEY = ['manager', 'instructors'] as const;
 export const MANAGER_ACADEMIC_YEARS_QUERY_KEY = ['manager', 'academic-years'] as const;
 

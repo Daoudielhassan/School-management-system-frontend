@@ -237,6 +237,13 @@ export interface ValidationStatsDTO {
 
 export type { TeachingAssignment, TeachingAssignmentStatus };
 
+export interface ModuleLite {
+  id: string;
+  name: string;
+  departmentId: string;
+  level: number;
+}
+
 export interface SubjectLite {
   id: string;
   name: string;

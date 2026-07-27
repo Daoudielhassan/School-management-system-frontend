@@ -31,6 +31,7 @@ import { useAuth } from '@/context/AuthContext';
 import { API_ENDPOINTS, apiGet } from '@/config/api';
 import { extractErrorMessage } from '@/lib/api-error';
 import { useCreateSession } from '../hooks/useSessions';
+import { SESSION_SLOTS, type SessionSlotId } from '../constants';
 import type { TeachingAssignment } from '@/types/education';
 
 interface SubjectLite {
@@ -67,8 +68,8 @@ export function CreateSessionDialog({
   const [instructors, setInstructors] = useState<InstructorLite[]>([]);
 
   const [teachingAssignmentId, setTeachingAssignmentId] = useState('');
-  const [startsAt, setStartsAt] = useState('');
-  const [endsAt, setEndsAt] = useState('');
+  const [date, setDate] = useState('');
+  const [slotId, setSlotId] = useState<SessionSlotId | ''>('');
   const [room, setRoom] = useState('');
 
   useEffect(() => {
@@ -96,21 +97,24 @@ export function CreateSessionDialog({
 
   const reset = () => {
     setTeachingAssignmentId('');
-    setStartsAt('');
-    setEndsAt('');
+    setDate('');
+    setSlotId('');
     setRoom('');
   };
 
-  const canSubmit = teachingAssignmentId && startsAt && endsAt;
+  const canSubmit = teachingAssignmentId && date && slotId;
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
+    const slot = SESSION_SLOTS.find((s) => s.id === slotId);
+    if (!slot) return;
     try {
       await createSession.mutateAsync({
         departmentId,
         teachingAssignmentId,
-        startsAt: new Date(startsAt).toISOString(),
-        endsAt: new Date(endsAt).toISOString(),
+        // Interpreted as local time, then converted to an ISO instant.
+        startsAt: new Date(`${date}T${slot.start}:00`).toISOString(),
+        endsAt: new Date(`${date}T${slot.end}:00`).toISOString(),
         room: room || undefined,
       });
       toast.success('Séance créée');
@@ -156,14 +160,28 @@ export function CreateSessionDialog({
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label>Début</Label>
-              <Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Fin</Label>
-              <Input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
+          <div className="space-y-1.5">
+            <Label>Date</Label>
+            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Créneau</Label>
+            <div className="flex flex-wrap gap-2">
+              {SESSION_SLOTS.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setSlotId(s.id)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all active:scale-95 ${
+                    slotId === s.id
+                      ? 'bg-blue-600 border-blue-600 text-white'
+                      : 'border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50'
+                  }`}
+                >
+                  {s.label} ({s.start}–{s.end})
+                </button>
+              ))}
             </div>
           </div>
 

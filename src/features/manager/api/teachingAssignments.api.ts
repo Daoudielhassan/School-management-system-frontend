@@ -8,6 +8,7 @@ import { apiGet, apiPatch, apiPost, API_ENDPOINTS } from '@/config/api';
 import type {
   TeachingAssignment,
   TeachingAssignmentCreatePayload,
+  ModuleLite,
   SubjectLite,
   InstructorLite,
   AcademicYearLite,
@@ -43,6 +44,36 @@ export function cancelTeachingAssignment(id: string, token?: string): Promise<Te
 /** `GET /api/subjects` — global catalogue, used to populate the create-assignment form. */
 export function fetchSubjects(token?: string): Promise<SubjectLite[]> {
   return apiGet<SubjectLite[]>(API_ENDPOINTS.SUBJECTS.BASE, token);
+}
+
+/**
+ * `GET /api/modules?departmentId=&level=` — the modules of the selected class
+ * group's filière, narrowed to its level, used to populate the create-assignment
+ * form's module step. Returns [] until a class group is picked (no useless
+ * unscoped fetch of every department's modules).
+ */
+export function fetchModulesByDepartmentAndLevel(
+  params: { departmentId?: string; level?: number },
+  token?: string
+): Promise<ModuleLite[]> {
+  if (!params.departmentId || params.level == null) {
+    return Promise.resolve([]);
+  }
+  return apiGet<ModuleLite[]>(API_ENDPOINTS.MODULES.FILTER(params), token);
+}
+
+/**
+ * `GET /api/subjects?moduleId=` — the subjects of the selected module, used to
+ * populate the create-assignment form's subject step. Returns [] until a
+ * module is picked. Distinct from {@link fetchSubjects}, which other callers
+ * (session dialogs, reports, assignment lists) use for the full, unfiltered
+ * catalogue to resolve display names.
+ */
+export function fetchSubjectsByModule(moduleId: string | undefined, token?: string): Promise<SubjectLite[]> {
+  if (!moduleId) {
+    return Promise.resolve([]);
+  }
+  return apiGet<SubjectLite[]>(API_ENDPOINTS.SUBJECTS.FILTER({ moduleId }), token);
 }
 
 /** `GET /api/instructors`. */
