@@ -2,6 +2,8 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -31,6 +33,16 @@ export function DisciplineFilters({ filters, academicYears, onChange, onReset }:
     <Card className="border-slate-200 shadow-sm shadow-slate-200/50">
       <CardContent className="p-4">
         <div className="flex flex-wrap gap-3">
+          <div className="relative flex-1 min-w-[220px]">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <Input
+              placeholder="Rechercher par nom d'étudiant…"
+              value={filters.studentName}
+              onChange={(e) => onChange({ ...filters, studentName: e.target.value })}
+              className="pl-10"
+            />
+          </div>
+
           <Select value={filters.status} onValueChange={(status) => onChange({ ...filters, status })}>
             <SelectTrigger className="w-44">
               <SelectValue placeholder="Statut" />

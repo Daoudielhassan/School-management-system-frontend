@@ -40,6 +40,7 @@ const EMPTY_FILTERS: Filters = {
   status: STATUS_FILTER_ALL,
   severity: SEVERITY_FILTER_ALL,
   academicYearId: ACADEMIC_YEAR_FILTER_ALL,
+  studentName: '',
 };
 const EMPTY_STATS = { total: 0, pending: 0, underReview: 0, resolved: 0, appealed: 0 };
 
@@ -183,8 +184,6 @@ export function DisciplineManager({ students }: DisciplineManagerProps) {
           <DataTable
             columns={columns}
             data={cases}
-            searchKey="studentName"
-            searchPlaceholder="Rechercher par nom d'étudiant…"
             isLoading={isLoading}
           />
           {totalPages > 1 && (

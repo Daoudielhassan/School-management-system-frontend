@@ -16,6 +16,7 @@ export interface AuditLogFilterValues {
   action: string;
   resource: string;
   userId: string;
+  username: string;
   from: string;
   to: string;
 }
@@ -35,7 +36,7 @@ export function AuditLogFilters({ filters, onChange, onReset }: AuditLogFiltersP
         <CardTitle className="text-sm font-semibold text-slate-500">Filtres</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
           <Select value={filters.action} onValueChange={(action) => set({ action })}>
             <SelectTrigger>
               <SelectValue placeholder="Action" />
@@ -58,6 +59,11 @@ export function AuditLogFilters({ filters, onChange, onReset }: AuditLogFiltersP
             placeholder="ID utilisateur"
             value={filters.userId}
             onChange={(e) => set({ userId: e.target.value })}
+          />
+          <Input
+            placeholder="Nom d'utilisateur"
+            value={filters.username}
+            onChange={(e) => set({ username: e.target.value })}
           />
           <Input type="date" value={filters.from} onChange={(e) => set({ from: e.target.value })} />
           <Input type="date" value={filters.to} onChange={(e) => set({ to: e.target.value })} />

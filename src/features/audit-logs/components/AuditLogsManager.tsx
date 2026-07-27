@@ -30,6 +30,7 @@ const EMPTY_FILTERS: AuditLogFilterValues = {
   action: 'ALL',
   resource: '',
   userId: '',
+  username: '',
   from: '',
   to: '',
 };
@@ -40,6 +41,7 @@ function toApiFilters(f: AuditLogFilterValues): ApiFilters {
     action: f.action !== 'ALL' ? f.action : undefined,
     resource: f.resource.trim() || undefined,
     userId: f.userId.trim() || undefined,
+    username: f.username.trim() || undefined,
     from: f.from || undefined,
     to: f.to || undefined,
   };
@@ -157,8 +159,6 @@ export function AuditLogsManager() {
             <DataTable
               columns={auditLogColumns}
               data={logs}
-              searchKey="username"
-              searchPlaceholder="Search by username…"
               isLoading={false}
             />
           )}

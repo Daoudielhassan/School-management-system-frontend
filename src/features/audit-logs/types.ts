@@ -38,6 +38,7 @@ export interface AuditLogFilters {
   action?: string;
   resource?: string;
   userId?: string;
+  username?: string;
   from?: string;
   to?: string;
   page?: number;

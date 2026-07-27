@@ -21,6 +21,7 @@ export async function fetchCases(
   if (filters.status !== STATUS_FILTER_ALL) params.set('status', filters.status);
   if (filters.severity !== SEVERITY_FILTER_ALL) params.set('severity', filters.severity);
   if (filters.academicYearId !== ACADEMIC_YEAR_FILTER_ALL) params.set('academicYearId', filters.academicYearId);
+  if (filters.studentName.trim()) params.set('studentName', filters.studentName.trim());
 
   const data = await apiGet<any>(`${API_ENDPOINTS.DISCIPLINE.BASE}?${params}`, token);
   if (data?.content) {

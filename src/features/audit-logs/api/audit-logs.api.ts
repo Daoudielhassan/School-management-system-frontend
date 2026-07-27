@@ -12,6 +12,7 @@ function buildParams(filters: AuditLogFilters): URLSearchParams {
   if (filters.action && filters.action !== 'ALL') params.set('action', filters.action);
   if (filters.resource) params.set('resource', filters.resource);
   if (filters.userId) params.set('userId', filters.userId);
+  if (filters.username) params.set('username', filters.username);
   if (filters.from) params.set('from', filters.from);
   if (filters.to) params.set('to', filters.to);
   return params;

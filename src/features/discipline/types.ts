@@ -49,6 +49,8 @@ export interface DisciplineFilters {
   status: string;
   severity: string;
   academicYearId: string;
+  /** Free-text student-name search — sent to the server, matches across every page. */
+  studentName: string;
 }
 
 /** Payload to create a case. */
