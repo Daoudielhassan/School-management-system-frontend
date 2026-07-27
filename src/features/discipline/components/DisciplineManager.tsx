@@ -20,6 +20,7 @@ import { CaseDetailDialog } from './CaseDetailDialog';
 import { buildDisciplineColumns } from './discipline-columns';
 import { useDisciplineCases, useDisciplineStats } from '../hooks/useDiscipline';
 import { useCreateCase, useUpdateCase, useDeleteCase } from '../hooks/useDisciplineMutations';
+import { useAcademicYears } from '@/features/academic';
 import {
   emptyCaseForm,
   toCreateCasePayload,
@@ -27,10 +28,19 @@ import {
   type CaseFormValues,
   type CaseUpdateValues,
 } from '../validations';
-import { DISCIPLINE_QUERY_KEY, STATUS_FILTER_ALL, SEVERITY_FILTER_ALL } from '../constants';
+import {
+  DISCIPLINE_QUERY_KEY,
+  STATUS_FILTER_ALL,
+  SEVERITY_FILTER_ALL,
+  ACADEMIC_YEAR_FILTER_ALL,
+} from '../constants';
 import type { DisciplinaryCase, DisciplineFilters as Filters, StudentOption } from '../types';
 
-const EMPTY_FILTERS: Filters = { status: STATUS_FILTER_ALL, severity: SEVERITY_FILTER_ALL };
+const EMPTY_FILTERS: Filters = {
+  status: STATUS_FILTER_ALL,
+  severity: SEVERITY_FILTER_ALL,
+  academicYearId: ACADEMIC_YEAR_FILTER_ALL,
+};
 const EMPTY_STATS = { total: 0, pending: 0, underReview: 0, resolved: 0, appealed: 0 };
 
 export interface DisciplineManagerProps {
@@ -50,6 +60,7 @@ export function DisciplineManager({ students }: DisciplineManagerProps) {
 
   const { data: casesPage, isLoading } = useDisciplineCases(filters, page);
   const { data: stats, isLoading: statsLoad } = useDisciplineStats();
+  const { data: academicYears } = useAcademicYears();
 
   const createCase = useCreateCase();
   const updateCase = useUpdateCase();
@@ -156,6 +167,7 @@ export function DisciplineManager({ students }: DisciplineManagerProps) {
 
       <DisciplineFilters
         filters={filters}
+        academicYears={academicYears ?? []}
         onChange={handleFiltersChange}
         onReset={() => handleFiltersChange(EMPTY_FILTERS)}
       />

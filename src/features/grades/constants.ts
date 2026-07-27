@@ -4,6 +4,7 @@ export const GRADES_QUERY_KEY = ['grades'] as const;
 
 export const SUBJECT_FILTER_ALL = 'all';
 export const PERFORMANCE_FILTER_ALL = 'all';
+export const ACADEMIC_YEAR_FILTER_ALL = 'all';
 
 /** `EvaluationType` enum (§2.10). */
 export const EVALUATION_TYPES = ['EXAM', 'QUIZ', 'HOMEWORK', 'PROJECT', 'PARTICIPATION', 'OTHER'] as const;

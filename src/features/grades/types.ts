@@ -7,6 +7,8 @@ export interface GradeResponse {
   studentId: string;
   subjectId: string;
   instructorId: string;
+  /** Set server-side from the active academic year when the grade is recorded — never client-supplied. */
+  academicYearId: string;
   value: number;
   maxValue: number;
   evaluationType: string;
@@ -59,6 +61,7 @@ export interface StudentGrade {
   subject: string;
   instructorId: string;
   instructor: string;
+  academicYearId: string;
   grade: number;
   maxGrade: number;
   percentage: number;
@@ -82,4 +85,5 @@ export interface GradeFilters {
   search: string;
   subject: string;
   performance: string;
+  academicYear: string;
 }

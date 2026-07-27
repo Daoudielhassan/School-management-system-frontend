@@ -2,7 +2,7 @@
  * Discipline API layer.
  */
 import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '@/config/api';
-import { DISCIPLINE_PAGE_SIZE, STATUS_FILTER_ALL, SEVERITY_FILTER_ALL } from '../constants';
+import { DISCIPLINE_PAGE_SIZE, STATUS_FILTER_ALL, SEVERITY_FILTER_ALL, ACADEMIC_YEAR_FILTER_ALL } from '../constants';
 import type {
   DisciplinePage,
   DisciplineStats,
@@ -20,6 +20,7 @@ export async function fetchCases(
   const params = new URLSearchParams({ page: String(page), size: String(DISCIPLINE_PAGE_SIZE) });
   if (filters.status !== STATUS_FILTER_ALL) params.set('status', filters.status);
   if (filters.severity !== SEVERITY_FILTER_ALL) params.set('severity', filters.severity);
+  if (filters.academicYearId !== ACADEMIC_YEAR_FILTER_ALL) params.set('academicYearId', filters.academicYearId);
 
   const data = await apiGet<any>(`${API_ENDPOINTS.DISCIPLINE.BASE}?${params}`, token);
   if (data?.content) {

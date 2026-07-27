@@ -27,6 +27,8 @@ export interface DisciplinaryCase {
   resolutionNotes: string;
   dateReported: string;
   lastUpdated: string;
+  /** Set server-side from the active academic year when the case is opened — never client-supplied. */
+  academicYearId: string;
 }
 
 export interface DisciplineStats {
@@ -46,6 +48,7 @@ export interface DisciplinePage {
 export interface DisciplineFilters {
   status: string;
   severity: string;
+  academicYearId: string;
 }
 
 /** Payload to create a case. */

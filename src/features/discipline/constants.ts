@@ -6,6 +6,7 @@ export const DISCIPLINE_PAGE_SIZE = 20;
 
 export const STATUS_FILTER_ALL = 'all';
 export const SEVERITY_FILTER_ALL = 'all';
+export const ACADEMIC_YEAR_FILTER_ALL = 'all';
 
 export const SEVERITY_OPTIONS = [
   { value: 'minor', label: 'Mineure' },

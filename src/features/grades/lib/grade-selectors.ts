@@ -2,7 +2,7 @@
  * Pure selectors for the grades feature: resolve foreign keys to display
  * names, derive performance/trend, compute stats, and filter.
  */
-import { SUBJECT_FILTER_ALL, PERFORMANCE_FILTER_ALL, performanceFromPercentage } from '../constants';
+import { SUBJECT_FILTER_ALL, PERFORMANCE_FILTER_ALL, ACADEMIC_YEAR_FILTER_ALL, performanceFromPercentage } from '../constants';
 import type { GradeBundle, GradeResponse, StudentGrade, GradeStats, GradeFilters, GradeTrend } from '../types';
 
 /** Resolve every raw grade to display strings, deriving performance + trend. */
@@ -53,6 +53,7 @@ export function resolveGrades(bundle: GradeBundle): StudentGrade[] {
       subject: subject?.name ?? 'Matière inconnue',
       instructorId: g.instructorId,
       instructor: instructor?.name ?? 'Instructeur inconnu',
+      academicYearId: g.academicYearId,
       grade: g.value,
       maxGrade: g.maxValue,
       percentage,
@@ -90,6 +91,8 @@ export function filterGrades(grades: StudentGrade[], filters: GradeFilters): Stu
     const matchesSubject = filters.subject === SUBJECT_FILTER_ALL || g.subjectId === filters.subject;
     const matchesPerformance =
       filters.performance === PERFORMANCE_FILTER_ALL || g.performance === filters.performance;
-    return matchesSearch && matchesSubject && matchesPerformance;
+    const matchesAcademicYear =
+      filters.academicYear === ACADEMIC_YEAR_FILTER_ALL || g.academicYearId === filters.academicYear;
+    return matchesSearch && matchesSubject && matchesPerformance && matchesAcademicYear;
   });
 }

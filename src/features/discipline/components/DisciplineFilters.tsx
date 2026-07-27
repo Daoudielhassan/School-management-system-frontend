@@ -14,16 +14,19 @@ import {
   STATUS_OPTIONS,
   STATUS_FILTER_ALL,
   SEVERITY_FILTER_ALL,
+  ACADEMIC_YEAR_FILTER_ALL,
 } from '../constants';
 import type { DisciplineFilters as Filters } from '../types';
+import type { AcademicYear } from '@/features/academic';
 
 export interface DisciplineFiltersProps {
   filters: Filters;
+  academicYears: AcademicYear[];
   onChange: (filters: Filters) => void;
   onReset: () => void;
 }
 
-export function DisciplineFilters({ filters, onChange, onReset }: DisciplineFiltersProps) {
+export function DisciplineFilters({ filters, academicYears, onChange, onReset }: DisciplineFiltersProps) {
   return (
     <Card className="border-slate-200 shadow-sm shadow-slate-200/50">
       <CardContent className="p-4">
@@ -54,6 +57,23 @@ export function DisciplineFilters({ filters, onChange, onReset }: DisciplineFilt
               {SEVERITY_OPTIONS.map((o) => (
                 <SelectItem key={o.value} value={o.value}>
                   {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={filters.academicYearId}
+            onValueChange={(academicYearId) => onChange({ ...filters, academicYearId })}
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Année scolaire" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ACADEMIC_YEAR_FILTER_ALL}>Toutes les années</SelectItem>
+              {academicYears.map((y) => (
+                <SelectItem key={y.id} value={y.id}>
+                  {y.code}
                 </SelectItem>
               ))}
             </SelectContent>

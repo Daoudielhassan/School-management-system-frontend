@@ -19,14 +19,16 @@ import { GradeGrid } from './GradeGrid';
 import { GradeDetailDialog } from './GradeDetailDialog';
 import { GradeFormDialog } from './GradeFormDialog';
 import { useGradesScreen, useGradeBundle, useCreateGrade, useDeleteGrade } from '../hooks/useGrades';
+import { useAcademicYears } from '@/features/academic';
 import { toGradeMutationPayload, type GradeFormValues } from '../validations';
-import { SUBJECT_FILTER_ALL, PERFORMANCE_FILTER_ALL } from '../constants';
+import { SUBJECT_FILTER_ALL, PERFORMANCE_FILTER_ALL, ACADEMIC_YEAR_FILTER_ALL } from '../constants';
 import type { GradeFilters as Filters, StudentGrade } from '../types';
 
 const EMPTY_FILTERS: Filters = {
   search: '',
   subject: SUBJECT_FILTER_ALL,
   performance: PERFORMANCE_FILTER_ALL,
+  academicYear: ACADEMIC_YEAR_FILTER_ALL,
 };
 
 export function GradesManager() {
@@ -37,6 +39,7 @@ export function GradesManager() {
 
   const { filtered, stats, isLoading } = useGradesScreen(filters);
   const { data: bundle } = useGradeBundle();
+  const { data: academicYears } = useAcademicYears();
   const createGrade = useCreateGrade();
   const deleteGrade = useDeleteGrade();
 
@@ -81,7 +84,12 @@ export function GradesManager() {
 
         <GradeStatsCards stats={stats} />
 
-        <GradeFilters filters={filters} subjects={bundle?.subjects ?? []} onChange={setFilters} />
+        <GradeFilters
+          filters={filters}
+          subjects={bundle?.subjects ?? []}
+          academicYears={academicYears ?? []}
+          onChange={setFilters}
+        />
 
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
