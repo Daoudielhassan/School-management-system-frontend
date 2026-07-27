@@ -12,6 +12,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { UserRole } from '@/types/auth';
 
+// Statically prerendering this route let a wrong cached response variant (RSC
+// payload served instead of HTML) get stuck for regular page loads. Nothing
+// here is per-request server data anyway (auth state is all client-fetched),
+// so forcing dynamic rendering is free and prevents that class of bug.
+export const dynamic = 'force-dynamic';
+
 export default function ChangePasswordPage() {
   const { token, userId, role, clearMustChangePassword } = useAuth();
   const router = useRouter();
