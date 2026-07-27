@@ -39,6 +39,7 @@ import {
   Briefcase,
   Layers,
   BookMarked,
+  Presentation,
 } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import { AdminProvider, useAdmin } from "@/context/AdminContext"
@@ -59,6 +60,7 @@ const sidebarSections = [
     title: "ACADEMIC",
     items: [
       { id: "students", label: "Étudiants", href: "/admin/students", icon: GraduationCap },
+      { id: "instructors", label: "Professeurs", href: "/admin/instructors", icon: Presentation },
       { id: "classes", label: "Classes", href: "/admin/classes", icon: BookOpen },
       { id: "departments", label: "Départements", href: "/admin/departments", icon: Building },
       { id: "academic", label: "Années", href: "/admin/academic", icon: BookCopy },
@@ -134,43 +136,44 @@ function AdminLayoutContent({
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header Premium - Sans logo, avec recherche centrale */}
-        <header className="z-40 px-[40px] pt-[32px] pb-4">
-          <div className="flex items-center justify-between gap-8">
+        {/* pl reserves room for the Sidebar's floating mobile hamburger (fixed top-4 left-4, shown below `lg`) */}
+        <header className="z-40 px-4 sm:px-6 lg:px-10 pt-20 lg:pt-8 pb-4">
+          <div className="flex flex-wrap items-center justify-between gap-4 lg:gap-8">
 
             {/* Gauche : Message de bienvenue */}
-            <div className="flex flex-col flex-shrink-0">
+            <div className="flex flex-col min-w-0">
               <h2
-                className="text-[26px] font-semibold text-slate-800 tracking-tight leading-none"
+                className="text-xl sm:text-[26px] font-semibold text-slate-800 tracking-tight leading-none truncate"
                 style={{ fontFamily: "var(--font-admin-display)" }}
               >
                 Bonjour {firstName}
               </h2>
-              <p className="text-sm font-medium text-slate-500 mt-1.5">
+              <p className="text-sm font-medium text-slate-500 mt-1.5 hidden sm:block">
                 Bienvenue dans votre espace d'administration
               </p>
             </div>
 
             {/* Centre : Barre de recherche globale */}
-            <div className="flex-1 max-w-2xl hidden md:flex items-center">
+            <div className="flex-1 min-w-[200px] max-w-2xl hidden md:flex items-center">
               <GlobalSearchDialog />
             </div>
 
             {/* Droite : Actions & Profil */}
-            <div className="flex items-center gap-3 flex-shrink-0">
-              <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl bg-white/60 border border-slate-200/60 shadow-sm hover:bg-white text-slate-500 hover:text-blue-600 transition-all duration-200">
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 ml-auto">
+              <Button variant="ghost" size="icon" className="hidden sm:inline-flex h-11 w-11 rounded-2xl bg-white/60 border border-slate-200/60 shadow-sm hover:bg-white text-slate-500 hover:text-blue-600 transition-all duration-200">
                 <MessageSquare className="h-5 w-5" />
               </Button>
-              
+
               <Button variant="ghost" size="icon" className="relative h-11 w-11 rounded-2xl bg-white/60 border border-slate-200/60 shadow-sm hover:bg-white text-slate-500 hover:text-blue-600 transition-all duration-200">
                 <Bell className="h-5 w-5" />
                 <span className="absolute top-2.5 right-3 h-2 w-2 bg-red-500 rounded-full border-2 border-white"></span>
               </Button>
-              
-              <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl bg-white/60 border border-slate-200/60 shadow-sm hover:bg-white text-slate-500 hover:text-blue-600 transition-all duration-200">
+
+              <Button variant="ghost" size="icon" className="hidden sm:inline-flex h-11 w-11 rounded-2xl bg-white/60 border border-slate-200/60 shadow-sm hover:bg-white text-slate-500 hover:text-blue-600 transition-all duration-200">
                 <HelpCircle className="h-5 w-5" />
               </Button>
 
-              <div className="w-px h-8 bg-slate-200/80 mx-1"></div>
+              <div className="hidden sm:block w-px h-8 bg-slate-200/80 mx-1"></div>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -222,7 +225,7 @@ function AdminLayoutContent({
         </header>
 
         {/* Main Content - Pleine largeur avec le bon espacement */}
-        <main className="flex-1 px-[40px] pt-4 pb-12 overflow-x-hidden overflow-y-auto w-full">
+        <main className="flex-1 px-4 sm:px-6 lg:px-10 pt-4 pb-12 overflow-x-hidden overflow-y-auto w-full">
           {/* L'espace est maintenu généreux et non limité par max-w-7xl */}
           <div className="w-full h-full flex flex-col space-y-8">
             {children}

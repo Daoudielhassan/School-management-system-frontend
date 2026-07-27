@@ -122,7 +122,8 @@ export function SessionCalendar({
   }
 
   return (
-    <div className={styles.calendarWrap}>
+    <div className={`${styles.calendarWrap} overflow-x-auto`}>
+      <div className="min-w-[700px]">
       <FullCalendar
         plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
         initialView="timeGridWeek"
@@ -157,6 +158,7 @@ export function SessionCalendar({
           onEventResize(info.event.id, info.event.start.toISOString(), info.event.end.toISOString(), info.revert);
         }}
       />
+      </div>
     </div>
   );
 }

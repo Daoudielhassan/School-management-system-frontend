@@ -121,14 +121,14 @@ export function EntityFormDialog<T extends FieldValues>({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
           {serverError && <p className="text-sm text-destructive">{serverError}</p>}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {fields.map((field) => {
               const error = (errors as Record<string, { message?: string }>)[field.name]
                 ?.message;
               return (
                 <div
                   key={field.name}
-                  className={cn('space-y-1', (field.colSpan ?? 2) === 2 && 'col-span-2')}
+                  className={cn('space-y-1', (field.colSpan ?? 2) === 2 && 'sm:col-span-2')}
                 >
                   <Label>
                     {field.label}{' '}

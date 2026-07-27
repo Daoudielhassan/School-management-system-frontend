@@ -74,6 +74,7 @@ export const API_ENDPOINTS = {
     STATS: (instructorId: string) => `${EDUCATION_CORE_BASE}/api/instructors/${instructorId}/stats`,
     ATTENDANCE_STATS: (instructorId: string) =>
       `${EDUCATION_CORE_BASE}/api/instructors/${instructorId}/attendance-stats`,
+    BULK_UPLOAD: `${EDUCATION_CORE_BASE}/api/instructors/bulk-upload`,
   },
 
   STUDENTS: {
