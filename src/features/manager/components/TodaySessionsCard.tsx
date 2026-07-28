@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Clock, MapPin } from 'lucide-react';
@@ -15,11 +16,14 @@ export function TodaySessionsCard({ sessions }: { sessions: SessionData[] }) {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
           <Calendar className="h-5 w-5 text-blue-600" />
           Aujourd&apos;hui
         </CardTitle>
+        <Link href="/manager/sessions" className="text-xs font-medium text-blue-600 hover:underline">
+          Voir le planning
+        </Link>
       </CardHeader>
       <CardContent>
         {sorted.length === 0 ? (

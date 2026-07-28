@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useDepartmentClassGroups, useDepartmentAttendance } from '../hooks/useDepartment';
 import { DepartmentClassGroupsTable } from './DepartmentClassGroupsTable';
-import { SessionScheduleBoard } from './SessionScheduleBoard';
 import { DepartmentAttendanceTable } from './DepartmentAttendanceTable';
 import { SessionAttendanceSheet } from './SessionAttendanceSheet';
 
@@ -19,7 +18,7 @@ export function DepartmentOverview() {
       <PageHeader
         icon={Building2}
         title="Département"
-        description="Classes, sessions et présences de votre département"
+        description="Classes et présences de votre département — le planning des séances est dans Sessions"
       />
 
       <Card>
@@ -27,7 +26,6 @@ export function DepartmentOverview() {
           <Tabs defaultValue="classes">
             <TabsList>
               <TabsTrigger value="classes">Classes</TabsTrigger>
-              <TabsTrigger value="sessions">Sessions</TabsTrigger>
               <TabsTrigger value="attendance">Présences</TabsTrigger>
               <TabsTrigger value="attendance-sheet">Feuille de présence</TabsTrigger>
             </TabsList>
@@ -39,10 +37,6 @@ export function DepartmentOverview() {
                 isError={classGroupsQuery.isError}
                 onRetry={classGroupsQuery.refetch}
               />
-            </TabsContent>
-
-            <TabsContent value="sessions">
-              <SessionScheduleBoard />
             </TabsContent>
 
             <TabsContent value="attendance">

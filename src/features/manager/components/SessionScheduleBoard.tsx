@@ -112,7 +112,7 @@ export function SessionScheduleBoard() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <p className="text-xs text-slate-400">Glissez une séance pour la déplacer, ou étirez-la pour changer sa durée.</p>
+        <p className="text-xs text-slate-400">Glissez une séance vers un autre jour ou créneau pour la reprogrammer.</p>
         <Button
           size="sm"
           onClick={() => {
