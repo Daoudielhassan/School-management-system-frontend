@@ -14,6 +14,17 @@ import styles from './SessionCalendar.module.css';
 
 const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
 
+/**
+ * `Date` -> local "YYYY-MM-DDTHH:mm:ss", matching the backend's `LocalDateTime`
+ * (no zone). `.toISOString()` converts to UTC and appends "Z", which the
+ * backend can neither parse into a LocalDateTime nor match against its
+ * fixed-slot validation (both compare local wall-clock time).
+ */
+function toLocalDateTimeString(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
 export interface SessionCalendarEvent {
   id: string;
   startsAt: string;
@@ -171,7 +182,7 @@ export function SessionCalendar({
         }}
         eventDrop={(info: EventDropArg) => {
           if (!onEventDrop || !info.event.start || !info.event.end) return;
-          onEventDrop(info.event.id, info.event.start.toISOString(), info.event.end.toISOString(), info.revert);
+          onEventDrop(info.event.id, toLocalDateTimeString(info.event.start), toLocalDateTimeString(info.event.end), info.revert);
         }}
       />
       </div>

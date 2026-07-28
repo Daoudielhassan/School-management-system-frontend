@@ -112,9 +112,12 @@ export function CreateSessionDialog({
       await createSession.mutateAsync({
         departmentId,
         teachingAssignmentId,
-        // Interpreted as local time, then converted to an ISO instant.
-        startsAt: new Date(`${date}T${slot.start}:00`).toISOString(),
-        endsAt: new Date(`${date}T${slot.end}:00`).toISOString(),
+        // Sent as a plain local wall-clock string, matching the backend's
+        // LocalDateTime (no zone) — `.toISOString()` would convert to UTC
+        // and fail Jackson's LocalDateTime parsing (it rejects the "Z"
+        // suffix) and/or the backend's exact-slot-time validation.
+        startsAt: `${date}T${slot.start}:00`,
+        endsAt: `${date}T${slot.end}:00`,
         room: room || undefined,
       });
       toast.success('Séance créée');

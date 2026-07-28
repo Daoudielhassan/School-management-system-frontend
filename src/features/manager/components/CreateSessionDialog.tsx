@@ -107,10 +107,12 @@ export function CreateSessionDialog({ open, onOpenChange, defaultStartsAt, defau
         managerId,
         departmentId: profile.departmentId,
         teachingAssignmentId,
-        // Interpreted as local time, then converted to an ISO instant — same
-        // approach the old datetime-local input relied on.
-        startsAt: new Date(`${date}T${slot.start}:00`).toISOString(),
-        endsAt: new Date(`${date}T${slot.end}:00`).toISOString(),
+        // Sent as a plain local wall-clock string, matching the backend's
+        // LocalDateTime (no zone) — `.toISOString()` would convert to UTC
+        // and fail Jackson's LocalDateTime parsing (it rejects the "Z"
+        // suffix) and/or the backend's exact-slot-time validation.
+        startsAt: `${date}T${slot.start}:00`,
+        endsAt: `${date}T${slot.end}:00`,
         room: room || undefined,
       });
       queryClient.invalidateQueries({ queryKey: MANAGER_DEPARTMENT_SESSIONS_QUERY_KEY });
