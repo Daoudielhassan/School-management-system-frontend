@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import {
@@ -81,7 +82,9 @@ export function MyAttendanceSheet() {
 
   const isLoading = (session1 && attendance1.isLoading) || (session2 && attendance2.isLoading) || studentsLoading;
   const isError = attendance1.isError || attendance2.isError;
-  const notInitialized = !!groupId && records1.length === 0 && records2.length === 0;
+  const session1Initialized = records1.length > 0;
+  const session2Initialized = records2.length > 0;
+  const neitherInitialized = !!groupId && !session1Initialized && !session2Initialized;
 
   const hasChanges = [...records1, ...records2].some((r) => pending[r.id] && pending[r.id] !== r.status);
 
@@ -124,6 +127,15 @@ export function MyAttendanceSheet() {
     try {
       await Promise.all([initialize.mutateAsync(session1.id), initialize.mutateAsync(session2.id)]);
       toast.success('Feuilles de présence initialisées');
+    } catch (error) {
+      toast.error(extractErrorMessage(error, "Échec de l'initialisation"));
+    }
+  };
+
+  const handleInitializeOne = async (sessionId: string, label: string) => {
+    try {
+      await initialize.mutateAsync(sessionId);
+      toast.success(`${label} initialisée`);
     } catch (error) {
       toast.error(extractErrorMessage(error, "Échec de l'initialisation"));
     }
@@ -184,7 +196,7 @@ export function MyAttendanceSheet() {
             attendance2.refetch();
           }}
         />
-      ) : notInitialized ? (
+      ) : neitherInitialized ? (
         <Card>
           <CardContent className="p-6 text-center space-y-3">
             <p className="text-slate-500">Aucune feuille de présence pour cette demi-journée.</p>
@@ -195,6 +207,28 @@ export function MyAttendanceSheet() {
         </Card>
       ) : (
         <div className="space-y-4">
+          {(!session1Initialized || !session2Initialized) && (
+            <Alert>
+              <AlertDescription className="flex items-center justify-between gap-3 flex-wrap">
+                <span>
+                  {!session1Initialized ? 'La Séance 1' : 'La Séance 2'} n&apos;a pas encore de feuille de présence.
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={initialize.isPending}
+                  onClick={() =>
+                    !session1Initialized && session1
+                      ? handleInitializeOne(session1.id, 'Séance 1')
+                      : session2 && handleInitializeOne(session2.id, 'Séance 2')
+                  }
+                >
+                  {initialize.isPending ? 'Initialisation…' : 'Initialiser cette séance'}
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="flex items-center justify-between">
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => markAll('PRESENT')}>
