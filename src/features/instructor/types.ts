@@ -72,6 +72,8 @@ export interface AcademicYearLite {
 /** Matches `SessionResponse` — `Session` carries a `teachingAssignmentId`, not a direct instructor/subject/class-group id. */
 export interface SessionData {
   id: string;
+  /** Shared by both 1h30 sessions of a half-day — pairs them in the attendance sheet. */
+  groupId: string;
   managerId: string;
   departmentId: string;
   teachingAssignmentId: string;

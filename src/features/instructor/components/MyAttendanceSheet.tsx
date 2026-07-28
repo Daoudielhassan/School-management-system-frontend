@@ -27,38 +27,92 @@ import {
   useInitializeSessionAttendance,
   useBulkUpdateAttendance,
 } from '../hooks/useSessionAttendance';
-import type { AttendanceStatus } from '../types';
+import type { AttendanceStatus, SessionData } from '../types';
+
+/** Both 1h30 sessions of a half-day, earliest first. */
+interface HalfDayPair {
+  groupId: string;
+  sessions: [SessionData, SessionData];
+}
+
+function pairSessionsByGroup(sessions: SessionData[]): HalfDayPair[] {
+  const byGroup = new Map<string, SessionData[]>();
+  sessions.forEach((s) => {
+    const list = byGroup.get(s.groupId) ?? [];
+    list.push(s);
+    byGroup.set(s.groupId, list);
+  });
+  return Array.from(byGroup.entries())
+    .filter(([, list]) => list.length === 2)
+    .map(([groupId, list]) => {
+      const sorted = [...list].sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
+      return { groupId, sessions: sorted as [SessionData, SessionData] };
+    });
+}
 
 export function MyAttendanceSheet() {
   const { data: sessions = [] } = useMySessions();
   const sessionDetails = useMySessionDetails(sessions);
-  const [sessionId, setSessionId] = useState('');
+  const [groupId, setGroupId] = useState('');
 
-  const attendanceQuery = useSessionAttendance(sessionId || undefined);
+  const pairs = useMemo(() => pairSessionsByGroup(sessions), [sessions]);
+  const selectedPair = pairs.find((p) => p.groupId === groupId);
+  const [session1, session2] = selectedPair?.sessions ?? [undefined, undefined];
+
+  const attendance1 = useSessionAttendance(session1?.id);
+  const attendance2 = useSessionAttendance(session2?.id);
   const initialize = useInitializeSessionAttendance();
   const bulkUpdate = useBulkUpdateAttendance();
 
   const [pending, setPending] = useState<Record<string, AttendanceStatus>>({});
 
-  const records = useMemo(() => attendanceQuery.data ?? [], [attendanceQuery.data]);
-  const classGroupId = records[0]?.classGroupId;
+  const records1 = useMemo(() => attendance1.data ?? [], [attendance1.data]);
+  const records2 = useMemo(() => attendance2.data ?? [], [attendance2.data]);
+  const classGroupId = records1[0]?.classGroupId ?? records2[0]?.classGroupId;
   const { students, isLoading: studentsLoading } = useClassGroupStudents(classGroupId);
-  const studentById = useMemo(() => new Map(students.map((s) => [s.id, s])), [students]);
 
   useEffect(() => {
-    setPending(Object.fromEntries(records.map((r) => [r.id, r.status])));
-  }, [records]);
+    setPending(Object.fromEntries([...records1, ...records2].map((r) => [r.id, r.status])));
+  }, [records1, records2]);
 
-  const sorted = [...sessions].sort((a, b) => new Date(b.startsAt).getTime() - new Date(a.startsAt).getTime());
-  const hasChanges = records.some((r) => pending[r.id] && pending[r.id] !== r.status);
+  const sortedPairs = [...pairs].sort(
+    (a, b) => new Date(b.sessions[0].startsAt).getTime() - new Date(a.sessions[0].startsAt).getTime()
+  );
+
+  const isLoading = (session1 && attendance1.isLoading) || (session2 && attendance2.isLoading) || studentsLoading;
+  const isError = attendance1.isError || attendance2.isError;
+  const notInitialized = !!groupId && records1.length === 0 && records2.length === 0;
+
+  const hasChanges = [...records1, ...records2].some((r) => pending[r.id] && pending[r.id] !== r.status);
+
+  // Every student enrolled, each with their two per-session records (a
+  // student missing from one side just shows as unset for that column —
+  // shouldn't normally happen since both sessions share the same class).
+  const rows = useMemo(() => {
+    const bySessionRecord = (records: typeof records1) => new Map(records.map((r) => [r.studentId, r]));
+    const map1 = bySessionRecord(records1);
+    const map2 = bySessionRecord(records2);
+    return students.map((student) => ({
+      student,
+      record1: map1.get(student.id),
+      record2: map2.get(student.id),
+    }));
+  }, [students, records1, records2]);
 
   const handleSave = async () => {
-    const updates = records
-      .filter((r) => pending[r.id] && pending[r.id] !== r.status)
-      .map((r) => ({ attendanceId: r.id, status: pending[r.id] }));
-    if (updates.length === 0) return;
+    const updatesFor = (sessionId: string, records: typeof records1) =>
+      records
+        .filter((r) => pending[r.id] && pending[r.id] !== r.status)
+        .map((r) => ({ attendanceId: r.id, status: pending[r.id] }));
     try {
-      await bulkUpdate.mutateAsync({ sessionId, updates });
+      await Promise.all([
+        session1 && updatesFor(session1.id, records1).length > 0
+          ? bulkUpdate.mutateAsync({ sessionId: session1.id, updates: updatesFor(session1.id, records1) })
+          : Promise.resolve(),
+        session2 && updatesFor(session2.id, records2).length > 0
+          ? bulkUpdate.mutateAsync({ sessionId: session2.id, updates: updatesFor(session2.id, records2) })
+          : Promise.resolve(),
+      ]);
       toast.success('Présences mises à jour');
     } catch (error) {
       toast.error(extractErrorMessage(error, 'Échec de la mise à jour des présences'));
@@ -66,9 +120,10 @@ export function MyAttendanceSheet() {
   };
 
   const handleInitialize = async () => {
+    if (!session1 || !session2) return;
     try {
-      await initialize.mutateAsync(sessionId);
-      toast.success('Feuille de présence initialisée');
+      await Promise.all([initialize.mutateAsync(session1.id), initialize.mutateAsync(session2.id)]);
+      toast.success('Feuilles de présence initialisées');
     } catch (error) {
       toast.error(extractErrorMessage(error, "Échec de l'initialisation"));
     }
@@ -77,7 +132,7 @@ export function MyAttendanceSheet() {
   const markAll = (status: AttendanceStatus) => {
     setPending((prev) => {
       const next = { ...prev };
-      records.forEach((r) => {
+      [...records1, ...records2].forEach((r) => {
         next[r.id] = status;
       });
       return next;
@@ -89,21 +144,21 @@ export function MyAttendanceSheet() {
       <PageHeader
         icon={ClipboardCheck}
         title="Feuille de présence"
-        description="Enregistrez les présences de vos séances"
+        description="Enregistrez les présences des 2 séances d'une demi-journée sur une seule page"
       />
 
       <div className="max-w-sm space-y-1.5">
-        <Label>Séance</Label>
-        <Select value={sessionId} onValueChange={setSessionId}>
+        <Label>Demi-journée</Label>
+        <Select value={groupId} onValueChange={setGroupId}>
           <SelectTrigger>
-            <SelectValue placeholder="Sélectionner une séance" />
+            <SelectValue placeholder="Sélectionner une demi-journée" />
           </SelectTrigger>
           <SelectContent>
-            {sorted.map((s) => {
-              const detail = sessionDetails[s.teachingAssignmentId];
+            {sortedPairs.map((p) => {
+              const detail = sessionDetails[p.sessions[0].teachingAssignmentId];
               return (
-                <SelectItem key={s.id} value={s.id}>
-                  {format(new Date(s.startsAt), 'dd/MM/yyyy HH:mm')} — {detail?.subjectName ?? 'Séance'}
+                <SelectItem key={p.groupId} value={p.groupId}>
+                  {format(new Date(p.sessions[0].startsAt), 'dd/MM/yyyy')} — {detail?.subjectName ?? 'Séance'}
                 </SelectItem>
               );
             })}
@@ -111,27 +166,30 @@ export function MyAttendanceSheet() {
         </Select>
       </div>
 
-      {!sessionId ? (
+      {!groupId ? (
         <p className="text-center py-12 text-slate-400">
-          Sélectionnez une séance pour gérer sa feuille de présence.
+          Sélectionnez une demi-journée pour gérer sa feuille de présence.
         </p>
-      ) : attendanceQuery.isLoading || studentsLoading ? (
+      ) : isLoading ? (
         <div className="space-y-2">
           {[...Array(4)].map((_, i) => (
             <Skeleton key={i} className="h-10 w-full" />
           ))}
         </div>
-      ) : attendanceQuery.isError ? (
+      ) : isError ? (
         <QueryErrorState
           message="Impossible de charger la feuille de présence."
-          onRetry={attendanceQuery.refetch}
+          onRetry={() => {
+            attendance1.refetch();
+            attendance2.refetch();
+          }}
         />
-      ) : records.length === 0 ? (
+      ) : notInitialized ? (
         <Card>
           <CardContent className="p-6 text-center space-y-3">
-            <p className="text-slate-500">Aucune feuille de présence pour cette séance.</p>
+            <p className="text-slate-500">Aucune feuille de présence pour cette demi-journée.</p>
             <Button onClick={handleInitialize} disabled={initialize.isPending}>
-              {initialize.isPending ? 'Initialisation…' : 'Initialiser la feuille de présence'}
+              {initialize.isPending ? 'Initialisation…' : 'Initialiser les 2 feuilles de présence'}
             </Button>
           </CardContent>
         </Card>
@@ -155,30 +213,52 @@ export function MyAttendanceSheet() {
             <TableHeader>
               <TableRow>
                 <TableHead>Étudiant</TableHead>
-                <TableHead className="text-right">Statut</TableHead>
+                <TableHead className="text-right">
+                  Séance 1 ({session1 && format(new Date(session1.startsAt), 'HH:mm')}–
+                  {session1 && format(new Date(session1.endsAt), 'HH:mm')})
+                </TableHead>
+                <TableHead className="text-right">
+                  Séance 2 ({session2 && format(new Date(session2.startsAt), 'HH:mm')}–
+                  {session2 && format(new Date(session2.endsAt), 'HH:mm')})
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {records.map((r) => {
-                const student = studentById.get(r.studentId);
-                return (
-                  <TableRow key={r.id}>
-                    <TableCell className="text-slate-700">
-                      {student ? `${student.firstName} ${student.lastName}` : 'Étudiant…'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end">
+              {rows.map(({ student, record1, record2 }) => (
+                <TableRow key={student.id}>
+                  <TableCell className="text-slate-700">
+                    {student.firstName} {student.lastName}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end">
+                      {record1 ? (
                         <AttendanceStatusPicker
-                          value={(pending[r.id] ?? r.status) as AttendanceStatusValue}
+                          value={(pending[record1.id] ?? record1.status) as AttendanceStatusValue}
                           onChange={(status) =>
-                            setPending((prev) => ({ ...prev, [r.id]: status as AttendanceStatus }))
+                            setPending((prev) => ({ ...prev, [record1.id]: status as AttendanceStatus }))
                           }
                         />
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                      ) : (
+                        <span className="text-slate-300 text-sm">—</span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end">
+                      {record2 ? (
+                        <AttendanceStatusPicker
+                          value={(pending[record2.id] ?? record2.status) as AttendanceStatusValue}
+                          onChange={(status) =>
+                            setPending((prev) => ({ ...prev, [record2.id]: status as AttendanceStatus }))
+                          }
+                        />
+                      ) : (
+                        <span className="text-slate-300 text-sm">—</span>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </div>
