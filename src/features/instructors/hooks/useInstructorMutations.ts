@@ -12,7 +12,7 @@ import {
   uploadInstructorsFile,
   resetInstructorPassword,
 } from '../api/instructors.api';
-import { generateTemporaryPassword } from '../lib/generate-temporary-password';
+import { generateTemporaryPassword } from '@/lib/generate-temporary-password';
 import { INSTRUCTORS_QUERY_KEY } from '../constants';
 import type {
   InstructorCreatePayload,

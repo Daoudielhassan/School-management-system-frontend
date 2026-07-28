@@ -1,6 +1,6 @@
 /**
  * Client-side temporary password generator, used only for an admin-triggered
- * reset (the account's own creation flow always generates one server-side —
+ * reset (an account's own creation flow always generates one server-side —
  * see `TemporaryPasswordGenerator` in education-core-service). Mirrors that
  * generator's alphabet (no ambiguous 0/O/1/l/I) and length, using the Web
  * Crypto API for secure randomness instead of `Math.random()`.

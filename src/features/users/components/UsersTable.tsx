@@ -5,7 +5,7 @@
  */
 import { useMemo } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, KeyRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/shared/DataTable';
 import { formatRole, USERS_PAGE_SIZE } from '../constants';
@@ -17,11 +17,13 @@ export interface UsersTableProps {
   error?: string | null;
   onEdit: (user: UserData) => void;
   onDelete: (user: UserData) => void;
+  onResetPassword: (user: UserData) => void;
 }
 
 function getUserColumns(
   onEdit: (u: UserData) => void,
-  onDelete: (u: UserData) => void
+  onDelete: (u: UserData) => void,
+  onResetPassword: (u: UserData) => void
 ): ColumnDef<UserData>[] {
   return [
     { header: "Nom d'utilisateur", accessorKey: 'username' },
@@ -35,10 +37,14 @@ function getUserColumns(
     {
       header: 'Actions',
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => onEdit(row.original)}>
             <Edit className="h-4 w-4 mr-1" />
             Modifier
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => onResetPassword(row.original)}>
+            <KeyRound className="h-4 w-4 mr-1" />
+            Mot de passe
           </Button>
           <Button variant="destructive" size="sm" onClick={() => onDelete(row.original)}>
             <Trash2 className="h-4 w-4 mr-1" />
@@ -56,8 +62,12 @@ export function UsersTable({
   error = null,
   onEdit,
   onDelete,
+  onResetPassword,
 }: UsersTableProps) {
-  const columns = useMemo(() => getUserColumns(onEdit, onDelete), [onEdit, onDelete]);
+  const columns = useMemo(
+    () => getUserColumns(onEdit, onDelete, onResetPassword),
+    [onEdit, onDelete, onResetPassword]
+  );
 
   return (
     <DataTable

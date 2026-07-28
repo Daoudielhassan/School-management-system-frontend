@@ -12,12 +12,18 @@ import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Pagination } from '@/components/shared/Pagination';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { TemporaryPasswordDialog } from '@/components/shared/TemporaryPasswordDialog';
 import { extractErrorMessage } from '@/lib/api-error';
 import { UserFilters } from './UserFilters';
 import { UsersTable } from './UsersTable';
 import { UserFormDialog } from './UserFormDialog';
 import { useUsersTable } from '../hooks/useUsers';
-import { useCreateUser, useUpdateUser, useDeleteUser } from '../hooks/useUserMutations';
+import {
+  useCreateUser,
+  useUpdateUser,
+  useDeleteUser,
+  useResetUserPassword,
+} from '../hooks/useUserMutations';
 import {
   emptyUserForm,
   toCreateUserPayload,
@@ -33,6 +39,14 @@ interface DialogState {
   mode: 'create' | 'edit';
   user: UserData | null;
 }
+
+interface TempPasswordState {
+  open: boolean;
+  name: string;
+  password: string;
+}
+
+const CLOSED_TEMP_PASSWORD: TempPasswordState = { open: false, name: '', password: '' };
 
 function toFormValues(user: UserData): UserFormValues {
   return {
@@ -50,12 +64,15 @@ export function UsersManager() {
   const [page, setPage] = useState(0);
   const [dialog, setDialog] = useState<DialogState | null>(null);
   const [deleting, setDeleting] = useState<UserData | null>(null);
+  const [resetting, setResetting] = useState<UserData | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [tempPassword, setTempPassword] = useState<TempPasswordState>(CLOSED_TEMP_PASSWORD);
 
   const { paged, isLoading, isError } = useUsersTable(filters, page);
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
   const deleteUser = useDeleteUser();
+  const resetPassword = useResetUserPassword();
 
   const dialogDefaults = useMemo<UserFormValues>(
     () => (dialog?.user ? toFormValues(dialog.user) : emptyUserForm),
@@ -101,6 +118,18 @@ export function UsersManager() {
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!resetting) return;
+    try {
+      const { temporaryPassword } = await resetPassword.mutateAsync({ id: resetting.id });
+      setTempPassword({ open: true, name: resetting.username, password: temporaryPassword });
+    } catch (error) {
+      toast.error(extractErrorMessage(error, 'Échec de la réinitialisation du mot de passe'));
+    } finally {
+      setResetting(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -124,6 +153,7 @@ export function UsersManager() {
           error={isError ? 'Impossible de charger les utilisateurs.' : null}
           onEdit={(user) => setDialog({ mode: 'edit', user })}
           onDelete={setDeleting}
+          onResetPassword={setResetting}
         />
       </div>
 
@@ -167,6 +197,29 @@ export function UsersManager() {
         variant="destructive"
         isConfirming={deleteUser.isPending}
         onConfirm={handleDelete}
+      />
+
+      <ConfirmDialog
+        open={!!resetting}
+        onOpenChange={(open) => {
+          if (!open) setResetting(null);
+        }}
+        title="Réinitialiser le mot de passe"
+        description={
+          resetting
+            ? `Générer un nouveau mot de passe temporaire pour « ${resetting.username} » ? L'ancien cessera de fonctionner immédiatement.`
+            : undefined
+        }
+        confirmLabel="Réinitialiser"
+        isConfirming={resetPassword.isPending}
+        onConfirm={handleResetPassword}
+      />
+
+      <TemporaryPasswordDialog
+        open={tempPassword.open}
+        onClose={() => setTempPassword(CLOSED_TEMP_PASSWORD)}
+        userName={tempPassword.name}
+        temporaryPassword={tempPassword.password}
       />
     </div>
   );

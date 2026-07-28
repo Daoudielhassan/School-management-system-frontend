@@ -39,3 +39,8 @@ export function toggleUser(id: string, enable: boolean, token?: string): Promise
   const url = enable ? API_ENDPOINTS.USERS.ENABLE(id) : API_ENDPOINTS.USERS.DISABLE(id);
   return apiPut<void>(url, {}, token);
 }
+
+/** Resets any user's password to a freshly generated one-time value — works for every role, not just instructors. */
+export function resetUserPassword(id: string, newPassword: string, token?: string): Promise<void> {
+  return apiPut<void>(API_ENDPOINTS.USERS.CHANGE_PASSWORD(id, newPassword), {}, token);
+}
