@@ -30,7 +30,8 @@ export const API_ENDPOINTS = {
     BY_ROLE: (role: string) => `${IDENTITY_BASE}/api/users/role/${role}`,
     ENABLE: (id: string) => `${IDENTITY_BASE}/api/users/${id}/enable`,
     DISABLE: (id: string) => `${IDENTITY_BASE}/api/users/${id}/disable`,
-    CHANGE_PASSWORD: (id: string) => `${IDENTITY_BASE}/api/users/${id}/change-password`,
+    CHANGE_PASSWORD: (id: string, newPassword: string) =>
+      `${IDENTITY_BASE}/api/users/${id}/change-password?newPassword=${encodeURIComponent(newPassword)}`,
     STATS: `${IDENTITY_BASE}/api/users/admin/stats`,
   },
 

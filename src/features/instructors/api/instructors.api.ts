@@ -4,6 +4,7 @@
  * return promises. Hooks (in ../hooks) add React Query and cache invalidation.
  */
 import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '@/config/api';
+import { IdentityServiceClient } from '@/lib/api-clients/identity-client';
 import type {
   InstructorData,
   CreateInstructorResponse,
@@ -37,6 +38,16 @@ export function updateInstructor(
 /** Delete an instructor by id. */
 export function deleteInstructor(id: string, token?: string): Promise<void> {
   return apiDelete<void>(API_ENDPOINTS.INSTRUCTORS.BY_ID(id), token);
+}
+
+/**
+ * Resets an instructor's password to a freshly generated one-time value —
+ * `userId` is identity-service's own id (not the instructor's), and the caller
+ * must hold ROLE_ADMIN (enforced by identity-service itself). The account must
+ * change this password on next login, same as at creation.
+ */
+export function resetInstructorPassword(userId: string, newPassword: string, token?: string): Promise<void> {
+  return IdentityServiceClient.changePassword(userId, newPassword, token ?? '');
 }
 
 /**

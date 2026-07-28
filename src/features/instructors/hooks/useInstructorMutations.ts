@@ -10,7 +10,9 @@ import {
   updateInstructor,
   deleteInstructor,
   uploadInstructorsFile,
+  resetInstructorPassword,
 } from '../api/instructors.api';
+import { generateTemporaryPassword } from '../lib/generate-temporary-password';
 import { INSTRUCTORS_QUERY_KEY } from '../constants';
 import type {
   InstructorCreatePayload,
@@ -60,6 +62,23 @@ export function useDeleteInstructor() {
     mutationFn: (id) => deleteInstructor(id, token ?? undefined),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: INSTRUCTORS_QUERY_KEY });
+    },
+  });
+}
+
+/**
+ * Resets an instructor's password to a freshly generated one-time value,
+ * shown to the admin exactly once (they must relay it out-of-band — it's
+ * never stored or retrievable afterward, same as at account creation).
+ */
+export function useResetInstructorPassword() {
+  const { token } = useAuth();
+
+  return useMutation<{ temporaryPassword: string }, Error, { userId: string }>({
+    mutationFn: async ({ userId }) => {
+      const temporaryPassword = generateTemporaryPassword();
+      await resetInstructorPassword(userId, temporaryPassword, token ?? undefined);
+      return { temporaryPassword };
     },
   });
 }

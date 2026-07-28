@@ -7,7 +7,7 @@
  */
 import { useMemo } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, KeyRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/shared/DataTable';
 import { INSTRUCTORS_PAGE_SIZE } from '../constants';
@@ -19,11 +19,13 @@ export interface InstructorsTableProps {
   error?: string | null;
   onEdit: (instructor: InstructorData) => void;
   onDelete: (instructor: InstructorData) => void;
+  onResetPassword: (instructor: InstructorData) => void;
 }
 
 function getInstructorColumns(
   onEdit: (i: InstructorData) => void,
-  onDelete: (i: InstructorData) => void
+  onDelete: (i: InstructorData) => void,
+  onResetPassword: (i: InstructorData) => void
 ): ColumnDef<InstructorData>[] {
   return [
     { header: 'Code', accessorKey: 'code' },
@@ -36,6 +38,10 @@ function getInstructorColumns(
           <Button variant="outline" size="sm" onClick={() => onEdit(row.original)}>
             <Pencil className="h-4 w-4 mr-1" />
             Modifier
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => onResetPassword(row.original)}>
+            <KeyRound className="h-4 w-4 mr-1" />
+            Mot de passe
           </Button>
           <Button variant="destructive" size="sm" onClick={() => onDelete(row.original)}>
             <Trash2 className="h-4 w-4 mr-1" />
@@ -53,8 +59,12 @@ export function InstructorsTable({
   error = null,
   onEdit,
   onDelete,
+  onResetPassword,
 }: InstructorsTableProps) {
-  const columns = useMemo(() => getInstructorColumns(onEdit, onDelete), [onEdit, onDelete]);
+  const columns = useMemo(
+    () => getInstructorColumns(onEdit, onDelete, onResetPassword),
+    [onEdit, onDelete, onResetPassword]
+  );
 
   return (
     <DataTable

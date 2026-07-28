@@ -78,6 +78,6 @@ export class IdentityServiceClient {
     }
 
     static async changePassword(id: string, newPassword: string, token: string) {
-        return apiPut(`${API_ENDPOINTS.USERS.CHANGE_PASSWORD(id)}?newPassword=${encodeURIComponent(newPassword)}`, {}, token);
+        return apiPut(API_ENDPOINTS.USERS.CHANGE_PASSWORD(id, newPassword), {}, token);
     }
 }
