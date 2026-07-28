@@ -15,6 +15,8 @@ import { useAuth } from '@/context/AuthContext';
  */
 export interface SessionData {
   id: string;
+  /** Shared by both sessions of a half-day — cancelling/moving one acts on both. */
+  groupId?: string;
   managerId?: string;
   departmentId?: string;
   teachingAssignmentId?: string;
@@ -25,8 +27,23 @@ export interface SessionData {
   createdAt: string;
 }
 
-/** Matches `SessionRequest` — `teachingAssignmentId` replaces the old class/subject/instructor fields. */
-export interface CreateSessionPayload {
+/**
+ * Matches `HalfDaySessionRequest` — there is no single-session creation
+ * endpoint; this always creates both fixed 1h30 slots of the chosen half-day
+ * at once (atomically — see `POST /api/sessions/half-day`).
+ */
+export interface CreateHalfDaySessionPayload {
+  managerId?: string;
+  departmentId: string;
+  teachingAssignmentId: string;
+  /** `YYYY-MM-DD`. */
+  date: string;
+  half: 'MORNING' | 'AFTERNOON';
+  room?: string;
+}
+
+/** Matches `SessionRequest`, used by `PUT /api/sessions/{id}` (full replace). */
+export interface SessionRequestPayload {
   managerId?: string;
   departmentId: string;
   teachingAssignmentId: string;
@@ -35,8 +52,8 @@ export interface CreateSessionPayload {
   room?: string;
 }
 
-/** `PUT /api/sessions/{id}` takes the same shape as create, full replace — `managerId` is required by the backend. */
-export interface UpdateSessionPayload extends CreateSessionPayload {
+/** `PUT /api/sessions/{id}` — `managerId` is required by the backend. */
+export interface UpdateSessionPayload extends SessionRequestPayload {
   managerId: string;
 }
 
@@ -99,12 +116,13 @@ export function useUpcomingSessions(params?: {
   });
 }
 
-export function useCreateSession() {
+/** Creates both fixed 1h30 sessions of a half-day at once, atomically. */
+export function useCreateHalfDaySession() {
   const { token } = useAuth();
   const queryClient = useQueryClient();
 
-  return useMutation<SessionData, Error, CreateSessionPayload>({
-    mutationFn: (payload) => apiPost(API_ENDPOINTS.SESSIONS.BASE, payload, token ?? undefined),
+  return useMutation<SessionData[], Error, CreateHalfDaySessionPayload>({
+    mutationFn: (payload) => apiPost(API_ENDPOINTS.SESSIONS.HALF_DAY, payload, token ?? undefined),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: SESSIONS_QUERY_KEY });
     },

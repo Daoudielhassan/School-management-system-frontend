@@ -135,6 +135,9 @@ export const API_ENDPOINTS = {
 
   SESSIONS: {
     BASE: `${EDUCATION_CORE_BASE}/api/sessions`,
+    // The only creation path — a manager can never create a single 1h30
+    // session, only both fixed slots of a half-day at once.
+    HALF_DAY: `${EDUCATION_CORE_BASE}/api/sessions/half-day`,
     BY_ID: (id: string) => `${EDUCATION_CORE_BASE}/api/sessions/${id}`,
     BY_INSTRUCTOR: (instructorId: string) => `${EDUCATION_CORE_BASE}/api/sessions/instructor/${instructorId}`,
     BY_INSTRUCTOR_AND_DATE: (instructorId: string, date: string) =>

@@ -9,7 +9,7 @@ import frLocale from '@fullcalendar/core/locales/fr';
 import type { EventContentArg, EventDropArg, DateSelectArg } from '@fullcalendar/core';
 import { MapPin } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { SESSION_SLOTS } from '@/features/sessions';
+import { FIXED_SLOTS } from '@/features/sessions';
 import styles from './SessionCalendar.module.css';
 
 const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
@@ -42,7 +42,7 @@ export interface SessionCalendarProps {
   isLoading?: boolean;
   /**
    * Enables drag-to-reschedule. Resize is never available — a session always
-   * runs a full fixed slot (see `SESSION_SLOTS`), so its duration isn't a
+   * runs a full fixed slot (see `FIXED_SLOTS`), so its duration isn't a
    * user-adjustable property.
    */
   editable?: boolean;
@@ -155,18 +155,18 @@ export function SessionCalendar({
         nowIndicator
         height="auto"
         editable={editable}
-        // A session always runs the full morning (09:00-12:15) or afternoon
-        // (14:00-17:15) slot — never a partial one — so duration can't be
-        // dragged, only the day/start can move. `businessHours` doubles as
-        // the drag/resize constraint: since an event's length always equals
-        // one full slot, it can only land flush with a slot's start, which
-        // keeps every drag valid instead of round-tripping to the server to
-        // find out. Same constraint on create-by-click via `selectConstraint`.
-        // Only set (and only shaded in the UI) when actually needed for a
+        // A session always runs exactly one of the four fixed 1h30 slots —
+        // never a partial one — so duration can't be dragged, only the
+        // day/start can move. `businessHours` doubles as the drag/resize
+        // constraint: since an event's length always equals one full slot,
+        // it can only land flush with a slot's start, which keeps every
+        // drag valid instead of round-tripping to the server to find out.
+        // Same constraint on create-by-click via `selectConstraint`. Only
+        // set (and only shaded in the UI) when actually needed for a
         // constraint — read-only calendars stay visually unchanged.
         businessHours={
           editable || onSlotSelect
-            ? SESSION_SLOTS.map((s) => ({ daysOfWeek: ALL_DAYS, startTime: `${s.start}:00`, endTime: `${s.end}:00` }))
+            ? FIXED_SLOTS.map((s) => ({ daysOfWeek: ALL_DAYS, startTime: `${s.start}:00`, endTime: `${s.end}:00` }))
             : undefined
         }
         eventStartEditable={editable}

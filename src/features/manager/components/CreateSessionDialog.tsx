@@ -22,17 +22,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { extractErrorMessage } from '@/lib/api-error';
-import { useCreateSession } from '@/features/sessions';
+import { useCreateHalfDaySession, HALF_DAYS, type HalfDayId } from '@/features/sessions';
 import { useDepartmentClassGroups, useDepartmentSessions } from '../hooks/useDepartment';
 import { useTeachingAssignments, useManagerSubjects, useManagerInstructors } from '../hooks/useTeachingAssignments';
 import { useMyManagerProfile, useMyManagerId } from '../hooks/useMyProfile';
 import { MANAGER_DEPARTMENT_SESSIONS_QUERY_KEY } from '../constants';
-import { SESSION_SLOTS, type SessionSlotId } from '@/features/sessions';
 
 export interface CreateSessionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Prefills the date/slot, e.g. when opened from a calendar slot click. ISO strings. */
+  /** Prefills the date/half-day, e.g. when opened from a calendar slot click. ISO strings. */
   defaultStartsAt?: string;
   defaultEndsAt?: string;
 }
@@ -53,12 +52,12 @@ export function CreateSessionDialog({ open, onOpenChange, defaultStartsAt, defau
   const { data: assignments = [] } = useTeachingAssignments(classGroupId || undefined);
   const { data: subjects = [] } = useManagerSubjects();
   const { data: instructors = [] } = useManagerInstructors();
-  const createSession = useCreateSession();
+  const createHalfDaySession = useCreateHalfDaySession();
   const roomListId = useId();
 
   const [teachingAssignmentId, setTeachingAssignmentId] = useState('');
   const [date, setDate] = useState('');
-  const [slotId, setSlotId] = useState<SessionSlotId | ''>('');
+  const [halfDayId, setHalfDayId] = useState<HalfDayId | ''>('');
   const [room, setRoom] = useState('');
 
   const activeAssignments = assignments.filter((a) => a.status === 'ACTIVE');
@@ -84,43 +83,37 @@ export function CreateSessionDialog({ open, onOpenChange, defaultStartsAt, defau
     if (!open || !defaultStartsAt) return;
     const start = new Date(defaultStartsAt);
     setDate(toDateInputValue(start));
-    // Whichever fixed slot the clicked time falls closest into.
-    setSlotId(start.getHours() < 13 ? 'MORNING' : 'AFTERNOON');
+    // Whichever half-day the clicked time falls closest into.
+    setHalfDayId(start.getHours() < 13 ? 'MORNING' : 'AFTERNOON');
   }, [open, defaultStartsAt, defaultEndsAt]);
 
   const reset = () => {
     setClassGroupId('');
     setTeachingAssignmentId('');
     setDate('');
-    setSlotId('');
+    setHalfDayId('');
     setRoom('');
   };
 
-  const canSubmit = classGroupId && teachingAssignmentId && date && slotId;
+  const canSubmit = classGroupId && teachingAssignmentId && date && halfDayId;
 
   const handleSubmit = async () => {
     if (!canSubmit || !profile) return;
-    const slot = SESSION_SLOTS.find((s) => s.id === slotId);
-    if (!slot) return;
     try {
-      await createSession.mutateAsync({
+      await createHalfDaySession.mutateAsync({
         managerId,
         departmentId: profile.departmentId,
         teachingAssignmentId,
-        // Sent as a plain local wall-clock string, matching the backend's
-        // LocalDateTime (no zone) — `.toISOString()` would convert to UTC
-        // and fail Jackson's LocalDateTime parsing (it rejects the "Z"
-        // suffix) and/or the backend's exact-slot-time validation.
-        startsAt: `${date}T${slot.start}:00`,
-        endsAt: `${date}T${slot.end}:00`,
+        date,
+        half: halfDayId,
         room: room || undefined,
       });
       queryClient.invalidateQueries({ queryKey: MANAGER_DEPARTMENT_SESSIONS_QUERY_KEY });
-      toast.success('Séance créée');
+      toast.success('Séances créées');
       reset();
       onOpenChange(false);
     } catch (error) {
-      toast.error(extractErrorMessage(error, 'Échec de la création de la séance'));
+      toast.error(extractErrorMessage(error, 'Échec de la création des séances'));
     }
   };
 
@@ -134,8 +127,10 @@ export function CreateSessionDialog({ open, onOpenChange, defaultStartsAt, defau
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Nouvelle séance</DialogTitle>
-          <DialogDescription>Planifier une séance pour une affectation active de votre département.</DialogDescription>
+          <DialogTitle>Nouvelles séances</DialogTitle>
+          <DialogDescription>
+            Planifier les 2 séances d&apos;une demi-journée pour une affectation active de votre département.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -186,23 +181,28 @@ export function CreateSessionDialog({ open, onOpenChange, defaultStartsAt, defau
           </div>
 
           <div className="space-y-1.5">
-            <Label>Créneau</Label>
+            <Label>Demi-journée</Label>
             <div className="flex flex-wrap gap-2">
-              {SESSION_SLOTS.map((s) => (
+              {HALF_DAYS.map((h) => (
                 <button
-                  key={s.id}
+                  key={h.id}
                   type="button"
-                  onClick={() => setSlotId(s.id)}
+                  onClick={() => setHalfDayId(h.id)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all active:scale-95 ${
-                    slotId === s.id
+                    halfDayId === h.id
                       ? 'bg-blue-600 border-blue-600 text-white'
                       : 'border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50'
                   }`}
                 >
-                  {s.label} ({s.start}–{s.end})
+                  {h.label}
                 </button>
               ))}
             </div>
+            {halfDayId && (
+              <p className="text-xs text-slate-400 mt-1">
+                Crée 2 séances : {HALF_DAYS.find((h) => h.id === halfDayId)?.hint}
+              </p>
+            )}
           </div>
 
           <div className="space-y-1.5">
@@ -217,11 +217,11 @@ export function CreateSessionDialog({ open, onOpenChange, defaultStartsAt, defau
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={createSession.isPending}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={createHalfDaySession.isPending}>
             Annuler
           </Button>
-          <Button onClick={handleSubmit} disabled={!canSubmit || createSession.isPending}>
-            {createSession.isPending ? 'Création…' : 'Créer'}
+          <Button onClick={handleSubmit} disabled={!canSubmit || createHalfDaySession.isPending}>
+            {createHalfDaySession.isPending ? 'Création…' : 'Créer'}
           </Button>
         </DialogFooter>
       </DialogContent>

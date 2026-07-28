@@ -30,8 +30,10 @@ import type { SessionData } from '../types';
  * Manager's department schedule: sessions can be dragged to a new day/slot or
  * clicked to cancel — every change round-trips through `PUT /api/sessions/{id}`
  * and reverts in place if the request fails. No resize: a session always runs
- * a full fixed slot (see `SESSION_SLOTS`), so duration isn't draggable — the
+ * a full fixed slot (see `FIXED_SLOTS`), so duration isn't draggable — the
  * calendar's `businessHours` constraint keeps drags snapped to a valid slot.
+ * Cancelling/moving one session also cancels/moves its half-day sibling
+ * (same `groupId`) — handled server-side, nothing extra needed here.
  */
 export function SessionScheduleBoard() {
   const queryClient = useQueryClient();
@@ -100,10 +102,11 @@ export function SessionScheduleBoard() {
     try {
       await deleteSession.mutateAsync(selected.id);
       invalidate();
-      toast.success('Séance annulée');
+      // Cancelling one session also cancels its half-day sibling (same groupId), server-side.
+      toast.success('Séances annulées');
       setSelected(null);
     } catch (error) {
-      toast.error(extractErrorMessage(error, "Échec de l'annulation de la séance"));
+      toast.error(extractErrorMessage(error, "Échec de l'annulation des séances"));
     }
   };
 
@@ -172,7 +175,7 @@ export function SessionScheduleBoard() {
                 onClick={handleCancel}
                 disabled={deleteSession.isPending}
               >
-                {deleteSession.isPending ? 'Annulation…' : 'Annuler la séance'}
+                {deleteSession.isPending ? 'Annulation…' : 'Annuler les 2 séances de la demi-journée'}
               </Button>
             )}
           </DialogFooter>

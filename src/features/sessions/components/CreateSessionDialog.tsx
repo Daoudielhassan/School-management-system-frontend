@@ -3,7 +3,7 @@
 /**
  * Admin session creation — department and class are already chosen by the
  * caller (the schedule filters); this dialog only needs a teaching
- * assignment for that class plus date/time/room. `departmentId` is passed
+ * assignment for that class plus date/half-day/room. `departmentId` is passed
  * through as-is (trusted for ADMIN, who bypasses the manager-department
  * check server-side); no `managerId` is sent.
  */
@@ -30,8 +30,8 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { API_ENDPOINTS, apiGet } from '@/config/api';
 import { extractErrorMessage } from '@/lib/api-error';
-import { useCreateSession } from '../hooks/useSessions';
-import { SESSION_SLOTS, type SessionSlotId } from '../constants';
+import { useCreateHalfDaySession } from '../hooks/useSessions';
+import { HALF_DAYS, type HalfDayId } from '../constants';
 import type { TeachingAssignment } from '@/types/education';
 
 interface SubjectLite {
@@ -49,7 +49,7 @@ export interface CreateSessionDialogProps {
   onOpenChange: (open: boolean) => void;
   departmentId: string;
   classGroupId: string;
-  /** Called after a session is successfully created (e.g. to refresh a plain-fetch schedule view). */
+  /** Called after sessions are successfully created (e.g. to refresh a plain-fetch schedule view). */
   onCreated?: () => void;
 }
 
@@ -61,7 +61,7 @@ export function CreateSessionDialog({
   onCreated,
 }: CreateSessionDialogProps) {
   const { token } = useAuth();
-  const createSession = useCreateSession();
+  const createHalfDaySession = useCreateHalfDaySession();
 
   const [assignments, setAssignments] = useState<TeachingAssignment[]>([]);
   const [subjects, setSubjects] = useState<SubjectLite[]>([]);
@@ -69,7 +69,7 @@ export function CreateSessionDialog({
 
   const [teachingAssignmentId, setTeachingAssignmentId] = useState('');
   const [date, setDate] = useState('');
-  const [slotId, setSlotId] = useState<SessionSlotId | ''>('');
+  const [halfDayId, setHalfDayId] = useState<HalfDayId | ''>('');
   const [room, setRoom] = useState('');
 
   useEffect(() => {
@@ -98,34 +98,28 @@ export function CreateSessionDialog({
   const reset = () => {
     setTeachingAssignmentId('');
     setDate('');
-    setSlotId('');
+    setHalfDayId('');
     setRoom('');
   };
 
-  const canSubmit = teachingAssignmentId && date && slotId;
+  const canSubmit = teachingAssignmentId && date && halfDayId;
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
-    const slot = SESSION_SLOTS.find((s) => s.id === slotId);
-    if (!slot) return;
     try {
-      await createSession.mutateAsync({
+      await createHalfDaySession.mutateAsync({
         departmentId,
         teachingAssignmentId,
-        // Sent as a plain local wall-clock string, matching the backend's
-        // LocalDateTime (no zone) — `.toISOString()` would convert to UTC
-        // and fail Jackson's LocalDateTime parsing (it rejects the "Z"
-        // suffix) and/or the backend's exact-slot-time validation.
-        startsAt: `${date}T${slot.start}:00`,
-        endsAt: `${date}T${slot.end}:00`,
+        date,
+        half: halfDayId,
         room: room || undefined,
       });
-      toast.success('Séance créée');
+      toast.success('Séances créées');
       reset();
       onOpenChange(false);
       onCreated?.();
     } catch (error) {
-      toast.error(extractErrorMessage(error, 'Échec de la création de la séance'));
+      toast.error(extractErrorMessage(error, 'Échec de la création des séances'));
     }
   };
 
@@ -139,8 +133,10 @@ export function CreateSessionDialog({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Nouvelle séance</DialogTitle>
-          <DialogDescription>Planifier une séance pour une affectation active de cette classe.</DialogDescription>
+          <DialogTitle>Nouvelles séances</DialogTitle>
+          <DialogDescription>
+            Planifier les 2 séances d&apos;une demi-journée pour une affectation active de cette classe.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -169,23 +165,28 @@ export function CreateSessionDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label>Créneau</Label>
+            <Label>Demi-journée</Label>
             <div className="flex flex-wrap gap-2">
-              {SESSION_SLOTS.map((s) => (
+              {HALF_DAYS.map((h) => (
                 <button
-                  key={s.id}
+                  key={h.id}
                   type="button"
-                  onClick={() => setSlotId(s.id)}
+                  onClick={() => setHalfDayId(h.id)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all active:scale-95 ${
-                    slotId === s.id
+                    halfDayId === h.id
                       ? 'bg-blue-600 border-blue-600 text-white'
                       : 'border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50'
                   }`}
                 >
-                  {s.label} ({s.start}–{s.end})
+                  {h.label}
                 </button>
               ))}
             </div>
+            {halfDayId && (
+              <p className="text-xs text-slate-400 mt-1">
+                Crée 2 séances : {HALF_DAYS.find((h) => h.id === halfDayId)?.hint}
+              </p>
+            )}
           </div>
 
           <div className="space-y-1.5">
@@ -195,11 +196,11 @@ export function CreateSessionDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={createSession.isPending}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={createHalfDaySession.isPending}>
             Annuler
           </Button>
-          <Button onClick={handleSubmit} disabled={!canSubmit || createSession.isPending}>
-            {createSession.isPending ? 'Création…' : 'Créer'}
+          <Button onClick={handleSubmit} disabled={!canSubmit || createHalfDaySession.isPending}>
+            {createHalfDaySession.isPending ? 'Création…' : 'Créer'}
           </Button>
         </DialogFooter>
       </DialogContent>
